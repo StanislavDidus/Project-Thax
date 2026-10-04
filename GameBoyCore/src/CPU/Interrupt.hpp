@@ -1,33 +1,48 @@
 #pragma once
 #include <cstdint>
 #include <optional>
+#include <stdexcept>
+
+#include "DMG/Utils/Log.hpp"
 
 namespace dmg
 {
     class Interrupt
     {
     public:
-        Interrupt() = default;
-        explicit Interrupt(uint8_t value) : m_value(value) {}
+         Interrupt(Bus& bus, uint16_t address, bool enable_last_bits)
+        : m_bus(bus)
+        , m_address(address)
+        , m_enable_last_bits(enable_last_bits)
+        {
+
+        }
         ~Interrupt() = default;
 
-        void Set(uint8_t value)
+        void Set(const uint8_t value)
         {
-            // NOTE: Mask value to make sure than the last 3 bits are not used in any way.
-            value &= 0b00011111;
-            m_value |= value;
+            m_bus.Write(m_address, m_bus.Read(m_address) | value);
         }
 
-        void Reset(uint8_t value)
+        void Reset(const uint8_t value)
         {
-            value &= 0b00011111;
-            m_value &= ~value;
+            m_bus.Write(m_address, m_bus.Read(m_address) & ~value);
         }
 
         bool ReadBit(uint8_t i) const
         {
-            if (i > 4 && i < 8) return false;
-            return m_value >> i & 1;
+            // Bounds checking
+            if (i < 0 || i > 7)
+            {
+                DMG_ERROR("Trying to read bit {} from an interrupt.", i);
+                throw std::runtime_error{"Trying to read a wrong bit from an interrupt."};
+            }
+
+            // In Interrupt Flag (IF) Last 3 bits always return "1" when read
+            if (m_enable_last_bits && i > 4)
+                return true;
+
+            return m_bus.Read(m_address) >> i & 1;
         }
 
         std::optional<uint8_t> GetSharedBit(const Interrupt& interrupt)
@@ -51,6 +66,8 @@ namespace dmg
         static constexpr uint8_t Serial = 0b1000;
         static constexpr uint8_t Joypad = 0b10000;
     private:
-        uint8_t m_value = 0;
+        Bus& m_bus;
+        uint16_t m_address = 0;
+        bool m_enable_last_bits = false;
     };
 }

@@ -7,6 +7,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "imgui_memory_editor.h"
 
 #include "Graphics/Graphics.hpp"
 
@@ -143,5 +144,21 @@ namespace dmg
             });
         }
         ImGui::End();
+    }
+
+    inline void DrawMemoryWindow(const DMG& dmg, const RegisterInfo& register_info)
+    {
+        static MemoryEditor mem_edit;
+        static std::array<uint8_t, 65'536> memory {0};
+
+        mem_edit.HighlightMin = register_info.PC;
+        mem_edit.HighlightMax = register_info.PC + 1;
+        mem_edit.HighlightColor = IM_COL32(0, 255, 0, 255);
+
+        for (int i = 0; i < 65'536; ++i)
+        {
+            memory[i] = dmg.ReadMemory(i);
+        }
+        mem_edit.DrawWindow("Memory", memory.data(), memory.size());
     }
 }

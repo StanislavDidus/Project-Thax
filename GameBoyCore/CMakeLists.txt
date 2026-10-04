@@ -9,7 +9,7 @@ add_subdirectory(externals)
 
 set(HEADER_FILES
         src/CPU/CPU.hpp
-        src/MemoryBus/MemoryBus.hpp
+        src/MemoryBus/Bus.hpp
         include/DMG/DMG.hpp
         include/DMG/Utils/Log.hpp
         src/CPU/ControlUnit.hpp
@@ -25,6 +25,12 @@ set(HEADER_FILES
         #include/DMGInitState.hpp
         include/DMG/RegisterInfo.hpp
         src/CPU/Interrupt.hpp
+        src/Timers/Timer.hpp
+        src/Cartridge.hpp
+        src/Constants.hpp
+        src/MemoryBus/StandardBus.hpp
+        src/MemoryBus/TestBus.hpp
+        src/InterruptController.hpp
 )
 
 set(SOURCE_FILES

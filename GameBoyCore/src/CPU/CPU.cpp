@@ -4,7 +4,7 @@
 
 #include "DMG/Utils/Log.hpp"
 
-dmg::CPU::CPU(MemoryBus& bus)
+dmg::CPU::CPU(Bus& bus)
     : AF{A, F}
     , BC{ B, C}
     , DE{ D, E}
@@ -34,7 +34,7 @@ uint32_t dmg::CPU::Step()
 
 void dmg::CPU::Reset()
 {
-    PC.WriteWord(CARTRIDGE_HEADER);
+    PC.WriteWord(0x100);
     SP.WriteWord(0);
     A.Write(0);
     F.Write(0);
@@ -46,7 +46,7 @@ void dmg::CPU::Reset()
     L.Write(0);
 }
 
-uint32_t dmg::CPU::HandleInterrupts()
+std::optional<uint32_t> dmg::CPU::HandleInterrupts()
 {
     if (IME)
     {
@@ -87,7 +87,12 @@ uint32_t dmg::CPU::HandleInterrupts()
         }
     }
 
-    return 0;
+    return std::nullopt;
+}
+
+void dmg::CPU::SendInterrupt(uint8_t interrupt)
+{
+    IE.Set(interrupt);
 }
 
 dmg::RegisterInfo dmg::CPU::GetRegisterInfo() const

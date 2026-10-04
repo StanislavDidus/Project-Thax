@@ -85,8 +85,8 @@ uint32_t dmg::ControlUnit::Step()
         case 0xA3: return AND(m_cpu.E);                                // AND E
         case 0xB3: return OR(m_cpu.E);                                 // OR E
         case 0xC3: return JP();                                        // JP a16
-        case 0xD3: DMG_WARN("Instruction 0xD3 is non-existent.\n"); return 4;
-        case 0xE3: DMG_WARN("Instruction 0xE3 is non-existent.\n"); return 4;
+        case 0xD3: DMG_WARN("Instruction 0xD3 is non-existent."); return 4;
+        case 0xE3: DMG_WARN("Instruction 0xE3 is non-existent."); return 4;
         case 0xF3: return DI();                                        // DI
 
         // 0x4 Column
@@ -226,9 +226,9 @@ uint32_t dmg::ControlUnit::Step()
         case 0x9B: return SBC(m_cpu.E);                                // SBC A, E
         case 0xAB: return XOR(m_cpu.E);                                // XOR E
         case 0xBB: return CP(m_cpu.E);                                 // CP E
-        case 0xCB: DMG_WARN("CB table is not implemented yet.\n"); return 4;
-        case 0xDB: DMG_WARN("Instruction 0xDB is non-existent.\n"); return 4;
-        case 0xEB: DMG_WARN("Instruction 0xEB is non-existent.\n"); return 4;
+        case 0xCB: DMG_WARN("CB table is not implemented yet."); return 4;
+        case 0xDB: DMG_WARN("Instruction 0xDB is non-existent."); return 4;
+        case 0xEB: DMG_WARN("Instruction 0xEB is non-existent."); return 4;
         case 0xFB: return EI();                                        // EI
 
         // 0xC Column
@@ -246,8 +246,8 @@ uint32_t dmg::ControlUnit::Step()
         case 0xBC: return CP(m_cpu.H);                                 // CP H
         case 0xCC: return CALL_Z();                                    // CALL Z, a16
         case 0xDC: return CALL_C();                                    // CALL C, a16
-        case 0xEC: DMG_WARN("Instruction 0xEC is non-existent.\n"); return 4;
-        case 0xFC: DMG_WARN("Instruction 0xFC is non-existent.\n"); return 4;
+        case 0xEC: DMG_WARN("Instruction 0xEC is non-existent."); return 4;
+        case 0xFC: DMG_WARN("Instruction 0xFC is non-existent."); return 4;
 
         // 0xD Column
         case 0x0D: return DEC(m_cpu.C);                                // DEC C
@@ -263,9 +263,9 @@ uint32_t dmg::ControlUnit::Step()
         case 0xAD: return XOR(m_cpu.L);                                // XOR L
         case 0xBD: return CP(m_cpu.L);                                 // CP L
         case 0xCD: return CALL();                                      // CALL a16
-        case 0xDD: DMG_WARN("Instruction 0xDD is non-existent.\n"); return 4;
-        case 0xED: DMG_WARN("Instruction 0xED is non-existent.\n"); return 4;
-        case 0xFD: DMG_WARN("Instruction 0xFD is non-existent.\n"); return 4;
+        case 0xDD: DMG_WARN("Instruction 0xDD is non-existent."); return 4;
+        case 0xED: DMG_WARN("Instruction 0xED is non-existent."); return 4;
+        case 0xFD: DMG_WARN("Instruction 0xFD is non-existent."); return 4;
 
         // 0xE Column
         case 0x0E: return LD(m_cpu.C, ReadD8());                       // LD C, d8
@@ -304,7 +304,7 @@ uint32_t dmg::ControlUnit::Step()
         case 0xFF: return RST(0x38);                                   // RST 7
 
         default:
-            DMG_WARN("There is no matching instruction for this opcode: %d\n", opcode);
+            DMG_WARN("There is no matching instruction for this opcode: %d", opcode);
             return 4;
     }
 }
@@ -317,21 +317,21 @@ uint32_t dmg::ControlUnit::NOP()
 
 uint32_t dmg::ControlUnit::STOP()
 {
-    DMG_WARN("STOP function is not yet implemented.\n");
+    DMG_WARN("STOP function is not yet implemented.");
 
     return 4;
 }
 
 uint32_t dmg::ControlUnit::DI()
 {
-    DMG_WARN("DI instruction function is not yet implemented.\n");
+    DMG_WARN("DI instruction function is not yet implemented.");
 
     return 4;
 }
 
  uint32_t dmg::ControlUnit::HALT()
 {
-    DMG_WARN("HALT instruction function is not yet implemented.\n");
+    DMG_WARN("HALT instruction function is not yet implemented.");
 
     return 4;
 }
@@ -422,7 +422,7 @@ uint32_t dmg::ControlUnit::SCF()
 
 uint32_t dmg::ControlUnit::EI()
 {
-    DMG_WARN("EI function is not yet implemented.\n");
+    DMG_WARN("EI function is not yet implemented.");
 
     return 4;
 }

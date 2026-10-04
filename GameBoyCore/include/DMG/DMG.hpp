@@ -1,7 +1,9 @@
 #pragma once
 
 #include <filesystem>
+#include <vector>
 
+#include "InterruptController.hpp"
 #include "RegisterInfo.hpp"
 
 namespace dmg
@@ -12,8 +14,9 @@ namespace dmg
     constexpr uint32_t M_CYCLES_PER_FRAME = 17'555;
     constexpr float FRAMES_PER_SECOND = 59.73f;
 
+    class Cartridge;
     class CPU;
-    class MemoryBus;
+    class Bus;
 
     class DMG
     {
@@ -26,14 +29,13 @@ namespace dmg
             PAUSE,
         };
 
-        /*struct DMGInfo
+        enum class InitState
         {
-            State dmg_state = State::NONE;
-            CPU::CPUInfo cpu_info {};
-            MemoryBus::MemoryInfo memory_info {};
-        };*/
+            STANDARD,
+            TEST,
+        };
 
-        DMG();
+        explicit DMG(InitState init_state = InitState::STANDARD);
         ~DMG();
 
         void LoadROM(const std::filesystem::path& path);
@@ -52,22 +54,25 @@ namespace dmg
         void SetRegisters(const RegisterInfo& register_info);
         [[nodiscard]] RegisterInfo GetRegisters() const;
 
-        uint8_t ReadFromMemory(uint16_t address);
-        void WriteToMemory(uint16_t address, uint8_t value);
-        uint8_t* GetMemoryPointer();
-        uint32_t GetMemorySize();
         void ClearMemory();
+        [[nodiscard]] uint8_t ReadMemory(uint16_t address) const;
+        void WriteMemory(uint16_t address, uint8_t value);
     private:
         void StartFrame();
         void EndFrame();
 
-        std::unique_ptr<MemoryBus> m_memory_bus {};
+        std::unique_ptr<Cartridge> m_cartridge {};
+        std::unique_ptr<InterruptController> m_interrupt_controller {};
+        std::unique_ptr<Bus> m_bus {};
         std::unique_ptr<CPU> m_cpu {};
 
         State m_state = State::NONE;
+        InitState m_init_state = InitState::STANDARD;
 
         uint32_t cycle_accumulator = 0;
         uint32_t cycle_target = T_CYCLES_PER_FRAME;
         uint32_t total_cycles = 0;
+
+        friend Bus;
     };
 }

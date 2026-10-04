@@ -1,14 +1,26 @@
 #include "DMG/DMG.hpp"
-#include "DMG/Utils/Log.hpp"
-#include <fstream>
 
-#include "MemoryBus/MemoryBus.hpp"
 #include "CPU/CPU.hpp"
+#include "DMG/Utils/Log.hpp"
+#include "MemoryBus/StandardBus.hpp"
+#include "MemoryBus/TestBus.hpp"
+#include "Cartridge.hpp"
 
-dmg::DMG::DMG()
+dmg::DMG::DMG(InitState init_state)
+    : m_init_state(init_state)
 {
-    m_memory_bus = std::make_unique<MemoryBus>();
-    m_cpu = std::make_unique<CPU>(*m_memory_bus);
+    if (init_state == InitState::STANDARD)
+    {
+        m_cartridge = std::make_unique<Cartridge>();
+        m_interrupt_controller = std::make_unique<InterruptController>();
+        m_bus = std::make_unique<StandardBus>(*m_cartridge, *m_interrupt_controller);
+        m_cpu = std::make_unique<CPU>(*m_bus);
+    }
+    else if (init_state == InitState::TEST)
+    {
+        m_bus = std::make_unique<TestBus>();
+        m_cpu = std::make_unique<CPU>(*m_bus);
+    }
 
     DMG_INFO("Game Boy was initialized.");
 }
@@ -17,26 +29,10 @@ dmg::DMG::~DMG() = default;
 
 void dmg::DMG::LoadROM(const std::filesystem::path& path)
 {
-    std::ifstream file(path, std::ios::binary | std::ios::ate);
-    if (!file)
-    {
-        DMG_ERROR("Could not open rom file for reading: {}", path.string());
-    }
-
-    std::streamsize file_size = file.tellg();
-
-    // TODO: Optionally check for the ROM size
-
-    file.seekg(0, std::ios::beg);
-
-    file.read(reinterpret_cast<char*>(m_memory_bus->GetDataPointer()), file_size);
-
-    if (file.bad())
-    {
-        DMG_ERROR("Failed to read from a file: {}", path.string());
-    }
-
-    DMG_INFO("ROM loaded: {}", path.filename().string());
+    if (m_cartridge)
+        m_cartridge->Load(path);
+    else
+        DMG_ERROR("Trying to load ROM when cartridge is not existed.");
 }
 
 void dmg::DMG::StartFrame()
@@ -53,13 +49,11 @@ void dmg::DMG::Update()
 
         while (total_cycles < cycle_target)
         {
-            uint32_t add = m_cpu->HandleInterrupts();
-            if (add != 0)
-            {
-                total_cycles += add;
-                continue;
-            }
+            total_cycles += m_cpu->HandleInterrupts().value_or(0);
             total_cycles += m_cpu->Step();
+
+            // If something something
+            // m_cpu->SendInterrupt(Interrupt::VBLANK);
         }
 
         EndFrame();
@@ -88,6 +82,7 @@ void dmg::DMG::EndFrame()
 
 void dmg::DMG::StepInstruction()
 {
+    total_cycles += m_cpu->HandleInterrupts().value_or(0);
     total_cycles += m_cpu->Step();
 }
 
@@ -95,6 +90,7 @@ void dmg::DMG::StepFrame()
 {
     while (total_cycles < cycle_target)
     {
+        total_cycles += m_cpu->HandleInterrupts().value_or(0);
         total_cycles += m_cpu->Step();
     }
 }
@@ -104,6 +100,8 @@ void dmg::DMG::StepCycles(uint32_t target_cycles)
     uint32_t current_cycles = 0;
     while (current_cycles < target_cycles)
     {
+        // NOTE: Should I add interrupt handling here as well?!
+        // This is only used for testing so I am not sure
         current_cycles += m_cpu->Step();
     }
 }
@@ -139,6 +137,22 @@ dmg::RegisterInfo dmg::DMG::GetRegisters() const
     return m_cpu->GetRegisterInfo();
 }
 
+void dmg::DMG::ClearMemory()
+{
+    m_bus->Clear();
+}
+
+uint8_t dmg::DMG::ReadMemory(const uint16_t address) const
+{
+    return m_bus->Read(address);
+}
+
+void dmg::DMG::WriteMemory(const uint16_t address, const uint8_t value)
+{
+    m_bus->Write(address, value);
+}
+
+/*
 uint8_t dmg::DMG::ReadFromMemory(uint16_t address)
 {
     return m_memory_bus->Read(address);
@@ -163,4 +177,5 @@ void dmg::DMG::ClearMemory()
 {
     m_memory_bus->Clear();
 }
+*/
 

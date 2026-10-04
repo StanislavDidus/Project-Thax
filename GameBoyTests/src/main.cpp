@@ -5,24 +5,13 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <array>
+#include <format>
 
 #include "DMG/Utils/Log.hpp"
 
 namespace dmg
 {
     using json = nlohmann::json;
-
-    /*struct MemoryMappings
-    {
-        uint16_t address = 0;
-        uint8_t value = 0;
-    };
-
-    struct DMGInfo
-    {
-        dmg::RegisterInfo register_info;
-        std::vector<MemoryMappings> mappings;
-    };*/
 
     static constexpr std::array<uint8_t, 12> non_existent_opcodes =
     {
@@ -61,7 +50,7 @@ namespace dmg
         {
             uint16_t address = i[0];
             uint8_t value = i[1];
-            if (dmg.ReadFromMemory(address) != value)
+            if (dmg.ReadMemory(address) != value)
             {
                 std::cout << std::hex << std::uppercase
                            << "Memory[0x" << address << "] mismatch: expected 0x"
@@ -104,7 +93,7 @@ namespace dmg
         json ram = data[name]["ram"];
         for (auto & i : ram)
         {
-            dmg.WriteToMemory(i[0], i[1]);
+            dmg.WriteMemory(i[0], i[1]);
         }
     }
 }
@@ -113,7 +102,7 @@ int main()
     using namespace dmg;
 
     Log::Init();
-    DMG dmg{};
+    DMG dmg{dmg::DMG::InitState::TEST};
 
     for (int i = 0; i < 256; ++i)
     {

@@ -21,9 +21,10 @@ int main()
     dmg::GraphicsContext graphics_context = dmg::InitializeGraphicsContext();
     dmg::InitializeImGui(graphics_context);
 
-    dmg::DMG dmg = dmg::DMG{};
-    //dmg::LoadTests();
+    dmg::DMG dmg = dmg::DMG{dmg::DMG::InitState::STANDARD};
     dmg.LoadROM("roms/test_suits/01-special.gb");
+
+    std::array<uint8_t, 65'536> dmg_memory {0};
 
     constexpr std::chrono::duration<double> FRAME_DURATION {1.0 / 59.7};
     std::chrono::time_point<std::chrono::high_resolution_clock> frame_start = std::chrono::high_resolution_clock::now();
@@ -48,12 +49,8 @@ int main()
 
         dmg::DrawRegisterWindow(registers);
         dmg::DrawControlWindow(dmg);
+        dmg::DrawMemoryWindow(dmg, registers);
         ImGui::ShowDemoWindow();
-        static MemoryEditor mem_edit;
-        mem_edit.HighlightMin = registers.PC;
-        mem_edit.HighlightMax = registers.PC + 1;
-        mem_edit.HighlightColor = IM_COL32(0, 255, 0, 255);
-        mem_edit.DrawWindow("Memory", dmg.GetMemoryPointer(), dmg.GetMemorySize());
 
         dmg::EndImGuiFrame();
 

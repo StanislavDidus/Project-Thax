@@ -4,7 +4,7 @@
 
 #include "ControlUnit.hpp"
 #include "DMG/RegisterInfo.hpp"
-#include "MemoryBus/MemoryBus.hpp"
+#include "MemoryBus/Bus.hpp"
 #include "Registers/ByteRegister.hpp"
 #include "Registers/ByteRegisterPair.hpp"
 #include "Registers/FlagRegister.hpp"
@@ -16,14 +16,15 @@ namespace dmg
     class CPU
     {
     public:
-        explicit CPU(MemoryBus& bus);
+        explicit CPU(Bus& bus);
 
         void SetRegisters(const RegisterInfo& register_info);
 
         uint32_t Step();
         void Reset();
 
-        uint32_t HandleInterrupts();
+        std::optional<uint32_t> HandleInterrupts();
+        void SendInterrupt(uint8_t interrupt);
 
         [[nodiscard]] RegisterInfo GetRegisterInfo() const;
     private:
@@ -35,16 +36,16 @@ namespace dmg
         FlagRegister F;
         ByteRegisterPair AF, BC, DE, HL;
 
-        TwoByteRegister PC {CARTRIDGE_HEADER};
+        TwoByteRegister PC {0x100};
         TwoByteRegister SP;
 
-        bool IME = false;
-        Interrupt IE {0};
-        Interrupt IF {0};
-
         ControlUnit m_control_unit {*this};
+        Bus& m_bus;
 
-        MemoryBus& m_bus;
+        bool IME = false;
+        Interrupt IE {m_bus, 0xFFFF, false};
+        Interrupt IF {m_bus, 0xFF0F, true};
+
 
         friend class ControlUnit;
     };
