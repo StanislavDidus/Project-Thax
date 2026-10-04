@@ -22,7 +22,8 @@ namespace dmg
 
         uint8_t ReadIF() const
         {
-            return IF;
+            // Lower 5 bits represent interrupts, other 3 always return 1
+            return IF | 0b11100000;
         }
         uint8_t ReadIE() const
         {
@@ -45,7 +46,7 @@ namespace dmg
             // the last three are not used.
             for (int i = 0; i < 5; ++i)
             {
-                if (IF >> i && IE >> i)
+                if ((IF >> i) & 1 && (IE >> i) & 1)
                 {
                     return i;
                 }

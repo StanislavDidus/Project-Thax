@@ -1,9 +1,7 @@
 #pragma once
 
 #include <filesystem>
-#include <vector>
 
-#include "InterruptController.hpp"
 #include "RegisterInfo.hpp"
 
 namespace dmg
@@ -17,6 +15,7 @@ namespace dmg
     class Cartridge;
     class CPU;
     class Bus;
+    class InterruptController;
 
     class DMG
     {

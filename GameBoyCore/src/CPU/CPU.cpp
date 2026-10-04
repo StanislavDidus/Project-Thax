@@ -4,12 +4,13 @@
 
 #include "DMG/Utils/Log.hpp"
 
-dmg::CPU::CPU(Bus& bus)
+dmg::CPU::CPU(Bus& bus, InterruptController& interrupt_controller)
     : AF{A, F}
     , BC{ B, C}
     , DE{ D, E}
     , HL{H, L}
     , m_bus(bus)
+    , m_interrupt_controller(interrupt_controller)
 {
 }
 
@@ -50,13 +51,13 @@ std::optional<uint32_t> dmg::CPU::HandleInterrupts()
 {
     if (IME)
     {
-        const auto& result = IE.GetSharedBit(IF);
+        const auto& result = m_interrupt_controller.GetSharedBit();
         if (result.has_value())
         {
             uint8_t value = result.value();
 
             IME = false;
-            IF.Reset(1 << value);
+            m_interrupt_controller.ResetIF(1 << value);
 
             WriteMemory(--SP, PC.ReadHigh());
             WriteMemory(--SP, PC.ReadLow());
@@ -88,11 +89,6 @@ std::optional<uint32_t> dmg::CPU::HandleInterrupts()
     }
 
     return std::nullopt;
-}
-
-void dmg::CPU::SendInterrupt(uint8_t interrupt)
-{
-    IE.Set(interrupt);
 }
 
 dmg::RegisterInfo dmg::CPU::GetRegisterInfo() const

@@ -14,12 +14,13 @@ dmg::DMG::DMG(InitState init_state)
         m_cartridge = std::make_unique<Cartridge>();
         m_interrupt_controller = std::make_unique<InterruptController>();
         m_bus = std::make_unique<StandardBus>(*m_cartridge, *m_interrupt_controller);
-        m_cpu = std::make_unique<CPU>(*m_bus);
+        m_cpu = std::make_unique<CPU>(*m_bus, *m_interrupt_controller);
     }
     else if (init_state == InitState::TEST)
     {
+        m_interrupt_controller = std::make_unique<InterruptController>();
         m_bus = std::make_unique<TestBus>();
-        m_cpu = std::make_unique<CPU>(*m_bus);
+        m_cpu = std::make_unique<CPU>(*m_bus, *m_interrupt_controller);
     }
 
     DMG_INFO("Game Boy was initialized.");

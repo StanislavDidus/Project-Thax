@@ -9,14 +9,14 @@
 #include "Registers/ByteRegisterPair.hpp"
 #include "Registers/FlagRegister.hpp"
 #include "Registers/TwoByteRegister.hpp"
-#include "Interrupt.hpp"
+#include "InterruptController.hpp"
 
 namespace dmg
 {
     class CPU
     {
     public:
-        explicit CPU(Bus& bus);
+        explicit CPU(Bus& bus, InterruptController& interrupt_controller);
 
         void SetRegisters(const RegisterInfo& register_info);
 
@@ -24,7 +24,6 @@ namespace dmg
         void Reset();
 
         std::optional<uint32_t> HandleInterrupts();
-        void SendInterrupt(uint8_t interrupt);
 
         [[nodiscard]] RegisterInfo GetRegisterInfo() const;
     private:
@@ -40,12 +39,10 @@ namespace dmg
         TwoByteRegister SP;
 
         ControlUnit m_control_unit {*this};
+        InterruptController& m_interrupt_controller;
         Bus& m_bus;
 
         bool IME = false;
-        Interrupt IE {m_bus, 0xFFFF, false};
-        Interrupt IF {m_bus, 0xFF0F, true};
-
 
         friend class ControlUnit;
     };
