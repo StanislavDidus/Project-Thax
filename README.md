@@ -1,2 +1,2 @@
-# GameBoyEm
-A dekstop Game Boy emulator developed in C++.
+# Project Thax
+A desktop Game Boy emulator developed in C++.
