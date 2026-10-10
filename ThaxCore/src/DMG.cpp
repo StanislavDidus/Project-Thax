@@ -6,6 +6,8 @@
 #include "MemoryBus/TestBus.hpp"
 #include "Cartridge.hpp"
 #include "Timers/Timer.hpp"
+#include "SerialPort.hpp"
+#include "Joypad.hpp"
 
 dmg::DMG::DMG(InitState init_state)
     : m_init_state(init_state)
@@ -15,6 +17,8 @@ dmg::DMG::DMG(InitState init_state)
         m_cartridge = std::make_unique<Cartridge>();
         m_interrupt_controller = std::make_unique<InterruptController>();
         m_timer = std::make_unique<Timer>(*m_interrupt_controller);
+        m_serial_port = std::make_unique<SerialPort>(*m_interrupt_controller);
+        m_joypad = std::make_unique<Joypad>(*m_interrupt_controller);
         m_bus = std::make_unique<StandardBus>(*m_cartridge, *m_interrupt_controller, *m_timer);
         m_cpu = std::make_unique<CPU>(*m_bus, *m_interrupt_controller);
     }
@@ -56,6 +60,7 @@ void dmg::DMG::Update()
             total_cycles += cycles;
             cycles += m_cpu->Step();
             if (m_timer) m_timer->Update(cycles);
+            if (m_serial_port) m_serial_port->Update(cycles);
         }
 
         EndFrame();
@@ -106,6 +111,16 @@ void dmg::DMG::StepCycles(uint32_t target_cycles)
         // This is only used for testing so I am not sure
         current_cycles += m_cpu->Step();
     }
+}
+
+void dmg::DMG::KeyPressed(JoypadButton button)
+{
+    if (m_joypad) m_joypad->KeyPressed(button);
+}
+
+void dmg::DMG::KeyReleased(JoypadButton button)
+{
+    if (m_joypad) m_joypad->KeyReleased(button);
 }
 
 void dmg::DMG::SetState(State state)

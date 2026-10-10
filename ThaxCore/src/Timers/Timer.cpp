@@ -11,6 +11,18 @@ namespace dmg
 
     void Timer::Update(const uint32_t cycles)
     {
+        if (overflow)
+        {
+            overflow_delay += cycles;
+            if (overflow_delay >= 4)
+            {
+                TIMA = TMA;
+                m_interrupt_controller.SetIF(InterruptController::Timer);
+                overflow = false;
+                overflow_delay = 0;
+            }
+        }
+
         for (int i = 0; i < cycles; ++i)
         {
             DIV++;
@@ -72,6 +84,7 @@ namespace dmg
 
     void Timer::IncrementTima()
     {
+        /*
         if (TIMA == 255)
         {
             TIMA = TMA;
@@ -80,6 +93,14 @@ namespace dmg
         else
         {
             ++TIMA;
+        }
+        */
+        ++TIMA;
+
+        if (TIMA == 0)
+        {
+            overflow_delay = 0;
+            overflow = true;
         }
     }
 }

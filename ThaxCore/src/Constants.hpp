@@ -2,6 +2,15 @@
 
 #include <cstdint>
 
+namespace dmg
+{
+#ifndef NDEBUG
+    inline constexpr bool DEBUG_MODE = true;
+#else
+    inline constexpr bool DEBUG_MODE = false;
+#endif
+}
+
 namespace dmg::address
 {
     struct Region

@@ -1,3 +1,4 @@
+#include "Input/Input.hpp"
 #ifdef _WIN32
 #include <windows.h>
 #include <timeapi.h>
@@ -8,8 +9,6 @@
 #include "Graphics/Graphics.hpp"
 #include "DMG/Utils/Log.hpp"
 #include "UI/UI.hpp"
-#include "imgui_memory_editor.h"
-//#include "../../GameBoyCore/src/Test/Test.hpp"
 
 int main()
 {
@@ -24,8 +23,6 @@ int main()
     dmg::DMG dmg = dmg::DMG{dmg::DMG::InitState::STANDARD};
     dmg.LoadROM("roms/test_suits/01-special.gb");
 
-    std::array<uint8_t, 65'536> dmg_memory {0};
-
     constexpr std::chrono::duration<double> FRAME_DURATION {1.0 / 59.7};
     std::chrono::time_point<std::chrono::high_resolution_clock> frame_start = std::chrono::high_resolution_clock::now();
 
@@ -36,6 +33,8 @@ int main()
         int width, height;
         glfwGetFramebufferSize(graphics_context.window, &width, &height);
         glViewport(0, 0, width, height);
+
+        dmg::HandleInput(graphics_context, dmg);
 
         dmg.Update();
 

@@ -10,6 +10,7 @@ add_subdirectory(externals)
 set(HEADER_FILES
         src/Graphics/Graphics.hpp
         src/UI/UI.hpp
+        src/Input/Input.hpp
 )
 
 set(SOURCE_FILES

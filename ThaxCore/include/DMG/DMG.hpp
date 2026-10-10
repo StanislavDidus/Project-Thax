@@ -2,6 +2,7 @@
 
 #include <filesystem>
 
+#include "Input.hpp"
 #include "RegisterInfo.hpp"
 
 namespace dmg
@@ -17,6 +18,8 @@ namespace dmg
     class Bus;
     class InterruptController;
     class Timer;
+    class SerialPort;
+    class Joypad;
 
     class DMG
     {
@@ -46,6 +49,9 @@ namespace dmg
         void StepFrame();
         void StepCycles(uint32_t target_cycles);
 
+        void KeyPressed(JoypadButton button);
+        void KeyReleased(JoypadButton button);
+
         void SetState(State state);
 
         // Setters and getters that are needed for objects outside of DMG class
@@ -63,6 +69,8 @@ namespace dmg
 
         std::unique_ptr<Cartridge> m_cartridge {};
         std::unique_ptr<Timer> m_timer {};
+        std::unique_ptr<SerialPort> m_serial_port {};
+        std::unique_ptr<Joypad> m_joypad {};
         std::unique_ptr<InterruptController> m_interrupt_controller {};
         std::unique_ptr<Bus> m_bus {};
         std::unique_ptr<CPU> m_cpu {};

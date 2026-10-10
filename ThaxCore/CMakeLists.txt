@@ -31,6 +31,8 @@ set(HEADER_FILES
         src/MemoryBus/TestBus.hpp
         src/InterruptController.hpp
         src/SerialPort.hpp
+        src/Joypad.hpp
+        src/Joypad.cpp
 )
 
 set(SOURCE_FILES
@@ -45,6 +47,7 @@ set(SOURCE_FILES
 set(ALL_FILES
         ${HEADER_FILES}
         ${SOURCE_FILES}
+        include/DMG/Input.hpp
 )
 
 add_library(ThaxCore ${ALL_FILES})

@@ -10,7 +10,7 @@ namespace dmg
     class Timer
     {
     public:
-        Timer(InterruptController& interrupt_controller);
+        explicit Timer(InterruptController& interrupt_controller);
         ~Timer() = default;
 
         void Update(uint32_t cycles);
@@ -25,7 +25,7 @@ namespace dmg
         void WriteTMA(const uint8_t value) { TMA = value; }
 
         [[nodiscard]] uint8_t ReadTAC() const { return TAC; }
-        void WriteTAC(const uint8_t value);
+        void WriteTAC(uint8_t value);
 
     private:
         static constexpr uint32_t DIV_CLOCK_FREQUENCY = 256;
@@ -40,6 +40,8 @@ namespace dmg
         uint8_t TAC = 0;
 
         uint8_t old_bit_value = 0;
+        uint8_t overflow_delay = 0;
+        bool overflow = false;
 
         InterruptController& m_interrupt_controller;
     };

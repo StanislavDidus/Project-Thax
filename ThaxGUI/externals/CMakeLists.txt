@@ -8,6 +8,7 @@ set(IMGUI_HEADER_FILES
         imgui/backends/imgui_impl_glfw.h
         imgui/backends/imgui_impl_opengl3.h
         imgui_memory_editor/imgui_memory_editor.h
+        ../../ThaxCore/include/DMG/Input.hpp
 )
 
 set(IMGUI_SOURCE_FILES
