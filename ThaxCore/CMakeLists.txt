@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 4.2)
 
-project(GameBoyCore)
+project(ThaxCore)
 
 set(CMAKE_CXX_STANDARD 23)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Don't build shared libraries." FORCE)
@@ -30,6 +30,7 @@ set(HEADER_FILES
         src/MemoryBus/StandardBus.hpp
         src/MemoryBus/TestBus.hpp
         src/InterruptController.hpp
+        src/SerialPort.hpp
 )
 
 set(SOURCE_FILES
@@ -37,6 +38,8 @@ set(SOURCE_FILES
         src/CPU/ControlUnit.cpp
         src/DMG.cpp
         src/CPU/CPU.cpp
+        src/Timers/Timer.cpp
+        src/InterruptController.cpp
 )
 
 set(ALL_FILES
@@ -44,7 +47,7 @@ set(ALL_FILES
         ${SOURCE_FILES}
 )
 
-add_library(GameBoyCore ${ALL_FILES})
+add_library(ThaxCore ${ALL_FILES})
 
 
 #add_custom_target(copy_command
@@ -52,10 +55,10 @@ add_library(GameBoyCore ${ALL_FILES})
 #)
 #add_dependencies(GameBoyCore copy_command)
 
-target_include_directories(GameBoyCore
+target_include_directories(ThaxCore
         PRIVATE src/
         PUBLIC include/
 )
 
 #target_link_libraries(GameBoyEm PUBLIC spdlog::spdlog glfw imgui nlohmann_json::nlohmann_json)
-target_link_libraries(GameBoyCore spdlog::spdlog)
+target_link_libraries(ThaxCore spdlog::spdlog)

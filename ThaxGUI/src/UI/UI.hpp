@@ -63,7 +63,7 @@ namespace dmg
         ImGui::Text("%X", value);
     }
 
-    inline void DrawRegisterWindow(const RegisterInfo& register_info)
+    inline void DrawRegisterWindow(const RegisterInfo& register_info, const DMG& dmg)
     {
         if (ImGui::Begin("Registers"))
         {
@@ -81,6 +81,18 @@ namespace dmg
                 PrintRegisterValue("C: ", register_info.C);
                 PrintRegisterValue("E: ", register_info.E);
                 PrintRegisterValue("L: ", register_info.L);
+            }
+            ImGui::EndTable();
+
+            ImGui::SeparatorText("Memory Mapped Registers");
+            if (ImGui::BeginTable("##anything", 2))
+            {
+                ImGui::TableNextColumn();
+                PrintRegisterValue("DIV: ", dmg.ReadMemory(0xFF04));
+                PrintRegisterValue("TIMA: ", dmg.ReadMemory(0xFF05));
+                ImGui::TableNextColumn();
+                PrintRegisterValue("TMA: ", dmg.ReadMemory(0xFF06));
+                PrintRegisterValue("TAC: ", dmg.ReadMemory(0xFF07));
             }
             ImGui::EndTable();
         }

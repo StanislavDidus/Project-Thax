@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 4.2)
 
-project(GameBoyGUI)
+project(ThaxGUI)
 
 set(CMAKE_CXX_STANDARD 23)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Don't build shared libraries." FORCE)
@@ -26,18 +26,18 @@ set(ALL_FILES
         ${GLAD_FILES}
 )
 
-add_executable(GameBoyGUI ${ALL_FILES})
+add_executable(ThaxGUI ${ALL_FILES})
 
 
 add_custom_target(copy_command
         COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/copy_files.cmake
 )
-add_dependencies(GameBoyGUI copy_command)
+add_dependencies(ThaxGUI copy_command)
 
-target_include_directories(GameBoyGUI PRIVATE
+target_include_directories(ThaxGUI PRIVATE
         src
         externals/glad/include
 )
 
 #target_link_libraries(GameBoyGUI PUBLIC spdlog::spdlog glfw imgui nlohmann_json::nlohmann_json)
-target_link_libraries(GameBoyGUI PUBLIC GameBoyCore glfw imgui)
+target_link_libraries(ThaxGUI PUBLIC ThaxCore glfw imgui)

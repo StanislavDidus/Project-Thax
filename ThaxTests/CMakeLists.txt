@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 4.2)
 
-project(GameBoyTests)
+project(ThaxTests)
 
 set(CMAKE_CXX_STANDARD 23)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Don't build shared libraries." FORCE)
@@ -19,15 +19,15 @@ set(ALL_FILES
         ${SOURCE_FILES}
 )
 
-add_executable(GameBoyTests ${ALL_FILES})
+add_executable(ThaxTests ${ALL_FILES})
 
 add_custom_target(copy_sst
         COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/copy_files.cmake
 )
-add_dependencies(GameBoyTests copy_sst)
+add_dependencies(ThaxTests copy_sst)
 
-target_include_directories(GameBoyTests PRIVATE
+target_include_directories(ThaxTests PRIVATE
         src
 )
 
-target_link_libraries(GameBoyTests PUBLIC GameBoyCore nlohmann_json::nlohmann_json)
+target_link_libraries(ThaxTests PUBLIC ThaxCore nlohmann_json::nlohmann_json)

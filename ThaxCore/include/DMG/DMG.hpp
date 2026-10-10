@@ -16,6 +16,7 @@ namespace dmg
     class CPU;
     class Bus;
     class InterruptController;
+    class Timer;
 
     class DMG
     {
@@ -61,6 +62,7 @@ namespace dmg
         void EndFrame();
 
         std::unique_ptr<Cartridge> m_cartridge {};
+        std::unique_ptr<Timer> m_timer {};
         std::unique_ptr<InterruptController> m_interrupt_controller {};
         std::unique_ptr<Bus> m_bus {};
         std::unique_ptr<CPU> m_cpu {};

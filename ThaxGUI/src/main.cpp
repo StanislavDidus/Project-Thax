@@ -47,7 +47,7 @@ int main()
 
         dmg::RegisterInfo registers = dmg.GetRegisters();
 
-        dmg::DrawRegisterWindow(registers);
+        dmg::DrawRegisterWindow(registers, dmg);
         dmg::DrawControlWindow(dmg);
         dmg::DrawMemoryWindow(dmg, registers);
         ImGui::ShowDemoWindow();

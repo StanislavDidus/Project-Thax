@@ -9,8 +9,8 @@ dmg::CPU::CPU(Bus& bus, InterruptController& interrupt_controller)
     , BC{ B, C}
     , DE{ D, E}
     , HL{H, L}
-    , m_bus(bus)
     , m_interrupt_controller(interrupt_controller)
+    , m_bus(bus)
 {
 }
 

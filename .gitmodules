@@ -1,15 +1,15 @@
-[submodule "GameBoyGUI/externals/glfw"]
-	path = GameBoyGUI/externals/glfw
+[submodule "ThaxUI/externals/glfw"]
+	path = ThaxGUI/externals/glfw
 	url = https://github.com/glfw/glfw.git
-[submodule "GameBoyGUI/externals/glad"]
-	path = GameBoyGUI/externals/glad
+[submodule "ThaxGUI/externals/glad"]
+	path = ThaxGUI/externals/glad
 	url = https://github.com/premake-libs/glad.git
-[submodule "GameBoyGUI/externals/imgui"]
-	path = GameBoyGUI/externals/imgui
+[submodule "ThaxGUI/externals/imgui"]
+	path = ThaxGUI/externals/imgui
 	url = https://github.com/ocornut/imgui.git
-[submodule "GameBoyCore/externals/spdlog"]
-	path = GameBoyCore/externals/spdlog
+[submodule "ThaxCore/externals/spdlog"]
+	path = ThaxCore/externals/spdlog
 	url = https://github.com/gabime/spdlog.git
-[submodule "GameBoyTests/externals/json"]
-	path = GameBoyTests/externals/json
+[submodule "ThaxTests/externals/json"]
+	path = ThaxTests/externals/json
 	url = https://github.com/nlohmann/json.git

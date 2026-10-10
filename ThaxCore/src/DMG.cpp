@@ -5,6 +5,7 @@
 #include "MemoryBus/StandardBus.hpp"
 #include "MemoryBus/TestBus.hpp"
 #include "Cartridge.hpp"
+#include "Timers/Timer.hpp"
 
 dmg::DMG::DMG(InitState init_state)
     : m_init_state(init_state)
@@ -13,7 +14,8 @@ dmg::DMG::DMG(InitState init_state)
     {
         m_cartridge = std::make_unique<Cartridge>();
         m_interrupt_controller = std::make_unique<InterruptController>();
-        m_bus = std::make_unique<StandardBus>(*m_cartridge, *m_interrupt_controller);
+        m_timer = std::make_unique<Timer>(*m_interrupt_controller);
+        m_bus = std::make_unique<StandardBus>(*m_cartridge, *m_interrupt_controller, *m_timer);
         m_cpu = std::make_unique<CPU>(*m_bus, *m_interrupt_controller);
     }
     else if (init_state == InitState::TEST)
@@ -50,11 +52,10 @@ void dmg::DMG::Update()
 
         while (total_cycles < cycle_target)
         {
-            total_cycles += m_cpu->HandleInterrupts().value_or(0);
-            total_cycles += m_cpu->Step();
-
-            // If something something
-            // m_cpu->SendInterrupt(Interrupt::VBLANK);
+            uint32_t cycles = m_cpu->HandleInterrupts().value_or(0);
+            total_cycles += cycles;
+            cycles += m_cpu->Step();
+            if (m_timer) m_timer->Update(cycles);
         }
 
         EndFrame();

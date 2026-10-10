@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <optional>
 
+#include "Utils/Math.hpp"
+
 namespace dmg
 {
     class InterruptController
@@ -20,12 +22,12 @@ namespace dmg
             IE = value;
         }
 
-        uint8_t ReadIF() const
+        [[nodiscard]] uint8_t ReadIF() const
         {
             // Lower 5 bits represent interrupts, other 3 always return 1
             return IF | 0b11100000;
         }
-        uint8_t ReadIE() const
+        [[nodiscard]] uint8_t ReadIE() const
         {
             return IE;
         }
@@ -40,13 +42,13 @@ namespace dmg
             IF &= ~value;
         }
 
-        std::optional<uint8_t> GetSharedBit() const
+        [[nodiscard]] std::optional<uint8_t> GetSharedBit() const
         {
             // NOTE: We don't have to go through all 8 bits because
             // the last three are not used.
             for (int i = 0; i < 5; ++i)
             {
-                if ((IF >> i) & 1 && (IE >> i) & 1)
+                if (getBit(IF, i) && getBit(IE, i))
                 {
                     return i;
                 }

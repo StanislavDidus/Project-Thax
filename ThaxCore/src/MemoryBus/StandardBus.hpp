@@ -4,15 +4,17 @@
 #include "Bus.hpp"
 #include "Cartridge.hpp"
 #include "Constants.hpp"
+#include "Timers/Timer.hpp"
 
 namespace dmg
 {
     class StandardBus : public Bus
     {
     public:
-        StandardBus(Cartridge& cartridge, InterruptController& interrupt_controller)
+        StandardBus(Cartridge& cartridge, InterruptController& interrupt_controller, Timer& timer)
             : m_cartridge(cartridge)
             , m_interrupt_controller(interrupt_controller)
+            , m_timer(timer)
         {
 
         }
@@ -56,16 +58,25 @@ namespace dmg
             {
                 return OAM[address - address::OAM.m_start];
             }
-            if (address::UNSUABLE1.Contains(address))
-            {
-                return 0xFF;
-            }
             if (address::IO.Contains(address))
             {
-                if (address == 0xFF0F) return m_interrupt_controller.ReadIF();
-                else return IO[address - address::IO.m_start];
+                switch (address)
+                {
+                case 0xFF0F:
+                    return m_interrupt_controller.ReadIF();
+                case 0xFF04:
+                    return m_timer.ReadDIV();
+                case 0xFF05:
+                    return m_timer.ReadTIMA();
+                case 0xFF06:
+                    return m_timer.ReadTMA();
+                case 0xFF07:
+                    return m_timer.ReadTAC();
+                default:
+                    return IO[address - address::IO.m_start];
+                }
             }
-            if (address::UNUSABLE2.Contains(address))
+            if (address::UNUSABLE.Contains(address))
             {
                 return 0xFF;
             }
@@ -109,17 +120,26 @@ namespace dmg
             {
                 OAM[address - address::OAM.m_start] = value;
             }
-            else if (address::UNSUABLE1.Contains(address))
-            {
-                //
-            }
             else if (address::IO.Contains(address))
             {
-                if (address == 0xFF0F) m_interrupt_controller.WriteIF(value);
-                else IO[address - address::IO.m_start] = value;
+                switch (address)
+                {
+                case 0xFF0F:
+                    m_interrupt_controller.WriteIF(value);
+                case 0xFF04:
+                    m_timer.WriteDIV(value);
+                case 0xFF05:
+                    m_timer.WriteTIMA(value);
+                case 0xFF06:
+                    m_timer.WriteTMA(value);
+                case 0xFF07:
+                    m_timer.WriteTAC(value);
+                default:
+                    IO[address - address::IO.m_start] = value;
+                }
             }
 
-            else if (address::UNUSABLE2.Contains(address))
+            else if (address::UNUSABLE.Contains(address))
             {
                 //
             }
@@ -131,6 +151,7 @@ namespace dmg
     private:
         Cartridge& m_cartridge;
         InterruptController& m_interrupt_controller;
+        Timer& m_timer;
 
         std::array<uint8_t, address::VRAM.m_size> VRAM   {};
         std::array<uint8_t, address::RAM_N.m_size> RAM_N {};
