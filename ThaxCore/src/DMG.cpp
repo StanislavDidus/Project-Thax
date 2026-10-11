@@ -50,22 +50,18 @@ void dmg::DMG::StartFrame()
 
 void dmg::DMG::Update()
 {
-    if (m_state == State::PLAY)
+    if (m_play_state == PlayState::PLAY)
     {
         StartFrame();
 
         while (total_cycles < cycle_target)
         {
-            uint32_t cycles = m_cpu->HandleInterrupts().value_or(0);
-            total_cycles += cycles;
-            cycles += m_cpu->Step();
-            if (m_timer) m_timer->Update(cycles);
-            if (m_serial_port) m_serial_port->Update(cycles);
+            StepInstruction();
         }
 
         EndFrame();
     }
-    else if (m_state == State::PAUSE)
+    else if (m_play_state == PlayState::PAUSE)
     {
         if (total_cycles >= cycle_target)
         {
@@ -89,16 +85,40 @@ void dmg::DMG::EndFrame()
 
 void dmg::DMG::StepInstruction()
 {
-    total_cycles += m_cpu->HandleInterrupts().value_or(0);
-    total_cycles += m_cpu->Step();
+    if (m_cpu->IsStopped())
+    {
+        total_cycles += 4;
+        return;
+    };
+
+    uint32_t cycles = 0;
+
+    if (m_cpu->IsHalted() && m_interrupt_controller->GetSharedBit())
+    {
+        m_cpu->UnHalt();
+    }
+    if (const auto irq = m_cpu->HandleInterrupts())
+        cycles += irq.value_or(0);
+    else if (m_cpu->IsHalted())
+    {
+        cycles = 4;
+    }
+    else
+    {
+        cycles = m_cpu->Step();
+    }
+
+    total_cycles += cycles;
+
+    if (m_timer) m_timer->Update(cycles);
+    if (m_serial_port) m_serial_port->Update(cycles);
 }
 
 void dmg::DMG::StepFrame()
 {
     while (total_cycles < cycle_target)
     {
-        total_cycles += m_cpu->HandleInterrupts().value_or(0);
-        total_cycles += m_cpu->Step();
+        StepInstruction();
     }
 }
 
@@ -107,6 +127,12 @@ void dmg::DMG::StepCycles(uint32_t target_cycles)
     uint32_t current_cycles = 0;
     while (current_cycles < target_cycles)
     {
+        if (m_cpu->IsStopped() || m_cpu->IsHalted())
+        {
+            current_cycles += 4;
+            continue;
+        }
+
         // NOTE: Should I add interrupt handling here as well?!
         // This is only used for testing so I am not sure
         current_cycles += m_cpu->Step();
@@ -123,25 +149,30 @@ void dmg::DMG::KeyReleased(JoypadButton button)
     if (m_joypad) m_joypad->KeyReleased(button);
 }
 
-void dmg::DMG::SetState(State state)
+void dmg::DMG::SetState(PlayState state)
 {
-    m_state = state;
+    m_play_state = state;
 
     // Do actions when entering certain states
-    switch (m_state)
+    switch (m_play_state)
     {
-    case State::NONE:
+    case PlayState::NONE:
         break;
-    case State::IDLE:
+    case PlayState::IDLE:
         m_cpu->Reset();
         break;
-    case State::PLAY:
+    case PlayState::PLAY:
         break;
-    case State::PAUSE:
+    case PlayState::PAUSE:
         break;
     default:
         break;
     }
+}
+
+void dmg::DMG::Reset()
+{
+    m_cpu->Reset();
 }
 
 void dmg::DMG::SetRegisters(const RegisterInfo& register_info)
@@ -168,31 +199,3 @@ void dmg::DMG::WriteMemory(const uint16_t address, const uint8_t value)
 {
     m_bus->Write(address, value);
 }
-
-/*
-uint8_t dmg::DMG::ReadFromMemory(uint16_t address)
-{
-    return m_memory_bus->Read(address);
-}
-
-void dmg::DMG::WriteToMemory(uint16_t address, uint8_t value)
-{
-    return m_memory_bus->Write(address, value);
-}
-
-uint8_t* dmg::DMG::GetMemoryPointer()
-{
-    return m_memory_bus->GetDataPointer();
-}
-
-uint32_t dmg::DMG::GetMemorySize()
-{
-    return m_memory_bus->GetMemorySize();
-}
-
-void dmg::DMG::ClearMemory()
-{
-    m_memory_bus->Clear();
-}
-*/
-

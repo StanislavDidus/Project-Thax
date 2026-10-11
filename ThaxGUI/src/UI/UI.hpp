@@ -114,33 +114,33 @@ namespace dmg
         {
             if (ImGui::Button("Start"))
             {
-                dmg.SetState(DMG::State::PLAY);
+                dmg.SetState(DMG::PlayState::PLAY);
             }
 
-            DoIfEnabled(dmg.GetState() != DMG::State::PLAY, [&dmg]
+            DoIfEnabled(dmg.GetState() != DMG::PlayState::PLAY, [&dmg]
             {
                 ImGui::SameLine();
 
                 if (ImGui::Button("Pause"))
                 {
-                    dmg.SetState(DMG::State::PAUSE);
+                    dmg.SetState(DMG::PlayState::PAUSE);
                 }
             });
 
             if (ImGui::Button("Start & Pause"))
             {
-                dmg.SetState(DMG::State::PAUSE);
+                dmg.SetState(DMG::PlayState::PAUSE);
             }
 
-            DoIfEnabled(dmg.GetState() == DMG::State::IDLE, [&dmg]
+            DoIfEnabled(dmg.GetState() == DMG::PlayState::IDLE, [&dmg]
             {
                 if (ImGui::Button("Stop"))
                 {
-                    dmg.SetState(DMG::State::IDLE);
+                    dmg.SetState(DMG::PlayState::IDLE);
                 }
             });
 
-            DoIfEnabled(dmg.GetState() != DMG::State::PAUSE,[&dmg]
+            DoIfEnabled(dmg.GetState() != DMG::PlayState::PAUSE,[&dmg]
             {
                 ImGui::SameLine();
 

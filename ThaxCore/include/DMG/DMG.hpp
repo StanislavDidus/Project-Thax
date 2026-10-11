@@ -24,7 +24,7 @@ namespace dmg
     class DMG
     {
     public:
-        enum class State
+        enum class PlayState
         {
             NONE,
             IDLE,
@@ -52,10 +52,12 @@ namespace dmg
         void KeyPressed(JoypadButton button);
         void KeyReleased(JoypadButton button);
 
-        void SetState(State state);
+        void SetState(PlayState state);
 
         // Setters and getters that are needed for objects outside of DMG class
-        State GetState() { return m_state; }
+        PlayState GetState() { return m_play_state; }
+
+        void Reset();
 
         void SetRegisters(const RegisterInfo& register_info);
         [[nodiscard]] RegisterInfo GetRegisters() const;
@@ -75,7 +77,7 @@ namespace dmg
         std::unique_ptr<Bus> m_bus {};
         std::unique_ptr<CPU> m_cpu {};
 
-        State m_state = State::NONE;
+        PlayState m_play_state = PlayState::NONE;
         InitState m_init_state = InitState::STANDARD;
 
         uint32_t cycle_accumulator = 0;

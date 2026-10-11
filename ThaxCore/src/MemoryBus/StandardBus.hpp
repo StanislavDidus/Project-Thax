@@ -92,13 +92,8 @@ namespace dmg
         {
             AddDirtyAddress(address);
 
-            if (address::ROM_0.Contains(address))
+            if (address::ROM_0.Contains(address) || address::ROM_N.Contains(address))
             {
-                m_cartridge.Write(address, value);
-            }
-            else if (address::ROM_N.Contains(address))
-            {
-                m_cartridge.Write(address, value);
             }
             else if (address::VRAM.Contains(address))
             {

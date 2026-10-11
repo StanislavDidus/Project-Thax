@@ -96,6 +96,11 @@ namespace dmg
             dmg.WriteMemory(i[0], i[1]);
         }
     }
+
+    inline void Reset(DMG& dmg)
+    {
+        dmg.Reset();
+    }
 }
 int main()
 {
@@ -104,28 +109,45 @@ int main()
     Log::Init();
     DMG dmg{dmg::DMG::InitState::TEST};
 
+    int finished_opcode_tests = 0;
     for (int i = 0; i < 256; ++i)
     {
         if (std::ranges::find(non_existent_opcodes, i) != non_existent_opcodes.end()) continue;
 
         std::string file_name = std::format("SST/{:02x}.json", i);
         std::ifstream f{file_name};
-        json data = json::parse(f)[0];
 
-        // Load State to DMG
-        std::string name = data["name"];
-        LoadRegisters(dmg, data);
-        LoadMemory(dmg, data);
-        dmg.SetState(dmg::DMG::State::PAUSE);
-        size_t tcycles = ReadTCyclesNumber(data);
-        dmg.StepCycles(tcycles);
+        json root = json::parse(f);
+        int j = 0;
 
-        // Run DMG
-        if (!CompareDMGStates(dmg, data))
+        bool failed = false;
+        for (const auto& data : root)
         {
-            std::cout << std::format("Test {}: did not pass.", name) << std::endl;
+
+            // Load State to DMG
+            std::string name = data["name"];
+            Reset(dmg);
+            LoadRegisters(dmg, data);
+            LoadMemory(dmg, data);
+            dmg.SetState(dmg::DMG::PlayState::PAUSE);
+            size_t tcycles = ReadTCyclesNumber(data);
+            dmg.StepCycles(tcycles);
+
+            // Run DMG
+            if (!CompareDMGStates(dmg, data))
+            {
+                std::cout << std::format("Test {}-{}: did not pass.", name, j) << std::endl;
+                failed = true;
+            }
+
+            ++j;
         }
+
+        if (!failed) finished_opcode_tests++;
     }
+
+    std::cout << std::format("Opcode tests finished {}/256", finished_opcode_tests) << std::endl;
+    //std::cout << std::format("Opcode specific tests finished {}", finished_specific_tests) << std::endl;
 
     return 0;
 }

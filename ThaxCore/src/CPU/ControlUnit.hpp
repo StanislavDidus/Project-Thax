@@ -119,6 +119,14 @@ namespace dmg
         uint16_t ReadA16();
         uint8_t ReadD8();
 
+        // CB
+        uint32_t CB_Table();
+
+        uint32_t RLC(AByteRegister& reg);
+        uint32_t RL(AByteRegister& reg);
+        uint32_t SLA(AByteRegister& reg);
+
+
         CPU& m_cpu;
     };
 }

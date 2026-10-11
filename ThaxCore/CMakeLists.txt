@@ -42,6 +42,8 @@ set(SOURCE_FILES
         src/CPU/CPU.cpp
         src/Timers/Timer.cpp
         src/InterruptController.cpp
+        src/CPU/Opcodes_Impl.cpp
+        src/CPU/CB_Opcodes_Impl.cpp
 )
 
 set(ALL_FILES

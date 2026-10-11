@@ -45,6 +45,8 @@ void dmg::CPU::Reset()
     E.Write(0);
     H.Write(0);
     L.Write(0);
+
+    m_current_state = State::NORMAL;
 }
 
 std::optional<uint32_t> dmg::CPU::HandleInterrupts()
@@ -89,6 +91,26 @@ std::optional<uint32_t> dmg::CPU::HandleInterrupts()
     }
 
     return std::nullopt;
+}
+
+void dmg::CPU::UnHalt()
+{
+    m_current_state = State::NORMAL;
+}
+
+bool dmg::CPU::IsHalted() const
+{
+    return m_current_state == State::HALT;
+}
+
+bool dmg::CPU::IsStopped() const
+{
+    return m_current_state == State::STOP;
+}
+
+bool dmg::CPU::IsIMESet() const
+{
+    return IME;
 }
 
 dmg::RegisterInfo dmg::CPU::GetRegisterInfo() const
