@@ -138,6 +138,16 @@ namespace dmg
         uint32_t RES(uint8_t bit, Address address);
         uint32_t SET(uint8_t bit, Address address);
 
+        uint32_t RRC(AByteRegister& reg);
+        uint32_t RR(AByteRegister& reg);
+        uint32_t SRA(AByteRegister& reg);
+        uint32_t SRL(AByteRegister& reg);
+
+        uint32_t RRC(Address address);
+        uint32_t RR(Address address);
+        uint32_t SRA(Address address);
+        uint32_t SRL(Address address);
+
         CPU& m_cpu;
     };
 }

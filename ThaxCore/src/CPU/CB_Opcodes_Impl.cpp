@@ -105,6 +105,8 @@ namespace dmg
         setBit(value, bit, 1);
 
         reg.Write(value);
+
+        return 8;
     }
 
     uint32_t ControlUnit::RLC(Address address)
@@ -122,7 +124,7 @@ namespace dmg
 
         m_cpu.WriteMemory(address.m_address, value);
 
-        return 8;
+        return 16;
     }
 
     uint32_t ControlUnit::RL(Address address)
@@ -140,7 +142,7 @@ namespace dmg
 
         m_cpu.WriteMemory(address.m_address, value);
 
-        return 8;
+        return 16;
     }
 
     uint32_t ControlUnit::SLA(Address address)
@@ -158,7 +160,7 @@ namespace dmg
 
         m_cpu.WriteMemory(address.m_address, value);
 
-        return 8;
+        return 16;
     }
 
     uint32_t ControlUnit::SWAP(Address address)
@@ -175,9 +177,9 @@ namespace dmg
         m_cpu.F.SetFlagH(false);
         m_cpu.F.SetFlagC(false);
 
-        m_cpu.WriteMemory(address.m_address, value);
+        m_cpu.WriteMemory(address.m_address, result);
 
-        return 8;
+        return 16;
     }
 
     uint32_t ControlUnit::BIT(uint8_t bit, Address address)
@@ -188,7 +190,7 @@ namespace dmg
         m_cpu.F.SetFlagN(false);
         m_cpu.F.SetFlagH(true);
 
-        return 8;
+        return 12;
     }
 
     uint32_t ControlUnit::RES(uint8_t bit, Address address)
@@ -199,7 +201,7 @@ namespace dmg
 
         m_cpu.WriteMemory(address.m_address, value);
 
-        return 8;
+        return 16;
     }
 
     uint32_t ControlUnit::SET(uint8_t bit, Address address)
@@ -209,5 +211,151 @@ namespace dmg
         setBit(value, bit, 1);
 
         m_cpu.WriteMemory(address.m_address, value);
+
+        return 16;
+    }
+
+    uint32_t ControlUnit::RRC(AByteRegister& reg)
+    {
+        uint8_t value = reg.Read();
+
+        const uint8_t last_bit = getBit(value, 0);
+        value = value >> 1;
+        setBit(value, 7, last_bit);
+
+        m_cpu.F.SetFlagZ(value == 0);
+        m_cpu.F.SetFlagN(false);
+        m_cpu.F.SetFlagH(false);
+        m_cpu.F.SetFlagC(last_bit);
+
+        reg.Write(value);
+
+        return 8;
+    }
+
+    uint32_t ControlUnit::RR(AByteRegister& reg)
+    {
+        uint8_t value = reg.Read();
+
+        const uint8_t last_bit = getBit(value, 0);
+        value = value >> 1;
+        setBit(value, 7, m_cpu.F.ReadFlagC());
+
+        m_cpu.F.SetFlagZ(value == 0);
+        m_cpu.F.SetFlagN(false);
+        m_cpu.F.SetFlagH(false);
+        m_cpu.F.SetFlagC(last_bit);
+
+        reg.Write(value);
+
+        return 8;
+    }
+
+    uint32_t ControlUnit::SRA(AByteRegister& reg)
+    {
+        uint8_t value = reg.Read();
+
+        const uint8_t carry = value & 0x01;
+        value = (value >> 1) | (value & 0x80);
+
+        m_cpu.F.SetFlagZ(value == 0);
+        m_cpu.F.SetFlagN(false);
+        m_cpu.F.SetFlagH(false);
+        m_cpu.F.SetFlagC(carry != 0);
+
+        reg.Write(value);
+
+        return 8;
+    }
+
+    uint32_t ControlUnit::SRL(AByteRegister& reg)
+    {
+        uint8_t value = reg.Read();
+
+        const uint8_t last_bit = getBit(value, 0);
+        value = value >> 1;
+        setBit(value, 7, 0);
+
+        m_cpu.F.SetFlagZ(value == 0);
+        m_cpu.F.SetFlagN(false);
+        m_cpu.F.SetFlagH(false);
+        m_cpu.F.SetFlagC(last_bit);
+
+        reg.Write(value);
+
+        return 8;
+
+    }
+
+    uint32_t ControlUnit::RRC(const Address address)
+    {
+        uint8_t value = m_cpu.ReadMemory(address.m_address);
+
+        const uint8_t last_bit = getBit(value, 0);
+        value = value >> 1;
+        setBit(value, 7, last_bit);
+
+        m_cpu.F.SetFlagZ(value == 0);
+        m_cpu.F.SetFlagN(false);
+        m_cpu.F.SetFlagH(false);
+        m_cpu.F.SetFlagC(last_bit);
+
+        m_cpu.WriteMemory(address.m_address, value);
+
+        return 16;
+    }
+
+    uint32_t ControlUnit::RR(const Address address)
+    {
+        uint8_t value = m_cpu.ReadMemory(address.m_address);
+
+        const uint8_t last_bit = getBit(value, 0);
+        value = value >> 1;
+        setBit(value, 7, m_cpu.F.ReadFlagC());
+
+        m_cpu.F.SetFlagZ(value == 0);
+        m_cpu.F.SetFlagN(false);
+        m_cpu.F.SetFlagH(false);
+        m_cpu.F.SetFlagC(last_bit);
+
+        m_cpu.WriteMemory(address.m_address, value);
+
+        return 16;
+    }
+
+    uint32_t ControlUnit::SRA(const Address address)
+    {
+        uint8_t value = m_cpu.ReadMemory(address.m_address);
+
+        const uint8_t carry = value & 0x01;
+        value = (value >> 1) | (value & 0x80);
+
+        m_cpu.F.SetFlagZ(value == 0);
+        m_cpu.F.SetFlagN(false);
+        m_cpu.F.SetFlagH(false);
+        m_cpu.F.SetFlagC(carry != 0);
+
+        m_cpu.WriteMemory(address.m_address, value);
+
+        return 16;
+    }
+
+    uint32_t ControlUnit::SRL(const Address address)
+    {
+        uint8_t value = m_cpu.ReadMemory(address.m_address);
+
+        const uint8_t last_bit = getBit(value, 0);
+        value = value >> 1;
+        setBit(value, 7, 0);
+
+        m_cpu.F.SetFlagZ(value == 0);
+        m_cpu.F.SetFlagN(false);
+        m_cpu.F.SetFlagH(false);
+        m_cpu.F.SetFlagC(last_bit);
+
+        m_cpu.WriteMemory(address.m_address, value);
+
+        return 16;
+
     }
 }

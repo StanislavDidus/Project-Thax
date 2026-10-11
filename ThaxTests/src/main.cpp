@@ -150,7 +150,44 @@ int main()
         if (!failed) finished_opcode_tests++;
     }
 
-    std::cout << std::format("Opcode tests finished {}/256", finished_opcode_tests) << std::endl;
+    for (int i = 0; i < 256; ++i)
+    {
+        std::string file_name = std::format("SST/cb {:02x}.json", i);
+        std::ifstream f{file_name};
+
+        json root = json::parse(f);
+        int j = 0;
+
+        bool failed = false;
+        for (const auto& data : root)
+        {
+            // Load State to DMG
+            std::string name = data["name"];
+            Reset(dmg);
+            LoadRegisters(dmg, data);
+            LoadMemory(dmg, data);
+            dmg.SetState(dmg::DMG::PlayState::PAUSE);
+            size_t tcycles = ReadTCyclesNumber(data);
+            dmg.StepCycles(tcycles);
+
+            // Run DMG
+            if (!CompareDMGStates(dmg, data))
+            {
+                std::cout << std::format("Test {}-{}: did not pass.", name, j) << std::endl;
+                failed = true;
+            }
+            else
+            {
+                finished_specific_tests++;
+            }
+
+            ++j;
+        }
+
+        if (!failed) finished_opcode_tests++;
+    }
+
+    std::cout << std::format("Opcode tests finished {}/500", finished_opcode_tests) << std::endl;
     std::cout << std::format("Opcode specific tests finished {}", finished_specific_tests) << std::endl;
 
     return 0;

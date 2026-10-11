@@ -4,7 +4,6 @@
 
 #include "DMG/Utils/Log.hpp"
 #include "CPU.hpp"
-#include "Utils/Math.hpp"
 
 dmg::ControlUnit::ControlUnit(CPU& cpu)
     : m_cpu(cpu)
@@ -450,6 +449,142 @@ uint32_t dmg::ControlUnit::CB_Table()
     case 0xE7: return SET(4, m_cpu.A); // SET 4, A
     case 0xF7: return SET(6, m_cpu.A); // SET 6, A
         // Column 0x08
+    case 0x08: return RRC(m_cpu.B); // RRC B
+    case 0x18: return RR(m_cpu.B); // RR B
+    case 0x28: return SRA(m_cpu.B); // SRA B
+    case 0x38: return SRL(m_cpu.B); // SRL B
+    case 0x48: return BIT(1, m_cpu.B); // BIT 1, B
+    case 0x58: return BIT(3, m_cpu.B); // BIT 3, B
+    case 0x68: return BIT(5, m_cpu.B); // BIT 5, B
+    case 0x78: return BIT(7, m_cpu.B); // BIT 7, B
+    case 0x88: return RES(1, m_cpu.B); // RES 1, B
+    case 0x98: return RES(3, m_cpu.B); // RES 3, B
+    case 0xA8: return RES(5, m_cpu.B); // RES 5, B
+    case 0xB8: return RES(7, m_cpu.B); // RES 7, B
+    case 0xC8: return SET(1, m_cpu.B); // SET 1, B
+    case 0xD8: return SET(3, m_cpu.B); // SET 3, B
+    case 0xE8: return SET(5, m_cpu.B); // SET 5, B
+    case 0xF8: return SET(7, m_cpu.B); // SET 7, B
+        // Column 0x09
+    case 0x09: return RRC(m_cpu.C); // RRC C
+    case 0x19: return RR(m_cpu.C); // RR C
+    case 0x29: return SRA(m_cpu.C); // SRA C
+    case 0x39: return SRL(m_cpu.C); // SRL C
+    case 0x49: return BIT(1, m_cpu.C); // BIT 1, C
+    case 0x59: return BIT(3, m_cpu.C); // BIT 3, C
+    case 0x69: return BIT(5, m_cpu.C); // BIT 5, C
+    case 0x79: return BIT(7, m_cpu.C); // BIT 7, C
+    case 0x89: return RES(1, m_cpu.C); // RES 1, C
+    case 0x99: return RES(3, m_cpu.C); // RES 3, C
+    case 0xA9: return RES(5, m_cpu.C); // RES 5, C
+    case 0xB9: return RES(7, m_cpu.C); // RES 7, C
+    case 0xC9: return SET(1, m_cpu.C); // SET 1, C
+    case 0xD9: return SET(3, m_cpu.C); // SET 3, C
+    case 0xE9: return SET(5, m_cpu.C); // SET 5, C
+    case 0xF9: return SET(7, m_cpu.C); // SET 7, C
+        // Column 0x0A
+    case 0x0A: return RRC(m_cpu.D); // RRC D
+    case 0x1A: return RR(m_cpu.D); // RR D
+    case 0x2A: return SRA(m_cpu.D); // SRA D
+    case 0x3A: return SRL(m_cpu.D); // SRL D
+    case 0x4A: return BIT(1, m_cpu.D); // BIT 1, D
+    case 0x5A: return BIT(3, m_cpu.D); // BIT 3, D
+    case 0x6A: return BIT(5, m_cpu.D); // BIT 5, D
+    case 0x7A: return BIT(7, m_cpu.D); // BIT 7, D
+    case 0x8A: return RES(1, m_cpu.D); // RES 1, D
+    case 0x9A: return RES(3, m_cpu.D); // RES 3, D
+    case 0xAA: return RES(5, m_cpu.D); // RES 5, D
+    case 0xBA: return RES(7, m_cpu.D); // RES 7, D
+    case 0xCA: return SET(1, m_cpu.D); // SET 1, D
+    case 0xDA: return SET(3, m_cpu.D); // SET 3, D
+    case 0xEA: return SET(5, m_cpu.D); // SET 5, D
+    case 0xFA: return SET(7, m_cpu.D); // SET 7, D
+        // Column 0x0B
+    case 0x0B: return RRC(m_cpu.E); // RRC E
+    case 0x1B: return RR(m_cpu.E); // RR E
+    case 0x2B: return SRA(m_cpu.E); // SRA E
+    case 0x3B: return SRL(m_cpu.E); // SRL E
+    case 0x4B: return BIT(1, m_cpu.E); // BIT 1, E
+    case 0x5B: return BIT(3, m_cpu.E); // BIT 3, E
+    case 0x6B: return BIT(5, m_cpu.E); // BIT 5, E
+    case 0x7B: return BIT(7, m_cpu.E); // BIT 7, E
+    case 0x8B: return RES(1, m_cpu.E); // RES 1, E
+    case 0x9B: return RES(3, m_cpu.E); // RES 3, E
+    case 0xAB: return RES(5, m_cpu.E); // RES 5, E
+    case 0xBB: return RES(7, m_cpu.E); // RES 7, E
+    case 0xCB: return SET(1, m_cpu.E); // SET 1, E
+    case 0xDB: return SET(3, m_cpu.E); // SET 3, E
+    case 0xEB: return SET(5, m_cpu.E); // SET 5, E
+    case 0xFB: return SET(7, m_cpu.E); // SET 7, E
+        // Column 0x0C
+    case 0x0C: return RRC(m_cpu.H); // RRC H
+    case 0x1C: return RR(m_cpu.H); // RR H
+    case 0x2C: return SRA(m_cpu.H); // SRA H
+    case 0x3C: return SRL(m_cpu.H); // SRL H
+    case 0x4C: return BIT(1, m_cpu.H); // BIT 1, H
+    case 0x5C: return BIT(3, m_cpu.H); // BIT 3, H
+    case 0x6C: return BIT(5, m_cpu.H); // BIT 5, H
+    case 0x7C: return BIT(7, m_cpu.H); // BIT 7, H
+    case 0x8C: return RES(1, m_cpu.H); // RES 1, H
+    case 0x9C: return RES(3, m_cpu.H); // RES 3, H
+    case 0xAC: return RES(5, m_cpu.H); // RES 5, H
+    case 0xBC: return RES(7, m_cpu.H); // RES 7, H
+    case 0xCC: return SET(1, m_cpu.H); // SET 1, H
+    case 0xDC: return SET(3, m_cpu.H); // SET 3, H
+    case 0xEC: return SET(5, m_cpu.H); // SET 5, H
+    case 0xFC: return SET(7, m_cpu.H); // SET 7, H
+        // Column 0x0D
+    case 0x0D: return RRC(m_cpu.L); // RRC L
+    case 0x1D: return RR(m_cpu.L); // RR L
+    case 0x2D: return SRA(m_cpu.L); // SRA L
+    case 0x3D: return SRL(m_cpu.L); // SRL L
+    case 0x4D: return BIT(1, m_cpu.L); // BIT 1, L
+    case 0x5D: return BIT(3, m_cpu.L); // BIT 3, L
+    case 0x6D: return BIT(5, m_cpu.L); // BIT 5, L
+    case 0x7D: return BIT(7, m_cpu.L); // BIT 7, L
+    case 0x8D: return RES(1, m_cpu.L); // RES 1, L
+    case 0x9D: return RES(3, m_cpu.L); // RES 3, L
+    case 0xAD: return RES(5, m_cpu.L); // RES 5, L
+    case 0xBD: return RES(7, m_cpu.L); // RES 7, L
+    case 0xCD: return SET(1, m_cpu.L); // SET 1, L
+    case 0xDD: return SET(3, m_cpu.L); // SET 3, L
+    case 0xED: return SET(5, m_cpu.L); // SET 5, L
+    case 0xFD: return SET(7, m_cpu.L); // SET 7, L
+        // Column 0x0E
+    case 0x0E: return RRC(Address(m_cpu.HL)); // RRC (HL)
+    case 0x1E: return RR(Address(m_cpu.HL)); // RR (HL)
+    case 0x2E: return SRA(Address(m_cpu.HL)); // SRA (HL)
+    case 0x3E: return SRL(Address(m_cpu.HL)); // SRL (HL)
+    case 0x4E: return BIT(1, Address(m_cpu.HL)); // BIT 1, (HL)
+    case 0x5E: return BIT(3, Address(m_cpu.HL)); // BIT 3, (HL)
+    case 0x6E: return BIT(5, Address(m_cpu.HL)); // BIT 5, (HL)
+    case 0x7E: return BIT(7, Address(m_cpu.HL)); // BIT 7, (HL)
+    case 0x8E: return RES(1, Address(m_cpu.HL)); // RES 1, (HL)
+    case 0x9E: return RES(3, Address(m_cpu.HL)); // RES 3, (HL)
+    case 0xAE: return RES(5, Address(m_cpu.HL)); // RES 5, (HL)
+    case 0xBE: return RES(7, Address(m_cpu.HL)); // RES 7, (HL)
+    case 0xCE: return SET(1, Address(m_cpu.HL)); // SET 1, (HL)
+    case 0xDE: return SET(3, Address(m_cpu.HL)); // SET 3, (HL)
+    case 0xEE: return SET(5, Address(m_cpu.HL)); // SET 5, (HL)
+    case 0xFE: return SET(7, Address(m_cpu.HL)); // SET 7, (HL)
+        // Column 0x0F
+    case 0x0F: return RRC(m_cpu.A); // RRC A
+    case 0x1F: return RR(m_cpu.A); // RR A
+    case 0x2F: return SRA(m_cpu.A); // SRA A
+    case 0x3F: return SRL(m_cpu.A); // SRL A
+    case 0x4F: return BIT(1, m_cpu.A); // BIT 1, A
+    case 0x5F: return BIT(3, m_cpu.A); // BIT 3, A
+    case 0x6F: return BIT(5, m_cpu.A); // BIT 5, A
+    case 0x7F: return BIT(7, m_cpu.A); // BIT 7, A
+    case 0x8F: return RES(1, m_cpu.A); // RES 1, A
+    case 0x9F: return RES(3, m_cpu.A); // RES 3, A
+    case 0xAF: return RES(5, m_cpu.A); // RES 5, A
+    case 0xBF: return RES(7, m_cpu.A); // RES 7, A
+    case 0xCF: return SET(1, m_cpu.A); // SET 1, A
+    case 0xDF: return SET(3, m_cpu.A); // SET 3, A
+    case 0xEF: return SET(5, m_cpu.A); // SET 5, A
+    case 0xFF: return SET(7, m_cpu.A); // SET 7, A
+
     default:
         DMG_WARN("There is no matching instruction for is opcode: CB-%d", opcode);
         return 4;
