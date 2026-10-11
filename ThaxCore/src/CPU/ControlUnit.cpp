@@ -317,63 +317,141 @@ uint32_t dmg::ControlUnit::CB_Table()
     case 0x00: return RLC(m_cpu.B); // RLC B
     case 0x10: return RL(m_cpu.B); // RL B
     case 0x20: return SLA(m_cpu.B); // SLA B
+    case 0x30: return SWAP(m_cpu.B); // SWAP B
+    case 0x40: return BIT(0, m_cpu.B); // BIT 0, B
+    case 0x50: return BIT(2, m_cpu.B); // BIT 2, B
+    case 0x60: return BIT(4, m_cpu.B); // BIT 4, B
+    case 0x70: return BIT(6, m_cpu.B); // BIT 4, B
+    case 0x80: return RES(0, m_cpu.B); // RES 0, B
+    case 0x90: return RES(2, m_cpu.B); // RES 2, B
+    case 0xA0: return RES(4, m_cpu.B); // RES 4, B
+    case 0xB0: return RES(6, m_cpu.B); // RES 6, B
+    case 0xC0: return SET(0, m_cpu.B); // SET 0, B
+    case 0xD0: return SET(2, m_cpu.B); // SET 2, B
+    case 0xE0: return SET(4, m_cpu.B); // SET 4, B
+    case 0xF0: return SET(6, m_cpu.B); // SET 6, B
+        // Column 0x01
+    case 0x01: return RLC(m_cpu.C); // RLC C
+    case 0x11: return RL(m_cpu.C); // RL C
+    case 0x21: return SLA(m_cpu.C); // SLA C
+    case 0x31: return SWAP(m_cpu.C); // SWAP C
+    case 0x41: return BIT(0, m_cpu.C); // BIT 0, C
+    case 0x51: return BIT(2, m_cpu.C); // BIT 2, C
+    case 0x61: return BIT(4, m_cpu.C); // BIT 4, C
+    case 0x71: return BIT(6, m_cpu.C); // BIT 4, C
+    case 0x81: return RES(0, m_cpu.C); // RES 0, C
+    case 0x91: return RES(2, m_cpu.C); // RES 2, C
+    case 0xA1: return RES(4, m_cpu.C); // RES 4, C
+    case 0xB1: return RES(6, m_cpu.C); // RES 6, C
+    case 0xC1: return SET(0, m_cpu.C); // SET 0, C
+    case 0xD1: return SET(2, m_cpu.C); // SET 2, C
+    case 0xE1: return SET(4, m_cpu.C); // SET 4, C
+    case 0xF1: return SET(6, m_cpu.C); // SET 6, C
+        // Column 0x02
+    case 0x02: return RLC(m_cpu.D); // RLC D
+    case 0x12: return RL(m_cpu.D); // RL D
+    case 0x22: return SLA(m_cpu.D); // SLA D
+    case 0x32: return SWAP(m_cpu.D); // SWAP D
+    case 0x42: return BIT(0, m_cpu.D); // BIT 0, D
+    case 0x52: return BIT(2, m_cpu.D); // BIT 2, D
+    case 0x62: return BIT(4, m_cpu.D); // BIT 4, D
+    case 0x72: return BIT(6, m_cpu.D); // BIT 4, D
+    case 0x82: return RES(0, m_cpu.D); // RES 0, D
+    case 0x92: return RES(2, m_cpu.D); // RES 2, D
+    case 0xA2: return RES(4, m_cpu.D); // RES 4, D
+    case 0xB2: return RES(6, m_cpu.D); // RES 6, D
+    case 0xC2: return SET(0, m_cpu.D); // SET 0, D
+    case 0xD2: return SET(2, m_cpu.D); // SET 2, D
+    case 0xE2: return SET(4, m_cpu.D); // SET 4, D
+    case 0xF2: return SET(6, m_cpu.D); // SET 6, D
+        // Column 0x13
+    case 0x03: return RLC(m_cpu.E); // RLC E
+    case 0x13: return RL(m_cpu.E); // RL E
+    case 0x23: return SLA(m_cpu.E); // SLA E
+    case 0x33: return SWAP(m_cpu.E); // SWAP E
+    case 0x43: return BIT(0, m_cpu.E); // BIT 0, E
+    case 0x53: return BIT(2, m_cpu.E); // BIT 2, E
+    case 0x63: return BIT(4, m_cpu.E); // BIT 4, E
+    case 0x73: return BIT(6, m_cpu.E); // BIT 4, E
+    case 0x83: return RES(0, m_cpu.E); // RES 0, E
+    case 0x93: return RES(2, m_cpu.E); // RES 2, E
+    case 0xA3: return RES(4, m_cpu.E); // RES 4, E
+    case 0xB3: return RES(6, m_cpu.E); // RES 6, E
+    case 0xC3: return SET(0, m_cpu.E); // SET 0, E
+    case 0xD3: return SET(2, m_cpu.E); // SET 2, E
+    case 0xE3: return SET(4, m_cpu.E); // SET 4, E
+    case 0xF3: return SET(6, m_cpu.E); // SET 6, E
+        // Column 0x04
+    case 0x04: return RLC(m_cpu.H); // RLC H
+    case 0x14: return RL(m_cpu.H); // RL H
+    case 0x24: return SLA(m_cpu.H); // SLA H
+    case 0x34: return SWAP(m_cpu.H); // SWAP H
+    case 0x44: return BIT(0, m_cpu.H); // BIT 0, H
+    case 0x54: return BIT(2, m_cpu.H); // BIT 2, H
+    case 0x64: return BIT(4, m_cpu.H); // BIT 4, H
+    case 0x74: return BIT(6, m_cpu.H); // BIT 4, H
+    case 0x84: return RES(0, m_cpu.H); // RES 0, H
+    case 0x94: return RES(2, m_cpu.H); // RES 2, H
+    case 0xA4: return RES(4, m_cpu.H); // RES 4, H
+    case 0xB4: return RES(6, m_cpu.H); // RES 6, H
+    case 0xC4: return SET(0, m_cpu.H); // SET 0, H
+    case 0xD4: return SET(2, m_cpu.H); // SET 2, H
+    case 0xE4: return SET(4, m_cpu.H); // SET 4, H
+    case 0xF4: return SET(6, m_cpu.H); // SET 6, H
+        // Column 0x05
+    case 0x05: return RLC(m_cpu.L); // RLC L
+    case 0x15: return RL(m_cpu.L); // RL L
+    case 0x25: return SLA(m_cpu.L); // SLA L
+    case 0x35: return SWAP(m_cpu.L); // SWAP L
+    case 0x45: return BIT(0, m_cpu.L); // BIT 0, L
+    case 0x55: return BIT(2, m_cpu.L); // BIT 2, L
+    case 0x65: return BIT(4, m_cpu.L); // BIT 4, L
+    case 0x75: return BIT(6, m_cpu.L); // BIT 4, L
+    case 0x85: return RES(0, m_cpu.L); // RES 0, L
+    case 0x95: return RES(2, m_cpu.L); // RES 2, L
+    case 0xA5: return RES(4, m_cpu.L); // RES 4, L
+    case 0xB5: return RES(6, m_cpu.L); // RES 6, L
+    case 0xC5: return SET(0, m_cpu.L); // SET 0, L
+    case 0xD5: return SET(2, m_cpu.L); // SET 2, L
+    case 0xE5: return SET(4, m_cpu.L); // SET 4, L
+    case 0xF5: return SET(6, m_cpu.L); // SET 6, L
+        // Column 0x06
+    case 0x06: return RLC(Address(m_cpu.HL)); // RLC (HL)
+    case 0x16: return RL(Address(m_cpu.HL)); // RL (HL)
+    case 0x26: return SLA(Address(m_cpu.HL)); // SLA (HL)
+    case 0x36: return SWAP(Address(m_cpu.HL)); // SWAP (HL)
+    case 0x46: return BIT(0, Address(m_cpu.HL)); // BIT 0, (HL)
+    case 0x56: return BIT(2, Address(m_cpu.HL)); // BIT 2, (HL)
+    case 0x66: return BIT(4, Address(m_cpu.HL)); // BIT 4, (HL)
+    case 0x76: return BIT(6, Address(m_cpu.HL)); // BIT 4, (HL)
+    case 0x86: return RES(0, Address(m_cpu.HL)); // RES 0, (HL)
+    case 0x96: return RES(2, Address(m_cpu.HL)); // RES 2, (HL)
+    case 0xA6: return RES(4, Address(m_cpu.HL)); // RES 4, (HL)
+    case 0xB6: return RES(6, Address(m_cpu.HL)); // RES 6, (HL)
+    case 0xC6: return SET(0, Address(m_cpu.HL)); // SET 0, (HL)
+    case 0xD6: return SET(2, Address(m_cpu.HL)); // SET 2, (HL)
+    case 0xE6: return SET(4, Address(m_cpu.HL)); // SET 4, (HL)
+    case 0xF6: return SET(6, Address(m_cpu.HL)); // SET 6, (HL)
+        // Column 0x07
+    case 0x07: return RLC(m_cpu.A); // RLC A
+    case 0x17: return RL(m_cpu.A); // RL A
+    case 0x27: return SLA(m_cpu.A); // SLA A
+    case 0x37: return SWAP(m_cpu.A); // SWAP A
+    case 0x47: return BIT(0, m_cpu.A); // BIT 0, A
+    case 0x57: return BIT(2, m_cpu.A); // BIT 2, A
+    case 0x67: return BIT(4, m_cpu.A); // BIT 4, A
+    case 0x77: return BIT(6, m_cpu.A); // BIT 4, A
+    case 0x87: return RES(0, m_cpu.A); // RES 0, A
+    case 0x97: return RES(2, m_cpu.A); // RES 2, A
+    case 0xA7: return RES(4, m_cpu.A); // RES 4, A
+    case 0xB7: return RES(6, m_cpu.A); // RES 6, A
+    case 0xC7: return SET(0, m_cpu.A); // SET 0, A
+    case 0xD7: return SET(2, m_cpu.A); // SET 2, A
+    case 0xE7: return SET(4, m_cpu.A); // SET 4, A
+    case 0xF7: return SET(6, m_cpu.A); // SET 6, A
+        // Column 0x08
     default:
         DMG_WARN("There is no matching instruction for is opcode: CB-%d", opcode);
         return 4;
     }
 }
-
-uint32_t dmg::ControlUnit::RLC(AByteRegister& reg)
-{
-    uint8_t value = reg.Read();
-
-    const uint8_t first_bit = getBit(value, 7);
-    value = value << 1;
-    setBit(value, 0, first_bit);
-
-    m_cpu.F.SetFlagZ(value == 0);
-    m_cpu.F.SetFlagN(false);
-    m_cpu.F.SetFlagH(false);
-    m_cpu.F.SetFlagC(first_bit);
-
-    reg.Write(value);
-
-    return 8;
-}
-
-uint32_t dmg::ControlUnit::RL(AByteRegister& reg)
-{
-    uint8_t value = reg.Read();
-
-    const uint8_t first_bit = getBit(value, 7);
-    value = value << 1;
-    setBit(value, 0, m_cpu.F.ReadFlagC());
-
-    m_cpu.F.SetFlagZ(value == 0);
-    m_cpu.F.SetFlagN(false);
-    m_cpu.F.SetFlagH(false);
-    m_cpu.F.SetFlagC(first_bit);
-
-    reg.Write(value);
-
-    return 8;
-}
-
-uint32_t dmg::ControlUnit::SLA(AByteRegister& reg)
-{
-    uint8_t value = reg.Read();
-
-    const uint8_t first_bit = getBit(value, 7);
-    value = value << 1;
-    setBit(value, 0, 0);
-
-    m_cpu.F.SetFlagZ(value == 0);
-    m_cpu.F.SetFlagN(false);
-    m_cpu.F.SetFlagH(false);
-    m_cpu.F.SetFlagC(first_bit);
-
-    reg.Write(value);
-
-    return 8;
-}
-

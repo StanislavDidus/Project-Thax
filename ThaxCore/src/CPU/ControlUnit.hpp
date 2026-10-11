@@ -125,7 +125,18 @@ namespace dmg
         uint32_t RLC(AByteRegister& reg);
         uint32_t RL(AByteRegister& reg);
         uint32_t SLA(AByteRegister& reg);
+        uint32_t SWAP(AByteRegister& reg);
+        uint32_t BIT(uint8_t bit, const AByteRegister& reg);
+        uint32_t RES(uint8_t bit, AByteRegister& reg);
+        uint32_t SET(uint8_t bit, AByteRegister& reg);
 
+        uint32_t RLC(Address address);
+        uint32_t RL(Address address);
+        uint32_t SLA(Address address);
+        uint32_t SWAP(Address address);
+        uint32_t BIT(uint8_t bit, Address address);
+        uint32_t RES(uint8_t bit, Address address);
+        uint32_t SET(uint8_t bit, Address address);
 
         CPU& m_cpu;
     };

@@ -110,6 +110,7 @@ int main()
     DMG dmg{dmg::DMG::InitState::TEST};
 
     int finished_opcode_tests = 0;
+    int finished_specific_tests = 0;
     for (int i = 0; i < 256; ++i)
     {
         if (std::ranges::find(non_existent_opcodes, i) != non_existent_opcodes.end()) continue;
@@ -123,7 +124,6 @@ int main()
         bool failed = false;
         for (const auto& data : root)
         {
-
             // Load State to DMG
             std::string name = data["name"];
             Reset(dmg);
@@ -139,6 +139,10 @@ int main()
                 std::cout << std::format("Test {}-{}: did not pass.", name, j) << std::endl;
                 failed = true;
             }
+            else
+            {
+                finished_specific_tests++;
+            }
 
             ++j;
         }
@@ -147,7 +151,7 @@ int main()
     }
 
     std::cout << std::format("Opcode tests finished {}/256", finished_opcode_tests) << std::endl;
-    //std::cout << std::format("Opcode specific tests finished {}", finished_specific_tests) << std::endl;
+    std::cout << std::format("Opcode specific tests finished {}", finished_specific_tests) << std::endl;
 
     return 0;
 }
