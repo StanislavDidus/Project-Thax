@@ -24,26 +24,26 @@ namespace dmg
         //uint16_t increment() override { uint16_t temp = readWord(); writeWord(readWord() + 1); return temp; }
         //uint16_t decrement() override { writeWord(readWord() - 1); return readWord();}
 
-        uint16_t operator++()
+        uint16_t operator++() override
         {
             WriteWord(ReadWord() + 1);
             return ReadWord();
         }
 
-        uint16_t operator++(int)
+        uint16_t operator++(int) override
         {
             uint16_t temp = ReadWord();
             WriteWord(ReadWord() + 1);
             return temp;
         }
 
-        uint16_t operator--()
+        uint16_t operator--() override
         {
             WriteWord(ReadWord() - 1);
             return ReadWord();
         }
 
-        uint16_t operator--(int)
+        uint16_t operator--(int) override
         {
             uint16_t temp = ReadWord();
             WriteWord(ReadWord() - 1);

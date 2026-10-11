@@ -29,7 +29,7 @@ namespace dmg
                     if constexpr (DEBUG_MODE)
                     {
                         if (m_transfer_progress == 0)
-                            std::cout << SB << std::endl;
+                            std::cout << SB;
                     }
 
                     m_serial_cycles -= TRANSFER_FREQUENCY;

@@ -18,6 +18,9 @@ namespace dmg
 
         void Load(const std::filesystem::path& path)
         {
+            // Reset ROM
+            std::fill_n(ROM.data(), ROM.size(), 0);
+
             std::ifstream file(path, std::ios::binary | std::ios::ate);
             if (!file)
             {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ByteRegister.hpp"
+#include "AByteRegister.hpp"
 
 namespace dmg
 {
@@ -8,6 +8,7 @@ namespace dmg
     {
     public:
         FlagRegister() = default;
+        explicit FlagRegister(const uint8_t data) : m_data(data) {}
         ~FlagRegister() override = default;
 
         [[nodiscard]] uint8_t Read() const override { return m_data; }

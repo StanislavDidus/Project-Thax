@@ -9,6 +9,7 @@ namespace dmg
     {
     public:
         ByteRegister() = default;
+        explicit ByteRegister(const uint8_t data) : m_data(data) {}
         ~ByteRegister() override = default;
 
         [[nodiscard]] uint8_t Read() const override { return m_data; }

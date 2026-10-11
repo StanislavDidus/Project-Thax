@@ -112,6 +112,14 @@ namespace dmg
     {
         if (ImGui::Begin("Control"))
         {
+            static std::array<char, 256> path_buffer;
+            ImGui::InputText("ROM Path", path_buffer.data(), sizeof(path_buffer));
+
+            if (ImGui::Button("Load"))
+            {
+                dmg.LoadROM(path_buffer.data());
+            }
+
             if (ImGui::Button("Start"))
             {
                 dmg.SetState(DMG::PlayState::PLAY);

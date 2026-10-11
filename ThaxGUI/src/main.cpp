@@ -21,7 +21,7 @@ int main()
     dmg::InitializeImGui(graphics_context);
 
     dmg::DMG dmg = dmg::DMG{dmg::DMG::InitState::STANDARD};
-    dmg.LoadROM("roms/test_suits/01-special.gb");
+    //dmg.LoadROM("roms/test_suits/01-special.gb");
 
     constexpr std::chrono::duration<double> FRAME_DURATION {1.0 / 59.7};
     std::chrono::time_point<std::chrono::high_resolution_clock> frame_start = std::chrono::high_resolution_clock::now();

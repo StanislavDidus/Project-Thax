@@ -19,7 +19,7 @@ dmg::DMG::DMG(InitState init_state)
         m_timer = std::make_unique<Timer>(*m_interrupt_controller);
         m_serial_port = std::make_unique<SerialPort>(*m_interrupt_controller);
         m_joypad = std::make_unique<Joypad>(*m_interrupt_controller);
-        m_bus = std::make_unique<StandardBus>(*m_cartridge, *m_interrupt_controller, *m_timer);
+        m_bus = std::make_unique<StandardBus>(*m_cartridge, *m_interrupt_controller, *m_timer, *m_serial_port, *m_joypad);
         m_cpu = std::make_unique<CPU>(*m_bus, *m_interrupt_controller);
     }
     else if (init_state == InitState::TEST)

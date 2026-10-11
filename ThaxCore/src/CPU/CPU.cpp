@@ -1,7 +1,10 @@
 #include "CPU.hpp"
 
+#include <fstream>
+#include <iomanip>
 #include <utility>
 
+#include "Constants.hpp"
 #include "DMG/Utils/Log.hpp"
 
 dmg::CPU::CPU(Bus& bus, InterruptController& interrupt_controller)
@@ -12,6 +15,10 @@ dmg::CPU::CPU(Bus& bus, InterruptController& interrupt_controller)
     , m_interrupt_controller(interrupt_controller)
     , m_bus(bus)
 {
+    if constexpr (DEBUG_MODE)
+    {
+        CreateLog();
+    }
 }
 
 void dmg::CPU::SetRegisters(const RegisterInfo& register_info)
@@ -30,7 +37,15 @@ void dmg::CPU::SetRegisters(const RegisterInfo& register_info)
 
 uint32_t dmg::CPU::Step()
 {
-    return m_control_unit.Step();
+    // Write CPU log information in a file for debugging
+    if constexpr (DEBUG_MODE)
+    {
+        WriteLog();
+    }
+
+    const uint32_t cycles =  m_control_unit.Step();
+
+    return cycles;
 }
 
 void dmg::CPU::Reset()
@@ -143,4 +158,40 @@ uint8_t dmg::CPU::ReadMemory(uint16_t address) const
 void dmg::CPU::WriteMemory(uint16_t address, uint8_t value)
 {
     m_bus.Write(address, value);
+}
+
+void dmg::CPU::CreateLog()
+{
+    log_file = std::ofstream{"cpu_log.txt", std::ios::out};
+    if (!log_file)
+    {
+        DMG_ERROR("Could not create log file for writing.");
+    }
+
+}
+
+void dmg::CPU::WriteLog()
+{
+    auto hex = [&](int value, int width)
+    {
+        log_file << std::setw(width) << std::setfill('0') << std::hex << std::uppercase << value;
+    };
+
+    uint16_t pc = PC.ReadWord();
+
+    log_file << "A:";  hex(A.Read(), 2);
+    log_file << " F:"; hex(F.Read(), 2);
+    log_file << " B:"; hex(B.Read(), 2);
+    log_file << " C:"; hex(C.Read(), 2);
+    log_file << " D:"; hex(D.Read(), 2);
+    log_file << " E:"; hex(E.Read(), 2);
+    log_file << " H:"; hex(H.Read(), 2);
+    log_file << " L:"; hex(L.Read(), 2);
+    log_file << " SP:"; hex(SP.ReadWord(), 4);
+    log_file << " PC:"; hex(pc, 4);
+    log_file << " PCMEM:";
+    hex(ReadMemory(pc), 2);                                  log_file << ",";
+    hex(ReadMemory(static_cast<uint16_t>(pc + 1)), 2);       log_file << ",";
+    hex(ReadMemory(static_cast<uint16_t>(pc + 2)), 2);      log_file << ",";
+    hex(ReadMemory(static_cast<uint16_t>(pc + 3)), 2);      log_file << "\n";
 }

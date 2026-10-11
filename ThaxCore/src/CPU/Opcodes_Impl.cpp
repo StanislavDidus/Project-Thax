@@ -70,7 +70,7 @@ namespace dmg
     }
 
     // Implementation was found on this website: https://blog.ollien.com/posts/gb-daa/
-    uint32_t dmg::ControlUnit::DAA()
+    uint32_t ControlUnit::DAA()
     {
         uint8_t offset = 0u;
         bool should_carry = false;
@@ -80,11 +80,11 @@ namespace dmg
         const bool carry = m_cpu.F.ReadFlagC();
         const bool subtract = m_cpu.F.ReadFlagN();
 
-        if (!subtract && (a_value & 0xF) > 0x09 || half_carry)
+        if ((!subtract && (a_value & 0xF) > 0x09) || half_carry)
         {
             offset |= 0x06;
         }
-        if (!subtract && a_value > 0x99 || carry)
+        if ((!subtract && a_value > 0x99) || carry)
         {
             offset |= 0x60;
             should_carry = true;
