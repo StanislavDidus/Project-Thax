@@ -8,7 +8,7 @@ set(IMGUI_HEADER_FILES
         imgui/backends/imgui_impl_glfw.h
         imgui/backends/imgui_impl_opengl3.h
         imgui_memory_editor/imgui_memory_editor.h
-        ../../ThaxCore/include/DMG/Input.hpp
+        imgui-filebrowser/imfilebrowser.h
 )
 
 set(IMGUI_SOURCE_FILES
@@ -26,5 +26,5 @@ set(IMGUI_ALL_FILES
         ${IMGUI_SOURCE_FILES}
 )
 add_library(imgui ${IMGUI_ALL_FILES})
-target_include_directories(imgui PUBLIC imgui imgui/backends imgui_memory_editor)
+target_include_directories(imgui PUBLIC imgui imgui/backends imgui_memory_editor imgui-filebrowser)
 target_link_libraries(imgui PUBLIC glfw)

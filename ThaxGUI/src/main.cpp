@@ -18,7 +18,7 @@ int main()
 
     dmg::Log::Init();
     dmg::GraphicsContext graphics_context = dmg::InitializeGraphicsContext();
-    dmg::InitializeImGui(graphics_context);
+    dmg::ImGuiContext imgui_context = dmg::InitializeImGui(graphics_context);
 
     dmg::DMG dmg = dmg::DMG{dmg::DMG::InitState::STANDARD};
     //dmg.LoadROM("roms/test_suits/01-special.gb");
@@ -49,6 +49,7 @@ int main()
         dmg::DrawRegisterWindow(registers, dmg);
         dmg::DrawControlWindow(dmg);
         dmg::DrawMemoryWindow(dmg, registers);
+        dmg::DrawMain(imgui_context);
         ImGui::ShowDemoWindow();
 
         dmg::EndImGuiFrame();

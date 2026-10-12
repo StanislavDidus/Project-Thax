@@ -13,3 +13,6 @@
 [submodule "ThaxTests/externals/json"]
 	path = ThaxTests/externals/json
 	url = https://github.com/nlohmann/json.git
+[submodule "ThaxGUI/externals/imgui-filebrowser"]
+	path = ThaxGUI/externals/imgui-filebrowser
+	url = https://github.com/AirGuanZ/imgui-filebrowser.git
