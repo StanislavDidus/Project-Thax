@@ -3,8 +3,8 @@
 #include "DMG/Utils/Log.hpp"
 
 #define GLFW_INCLUDE_NONE
-#include "GLFW/glfw3.h"
 #include <glad/glad.h>
+#include "GLFW/glfw3.h"
 
 namespace dmg
 {

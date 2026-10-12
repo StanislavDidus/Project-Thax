@@ -1,6 +1,7 @@
 #pragma once
+
 #include "DMG/DMG.hpp"
-#include "../Graphics/Graphics.hpp"
+#include "Graphics/Graphics.hpp"
 
 namespace dmg
 {

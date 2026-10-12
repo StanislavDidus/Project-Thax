@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <array>
 
 #include "DMG/DMG.hpp"
 
