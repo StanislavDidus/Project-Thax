@@ -11,6 +11,7 @@ set(HEADER_FILES
         src/Graphics/Graphics.hpp
         src/UI/UI.hpp
         src/Input/Input.hpp
+        src/Data/Data.hpp
 )
 
 set(SOURCE_FILES

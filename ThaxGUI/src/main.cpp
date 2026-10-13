@@ -21,7 +21,14 @@ int main()
     dmg::ImGuiContext imgui_context = dmg::InitializeImGui(graphics_context);
 
     dmg::DMG dmg = dmg::DMG{dmg::DMG::InitState::STANDARD};
-    //dmg.LoadROM("roms/test_suits/01-special.gb");
+
+    auto config = dmg::LoadConfig();
+    dmg::Config current_config {};
+    if (config.has_value())
+    {
+        current_config = config.value();
+        imgui_context.root_entry = std::move(dmg::SearchROMs(current_config.rom_folder));
+    }
 
     constexpr std::chrono::duration<double> FRAME_DURATION {1.0 / 59.7};
     std::chrono::time_point<std::chrono::high_resolution_clock> frame_start = std::chrono::high_resolution_clock::now();
@@ -49,7 +56,7 @@ int main()
         dmg::DrawRegisterWindow(registers, dmg);
         dmg::DrawControlWindow(dmg);
         dmg::DrawMemoryWindow(dmg, registers);
-        dmg::DrawMain(imgui_context);
+        dmg::DrawMain(dmg, imgui_context, current_config);
         ImGui::ShowDemoWindow();
 
         dmg::EndImGuiFrame();
@@ -76,6 +83,8 @@ int main()
 
     dmg::DestroyImGui();
     dmg::DestroyGraphicsContext(graphics_context);
+
+    dmg::SaveConfig(current_config);
 
     DMG_INFO("Program finished.");
 

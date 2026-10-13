@@ -9,23 +9,21 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_memory_editor.h"
+#include "IconsFontAwesome4.h"
 
 #include "imfilebrowser.h"
+#include "Data/Data.hpp"
 
 #include "Graphics/Graphics.hpp"
 
+#include "imgui_stdlib.h"
+
 namespace dmg
 {
-    struct ROMEntry
-    {
-        std::string name;
-        std::filesystem::path path;
-    };
-
     struct ImGuiContext
     {
         ImGui::FileBrowser rom_file_dialog;
-        std::vector<ROMEntry> rom_entries;
+        std::unique_ptr<ROMEntry> root_entry = nullptr;
     };
 
     inline ImGuiContext InitializeImGui(const GraphicsContext& graphics_context)
@@ -43,6 +41,13 @@ namespace dmg
         ImGui_ImplOpenGL3_Init();
 
         io.FontGlobalScale = 2.0f;
+
+        io.Fonts->AddFontFromFileTTF("assets/fonts/Inconsolata_Expanded-Medium.ttf", 13.0f);
+        static const ImWchar icon_ranges[] = {ICON_MIN_FA, ICON_MIN_FA, 0};
+        ImFontConfig config;
+        config.MergeMode = true;
+        config.PixelSnapH = true;
+        io.Fonts->AddFontFromFileTTF("assets/fonts/fontawesome-webfont.ttf", 13.0f, &config, icon_ranges);
 
         // Initialize File Browser
         ImGuiContext context;
@@ -136,15 +141,7 @@ namespace dmg
     {
         if (ImGui::Begin("Control"))
         {
-            static std::array<char, 256> path_buffer;
-            ImGui::InputText("ROM Path", path_buffer.data(), sizeof(path_buffer));
-
-            if (ImGui::Button("Load"))
-            {
-                dmg.LoadROM(path_buffer.data());
-            }
-
-            if (ImGui::Button("Start"))
+            if (ImGui::Button(ICON_FA_PLAY " Play"))
             {
                 dmg.SetState(DMG::PlayState::PLAY);
             }
@@ -153,20 +150,22 @@ namespace dmg
             {
                 ImGui::SameLine();
 
-                if (ImGui::Button("Pause"))
+                if (ImGui::Button(ICON_FA_PAUSE " Pause"))
                 {
                     dmg.SetState(DMG::PlayState::PAUSE);
                 }
             });
 
-            if (ImGui::Button("Start & Pause"))
+            if (ImGui::Button(ICON_FA_PLAY_CIRCLE " Play & Pause"))
             {
                 dmg.SetState(DMG::PlayState::PAUSE);
             }
 
             DoIfEnabled(dmg.GetState() == DMG::PlayState::IDLE, [&dmg]
             {
-                if (ImGui::Button("Stop"))
+                ImGui::SameLine();
+
+                if (ImGui::Button(ICON_FA_STOP " Stop"))
                 {
                     dmg.SetState(DMG::PlayState::IDLE);
                 }
@@ -174,16 +173,35 @@ namespace dmg
 
             DoIfEnabled(dmg.GetState() != DMG::PlayState::PAUSE,[&dmg]
             {
-                ImGui::SameLine();
-
-                if (ImGui::Button("Step Instruction"))
+                static int instruction_skip = 1;
+                char label[128];
+                sprintf(label, "Step Instructions");
+                if (ImGui::Button(label))
                 {
-                    dmg.StepInstruction();
+                    for (int i = 0; i < instruction_skip; ++i)
+                        dmg.StepInstruction();
                 }
 
-                if (ImGui::Button("Step Frame"))
+                ImGui::SameLine();
+                ImGui::PushItemWidth(150.0f);
+                if (ImGui::InputInt("##anything1", &instruction_skip))
+                {
+                    if (instruction_skip < 0) instruction_skip = 0;
+                }
+
+                static int frame_skip = 1;
+                char label_1[128];
+                sprintf(label_1, "Step Frames");
+                if (ImGui::Button(label_1))
                 {
                     dmg.StepFrame();
+                }
+
+                ImGui::SameLine();
+                ImGui::PushItemWidth(150.0f);
+                if (ImGui::InputInt("##anything2", &frame_skip))
+                {
+                    if (frame_skip < 0) frame_skip = 0;
                 }
             });
         }
@@ -206,32 +224,52 @@ namespace dmg
         mem_edit.DrawWindow("Memory", memory.data(), memory.size());
     }
 
-    inline std::vector<ROMEntry> SearchROMs(const std::filesystem::path& path)
+    inline void PrintEntry(DMG& dmg, ROMEntry* entry, ROMEntry** selected_rom_entry)
     {
-        if (!std::filesystem::is_directory(path))
-        {
-            DMG_ERROR("Trying to load ROMs from not a folder.");
-            return {};
-        }
+        static int selected = 0;
+        static int i = 0;
+        if (!entry) return;
 
-        using recursive_directory_iterator = std::filesystem::recursive_directory_iterator;
+        char label[128];
 
-        std::vector<ROMEntry> rom_entries {};
-        for (const auto& dir_entry : recursive_directory_iterator(path))
+        if (entry->is_directory && !entry->closed_directory)
+            sprintf(label, ICON_FA_FOLDER_OPEN " %s", entry->name.c_str());
+        else if (entry->is_directory && entry->closed_directory)
+            sprintf(label, ICON_FA_FOLDER " %s", entry->name.c_str());
+        else
+            sprintf(label, ICON_FA_GAMEPAD " %s", entry->name.c_str());
+
+        if (ImGui::Selectable(label, selected == i, ImGuiSelectableFlags_SelectOnNav | ImGuiSelectableFlags_AllowDoubleClick))
         {
-            if (!dir_entry.is_directory())
+            selected = i;
+            *selected_rom_entry = entry;
+
+            if (ImGui::IsMouseDoubleClicked(0))
             {
-                ROMEntry rom_entry{};
-                rom_entry.name = dir_entry.path().stem();
-                rom_entry.path = dir_entry.path();
-                rom_entries.emplace_back(rom_entry);
+                if (entry->is_directory)
+                {
+                    entry->closed_directory = !entry->closed_directory;
+                }
+                else if (!entry->is_directory)
+                {
+                    dmg.LoadROM(entry->path);
+                }
             }
         }
+        ++i;
 
-        return rom_entries;
+        if (entry->is_directory && !entry->closed_directory)
+        {
+            ImGui::Indent();
+            for (const auto& child : entry->children)
+            {
+                PrintEntry(dmg, child.get(), selected_rom_entry);
+            }
+            ImGui::Unindent();
+        }
     }
 
-    inline void DrawMain(ImGuiContext& imgui_context)
+    inline void DrawMain(DMG& dmg, ImGuiContext& imgui_context, Config& config)
     {
         static bool show_settings = false;
         if (ImGui::Begin("Main", nullptr, ImGuiWindowFlags_MenuBar))
@@ -246,18 +284,41 @@ namespace dmg
                 ImGui::EndMenuBar();
             }
 
-            static int selected = 0;
+            static ROMEntry* selected_rom_entry = nullptr;
             {
-                ImGui::BeginChild("Library", ImVec2(ImGui::GetWindowSize().x * 0.5f, 0), ImGuiChildFlags_Borders);
-                for (int i = 0; i < imgui_context.rom_entries.size(); i++)
+                ImGui::SetNextWindowSize({ImGui::GetWindowSize().x * 0.5f, 0.0f}, ImGuiCond_Once);
+                ImGui::BeginChild("Library", {0,0}, ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
+
+                // Get root entry
+                if (imgui_context.root_entry != nullptr)
                 {
-                    ROMEntry rom_entry = imgui_context.rom_entries[i];
-                    char label[128];
-                    sprintf(label, "%s", rom_entry.name.c_str());
-                    if (ImGui::Selectable(label, selected == i, ImGuiSelectableFlags_SelectOnNav))
-                        selected = i;
+                    for ( const auto& child : imgui_context.root_entry->children )
+                    {
+                        PrintEntry(dmg, child.get(), &selected_rom_entry);
+                    }
                 }
                 ImGui::EndChild();
+
+                ImGui::SameLine();
+
+                ImGui::BeginGroup();
+                ImGui::BeginChild("File Description", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
+                if (selected_rom_entry)
+                {
+                    std::string file_type;
+                    if (selected_rom_entry->is_directory) file_type = "Folder";
+                    else if (!selected_rom_entry->is_directory) file_type = "File";
+                    ImGui::Text("%s", file_type.c_str());
+                    ImGui::Separator();
+                    ImGui::SetCursorPosX(ImGui::GetWindowSize().x * 0.5f - ImGui::CalcTextSize(selected_rom_entry->name.c_str()).x * 0.5f);
+                    ImGui::Text(selected_rom_entry->name.c_str());
+                    //ImGui::Image();
+                    //ImDrawList* draw_list = ImGui::GetWindowDrawList();
+                    //ImVec2 p = ImGui::GetCursorPos();
+                    //draw_list->AddRect(p, ImVec2{p.x + 100.0f, p.y + 100.0f}, IM_COL32(255,0,0,255));
+                }
+                ImGui::EndChild();
+                ImGui::EndGroup();
             }
             ImGui::SameLine();
         }
@@ -266,13 +327,13 @@ namespace dmg
         if (show_settings)
         {
             ImGui::FileBrowser& browser = imgui_context.rom_file_dialog;
-            static std::array<char, 256> rom_folder_path_buffer {};
+            static std::string rom_folder_path_buffer {config.rom_folder};
 
             if (ImGui::Begin("Settings", &show_settings))
             {
                 ImGui::SeparatorText("Choose your ROM folder path");
 
-                ImGui::InputTextWithHint("##anything", "path to your rom directory", rom_folder_path_buffer.data(), rom_folder_path_buffer.size());
+                ImGui::InputTextWithHint("##anything", "path to your rom directory", &rom_folder_path_buffer, ImGuiInputTextFlags_ElideLeft);
 
                 ImGui::SameLine();
 
@@ -282,7 +343,9 @@ namespace dmg
                 }
                 if (ImGui::Button("Search for ROMs"))
                 {
-                    imgui_context.rom_entries = SearchROMs(std::string{rom_folder_path_buffer.data()});
+                    //SearchROMs(std::string{rom_folder_path_buffer.data()});
+                    //imgui_context.root_entry = std::move(rom_entries[rom_folder_path_buffer.data()]);
+                    imgui_context.root_entry = std::move(SearchROMs(std::string{rom_folder_path_buffer.data()}));
                 }
             }
             ImGui::End();
@@ -294,10 +357,15 @@ namespace dmg
                 std::filesystem::path folder = browser.GetSelected();
 
                 const std::string s = folder.string();
+                rom_folder_path_buffer = folder.string();
+                /*
                 std::array<char, 256>& buf = rom_folder_path_buffer;
                 const size_t n = std::min(s.size(), buf.size() - 1);
                 std::copy_n(folder.string().begin(), n, buf.begin());
                 buf[n] = '\0';
+                */
+
+                config.rom_folder = folder;
 
                 browser.ClearSelected();
             }
