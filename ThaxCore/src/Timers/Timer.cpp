@@ -76,7 +76,7 @@ namespace dmg
             bit_selected = 7;
             break;
         default:
-            DMG_ERROR("Program should never reach this point.");
+            DMG_ERROR("Program should never reach this point. Timer frequency selection.");
         }
 
         return bit_selected;

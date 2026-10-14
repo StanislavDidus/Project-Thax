@@ -184,6 +184,19 @@ namespace dmg
         ImGui::Text("%X", value);
     }
 
+    inline void PrintFRegisterValue(const uint8_t value)
+    {
+        ImGui::Text("F: ");
+        ImGui::SameLine();
+        value >> 7 & 1 ? ImGui::Text("Z") : ImGui::Text("-");
+        ImGui::SameLine();
+        value >> 6 & 1 ? ImGui::Text("N") : ImGui::Text("-");
+        ImGui::SameLine();
+        value >> 5 & 1 ? ImGui::Text("H") : ImGui::Text("-");
+        ImGui::SameLine();
+        value >> 4 & 1 ? ImGui::Text("C") : ImGui::Text("-");
+    }
+
     inline void DrawRegisterWindow(const RegisterInfo& register_info, const DMG& dmg)
     {
         if (ImGui::Begin("Registers"))
@@ -200,7 +213,7 @@ namespace dmg
                 PrintRegisterValue("H: ", register_info.H);
                 ImGui::TableNextColumn();
                 PrintRegisterValue("SP: ", register_info.SP);
-                PrintRegisterValue("F: ", register_info.F);
+                PrintFRegisterValue(register_info.F);
                 PrintRegisterValue("C: ", register_info.C);
                 PrintRegisterValue("E: ", register_info.E);
                 PrintRegisterValue("L: ", register_info.L);
@@ -216,6 +229,14 @@ namespace dmg
                 ImGui::TableNextColumn();
                 PrintRegisterValue("TMA: ", dmg.ReadMemory(0xFF06));
                 PrintRegisterValue("TAC: ", dmg.ReadMemory(0xFF07));
+            }
+            ImGui::EndTable();
+
+            ImGui::SeparatorText("Others");
+            if (ImGui::BeginTable("##anything", 2))
+            {
+                //ImGui::TableNextColumn();
+                //ImGui::TableNextColumn();
             }
             ImGui::EndTable();
         }
@@ -235,35 +256,40 @@ namespace dmg
     {
         if (ImGui::Begin("Control"))
         {
-            if (ImGui::Button(ICON_FA_PLAY " Play"))
+            if (ImGui::BeginTable("##anything", 2))
             {
-                dmg.SetState(DMG::PlayState::PLAY);
-            }
+                ImGui::TableNextColumn();
 
-            DoIfEnabled(dmg.GetState() != DMG::PlayState::PLAY, [&dmg]
-            {
-                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_PLAY " Play"))
+                {
+                    dmg.SetState(DMG::PlayState::PLAY);
+                }
 
-                if (ImGui::Button(ICON_FA_PAUSE " Pause"))
+                if (ImGui::Button(ICON_FA_PLAY_CIRCLE " Play & Pause"))
                 {
                     dmg.SetState(DMG::PlayState::PAUSE);
                 }
-            });
 
-            if (ImGui::Button(ICON_FA_PLAY_CIRCLE " Play & Pause"))
-            {
-                dmg.SetState(DMG::PlayState::PAUSE);
-            }
+                ImGui::TableNextColumn();
 
-            DoIfEnabled(dmg.GetState() == DMG::PlayState::IDLE, [&dmg]
-            {
-                ImGui::SameLine();
-
-                if (ImGui::Button(ICON_FA_STOP " Stop"))
+                DoIfEnabled(dmg.GetState() != DMG::PlayState::PLAY, [&dmg]
                 {
-                    dmg.SetState(DMG::PlayState::IDLE);
-                }
-            });
+                    if (ImGui::Button(ICON_FA_PAUSE " Pause"))
+                    {
+                        dmg.SetState(DMG::PlayState::PAUSE);
+                    }
+                });
+
+                DoIfEnabled(dmg.GetState() == DMG::PlayState::IDLE, [&dmg]
+                {
+                    if (ImGui::Button(ICON_FA_STOP " Stop"))
+                    {
+                        dmg.SetState(DMG::PlayState::IDLE);
+                    }
+                });
+            }
+            ImGui::EndTable();
+
 
             DoIfEnabled(dmg.GetState() != DMG::PlayState::PAUSE,[&dmg]
             {
@@ -305,6 +331,7 @@ namespace dmg
     inline void DrawMemoryWindow(const DMG& dmg, const RegisterInfo& register_info)
     {
         static MemoryEditor mem_edit;
+        mem_edit.OptShowAscii = false;
         static std::array<uint8_t, 65'536> memory {0};
 
         mem_edit.HighlightMin = register_info.PC;

@@ -70,6 +70,8 @@ namespace dmg
         Bus& m_bus;
 
         bool IME = false;
+        bool set_IME = false;
+        bool set_IME_delay = false;
 
         State m_current_state = State::NORMAL;
 

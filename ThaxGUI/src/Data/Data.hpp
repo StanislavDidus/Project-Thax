@@ -24,15 +24,12 @@ namespace dmg
         std::filesystem::path rom_folder {""};
     };
 
-    //static std::unordered_map<std::string, std::unique_ptr<ROMEntry>> rom_entries;
-
     inline void ScanDirectory(const std::filesystem::path& path, ROMEntry* parent)
     {
         for (const auto& file : std::filesystem::directory_iterator(path))
         {
             if (file.path().extension() != ".gb" && !file.is_directory())
                 continue;
-            if (file.is_directory() && std::filesystem::is_empty(file)) continue;
 
             auto root_entry = std::make_unique<ROMEntry>();
             root_entry->name = file.path().filename().string();
@@ -42,8 +39,6 @@ namespace dmg
 
             ROMEntry* root = root_entry.get();
             parent->children.push_back(std::move(root_entry));
-
-            //rom_entries[file.path().string()] = std::move(root_entry);
 
             if (file.is_directory())
                 ScanDirectory(file.path(), root);
@@ -65,7 +60,6 @@ namespace dmg
         root_entry->is_directory = true;
 
         ROMEntry* root = root_entry.get();
-        //rom_entries[path.string()] = std::move(root_entry);
 
         ScanDirectory(path, root);
 

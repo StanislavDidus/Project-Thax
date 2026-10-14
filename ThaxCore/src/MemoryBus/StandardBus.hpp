@@ -180,7 +180,7 @@ namespace dmg
             }
             else if (address::IE.Contains(address))
             {
-                m_interrupt_controller.WriteIF(value);
+                m_interrupt_controller.WriteIE(value);
             }
         }
     private:

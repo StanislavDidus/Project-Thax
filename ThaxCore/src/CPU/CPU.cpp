@@ -45,6 +45,16 @@ uint32_t dmg::CPU::Step()
 
     const uint32_t cycles =  m_control_unit.Step();
 
+    if (!set_IME_delay && set_IME)
+    {
+        set_IME = false;
+        IME = true;
+    }
+    if (set_IME_delay && set_IME)
+    {
+        set_IME_delay = false;
+    }
+
     return cycles;
 }
 

@@ -68,7 +68,6 @@ namespace dmg
                 setBit(P1, static_cast<uint8_t>(Buttons::START_DOWN), value);
                 break;
             default:
-                DMG_ERROR("Program should never reach this point.");
                 break;
             }
         }
@@ -90,7 +89,6 @@ namespace dmg
                 setBit(P1, static_cast<uint8_t>(Buttons::START_DOWN), value);
                 break;
             default:
-                DMG_ERROR("Program should never reach this point.");
                 break;
             }
         }

@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include  "ControlUnit.hpp"
 #include "CPU.hpp"
 
@@ -19,6 +21,8 @@ namespace dmg
     uint32_t dmg::ControlUnit::DI()
     {
         m_cpu.IME = false;
+        m_cpu.set_IME = false;
+        m_cpu.set_IME_delay = false;
 
         return 4;
     }
@@ -116,7 +120,8 @@ namespace dmg
 
     uint32_t dmg::ControlUnit::EI()
     {
-        m_cpu.IME = true;
+        m_cpu.set_IME = true;
+        m_cpu.set_IME_delay = true;
 
         return 4;
     }
@@ -588,13 +593,17 @@ namespace dmg
 
     uint32_t dmg::ControlUnit::SBC(AByteRegister& reg)
     {
+        uint8_t a = m_cpu.A.Read();
+        uint8_t value = reg.Read();
         uint8_t carry_flag = m_cpu.F.ReadFlagC();
-        int16_t result = static_cast<int16_t>(m_cpu.A.Read() - reg.Read() - carry_flag);
 
-        m_cpu.F.SetFlagZ(result == 0);
+        int16_t result = static_cast<int16_t>(m_cpu.A.Read() - reg.Read() - carry_flag);
+        uint8_t result8 = m_cpu.A.Read() - reg.Read() - carry_flag;
+
+        m_cpu.F.SetFlagZ(result8 == 0);
         m_cpu.F.SetFlagN(true);
         m_cpu.F.SetFlagC(result < 0);
-        m_cpu.F.SetFlagH((m_cpu.A.Read() & 0xF) - (reg.Read() & 0xF) - carry_flag  < 0);
+        m_cpu.F.SetFlagH((a & 0xF) - (value & 0xF) - carry_flag  < 0);
 
         m_cpu.A.Write(static_cast<uint8_t>(result));
 
@@ -603,14 +612,17 @@ namespace dmg
 
     uint32_t dmg::ControlUnit::SBC(Address address)
     {
+        uint8_t a = m_cpu.A.Read();
+        uint8_t value = m_cpu.ReadMemory(address.m_address);
         uint8_t carry_flag = m_cpu.F.ReadFlagC();
-        uint8_t address_value = m_cpu.ReadMemory(address.m_address);
-        int16_t result = static_cast<int16_t>(m_cpu.A.Read() - address_value - carry_flag);
 
-        m_cpu.F.SetFlagZ(result == 0);
+        int result = a - value - carry_flag;
+        uint8_t result8 = static_cast<uint8_t>(result);
+
+        m_cpu.F.SetFlagZ(result8 == 0);
         m_cpu.F.SetFlagN(true);
         m_cpu.F.SetFlagC(result < 0);
-        m_cpu.F.SetFlagH((m_cpu.A.Read() & 0xF) - (address_value & 0xF) - carry_flag  < 0);
+        m_cpu.F.SetFlagH((a & 0xF) - (value & 0xF) - carry_flag  < 0);
 
         m_cpu.A.Write(static_cast<uint8_t>(result));
 
@@ -619,15 +631,18 @@ namespace dmg
 
     uint32_t dmg::ControlUnit::SBC(uint8_t d8)
     {
+        uint8_t a = m_cpu.A.Read();
         uint8_t carry_flag = m_cpu.F.ReadFlagC();
-        int16_t result = static_cast<int16_t>(m_cpu.A.Read() - d8 - carry_flag);
 
-        m_cpu.F.SetFlagZ(result == 0);
+        int result = a - d8 - carry_flag;
+        uint8_t result8 = static_cast<uint8_t>(result);
+
+        m_cpu.F.SetFlagZ(result8 == 0);
         m_cpu.F.SetFlagN(true);
         m_cpu.F.SetFlagC(result < 0);
         m_cpu.F.SetFlagH((m_cpu.A.Read() & 0xF) - (d8 & 0xF) - carry_flag  < 0);
 
-        m_cpu.A.Write(static_cast<uint8_t>(result));
+        m_cpu.A.Write(result8);
 
         return 8;
     }
