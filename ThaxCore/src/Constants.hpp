@@ -6,9 +6,14 @@ namespace dmg
 {
 #ifndef NDEBUG
     inline constexpr bool DEBUG_MODE = true;
+    inline constexpr bool PRINT_SERIAL_PORT = true;
+    inline constexpr bool WRITE_DOCTOR_LOGS = false;
 #else
     inline constexpr bool DEBUG_MODE = false;
+    inline constexpr bool PRINT_SERIAL_PORT = false;
+    inline constexpr bool WRITE_DOCTOR_LOGS = false;
 #endif
+
 }
 
 namespace dmg::address

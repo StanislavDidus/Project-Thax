@@ -15,7 +15,7 @@ dmg::CPU::CPU(Bus& bus, InterruptController& interrupt_controller)
     , m_interrupt_controller(interrupt_controller)
     , m_bus(bus)
 {
-    if constexpr (DEBUG_MODE)
+    if constexpr (WRITE_DOCTOR_LOGS)
     {
         CreateLog();
     }
@@ -38,7 +38,7 @@ void dmg::CPU::SetRegisters(const RegisterInfo& register_info)
 uint32_t dmg::CPU::Step()
 {
     // Write CPU log information in a file for debugging
-    if constexpr (DEBUG_MODE)
+    if constexpr (WRITE_DOCTOR_LOGS)
     {
         WriteLog();
     }

@@ -84,17 +84,6 @@ namespace dmg
 
     void Timer::IncrementTima()
     {
-        /*
-        if (TIMA == 255)
-        {
-            TIMA = TMA;
-            m_interrupt_controller.SetIF(InterruptController::Timer);
-        }
-        else
-        {
-            ++TIMA;
-        }
-        */
         ++TIMA;
 
         if (TIMA == 0)
