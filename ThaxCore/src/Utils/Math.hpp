@@ -17,7 +17,7 @@ namespace dmg
     }
 
     template<class T, class = std::enable_if_t<std::is_integral_v<T>>>
-    void setBit(T& reg, uint8_t index, uint8_t value)
+    void setBit(T& reg, const uint8_t index, uint8_t value)
     {
         reg = value ? reg | (1u << index) : reg & ~(1u << index);
     }

@@ -21,11 +21,6 @@ set(ALL_FILES
 
 add_executable(ThaxTests ${ALL_FILES})
 
-add_custom_target(copy_sst
-        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/copy_files.cmake
-)
-add_dependencies(ThaxTests copy_sst)
-
 target_include_directories(ThaxTests PRIVATE
         src
 )

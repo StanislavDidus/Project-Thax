@@ -12,6 +12,7 @@ set(HEADER_FILES
         src/UI/UI.hpp
         src/Input/Input.hpp
         src/Data/Data.hpp
+        src/UI/UIAssets.hpp
 )
 
 set(SOURCE_FILES
@@ -29,12 +30,6 @@ set(ALL_FILES
 )
 
 add_executable(ThaxGUI ${ALL_FILES})
-
-
-add_custom_target(copy_command
-        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/copy_files.cmake
-)
-add_dependencies(ThaxGUI copy_command)
 
 target_include_directories(ThaxGUI PRIVATE
         src

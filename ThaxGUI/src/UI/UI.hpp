@@ -16,6 +16,8 @@
 
 #include "Graphics/Graphics.hpp"
 
+#include "UIAssets.hpp"
+
 #include "imgui_stdlib.h"
 
 namespace dmg
@@ -134,12 +136,16 @@ namespace dmg
 
         io.FontGlobalScale = 2.0f;
 
-        io.Fonts->AddFontFromFileTTF("assets/fonts/Inconsolata_Expanded-Medium.ttf", 13.0f);
-        static const ImWchar icon_ranges[] = {ICON_MIN_FA, ICON_MIN_FA, 0};
+        ImFontConfig base_config;
+        base_config.FontDataOwnedByAtlas = false;
+        io.Fonts->AddFontFromMemoryTTF(inconsolata_medium_font_data, inconsolata_medium_font_size, 13.0f, &base_config);
+
         ImFontConfig config;
+        config.FontDataOwnedByAtlas = false;
         config.MergeMode = true;
         config.PixelSnapH = true;
-        io.Fonts->AddFontFromFileTTF("assets/fonts/fontawesome-webfont.ttf", 13.0f, &config, icon_ranges);
+        static const ImWchar icon_ranges[] = {ICON_MIN_FA, ICON_MIN_FA, 0};
+        io.Fonts->AddFontFromMemoryTTF(fontawesome_webfont_data, fontawesome_webfont_size, 13.0f, &config, icon_ranges);
 
         // Initialize File Browser
         ImGuiContext context;

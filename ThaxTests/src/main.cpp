@@ -6,6 +6,7 @@
 #include <nlohmann/json.hpp>
 #include <array>
 #include <format>
+#include <string>
 
 #include "DMG/Utils/Log.hpp"
 
@@ -102,9 +103,15 @@ namespace dmg
         dmg.Reset();
     }
 }
-int main()
+int main(int argc, char* argv[])
 {
     using namespace dmg;
+
+    if (argc == 1)
+    {
+        std::cerr << "Not enough arguments. Pass a path to the folder with SSTs\n";
+        return -1;
+    }
 
     Log::Init();
     DMG dmg{dmg::DMG::InitState::TEST};
@@ -115,7 +122,7 @@ int main()
     {
         if (std::ranges::find(non_existent_opcodes, i) != non_existent_opcodes.end()) continue;
 
-        std::string file_name = std::format("SST/{:02x}.json", i);
+        std::string file_name = std::format("{}/{:02x}.json", std::string{argv[1]}, i);
         std::ifstream f{file_name};
 
         json root = json::parse(f);

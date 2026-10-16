@@ -49,7 +49,7 @@ namespace dmg
     {
         if (!std::filesystem::is_directory(path))
         {
-            DMG_ERROR("Trying to load ROMs from not a folder.");
+            DMG_WARN("Trying to load ROMs from not a folder or this folder doesn't exist.");
             return nullptr;
         }
 
