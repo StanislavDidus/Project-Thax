@@ -26,7 +26,7 @@ namespace dmg
                 while (m_serial_cycles >= TRANSFER_FREQUENCY)
                 {
                     // When the transfer just started and debug mode is enabled we can print put the contents of the Serial Buffer
-                    if constexpr (DEBUG_MODE)
+                    if constexpr (PRINT_SERIAL_PORT)
                     {
                         if (m_transfer_progress == 0)
                             std::cout << SB;
