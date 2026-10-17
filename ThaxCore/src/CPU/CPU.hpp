@@ -73,6 +73,8 @@ namespace dmg
         bool set_IME = false;
         bool set_IME_delay = false;
 
+        bool halt_bug = false;
+
         State m_current_state = State::NORMAL;
 
         friend class ControlUnit;

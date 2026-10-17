@@ -13,7 +13,7 @@ namespace dmg
     public:
         explicit ControlUnit(CPU& cpu);
 
-        uint32_t Step();
+        uint32_t ExecuteOpcode(uint32_t opcode);
     private:
         uint32_t NOP();
         uint32_t STOP();

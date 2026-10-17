@@ -93,7 +93,7 @@ void dmg::DMG::StepInstruction()
 
     uint32_t cycles = 0;
 
-    if (m_cpu->IsHalted() && m_interrupt_controller->GetSharedBit())
+    if (m_cpu->IsHalted() && m_interrupt_controller->GetPendingInterrupt())
     {
         m_cpu->UnHalt();
     }

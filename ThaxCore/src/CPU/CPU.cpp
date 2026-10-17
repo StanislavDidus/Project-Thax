@@ -43,7 +43,19 @@ uint32_t dmg::CPU::Step()
         WriteLog();
     }
 
-    const uint32_t cycles =  m_control_unit.Step();
+    uint8_t opcode = 0;
+
+    if (halt_bug)
+    {
+        opcode = ReadMemory(PC.ReadWord());
+        halt_bug = false;
+    }
+    else
+    {
+        opcode = Fetch();
+    }
+
+    const uint32_t cycles = m_control_unit.ExecuteOpcode(opcode);
 
     if (!set_IME_delay && set_IME)
     {
@@ -78,36 +90,34 @@ std::optional<uint32_t> dmg::CPU::HandleInterrupts()
 {
     if (IME)
     {
-        const auto& result = m_interrupt_controller.GetSharedBit();
-        if (result.has_value())
+        uint8_t result = m_interrupt_controller.GetPendingInterrupt();
+        if (result)
         {
-            uint8_t value = result.value();
-
             IME = false;
-            m_interrupt_controller.ResetIF(1 << value);
+            m_interrupt_controller.ResetIF(result);
 
             WriteMemory(--SP, PC.ReadHigh());
             WriteMemory(--SP, PC.ReadLow());
 
-            switch (value)
+            switch (result)
             {
-            case 0: // VBLANK
+            case InterruptController::VBLANK: // VBLANK
                 PC.WriteWord(0x40);
                 break;
-            case 1: // LCD
+            case InterruptController::LCD: // LCD
                 PC.WriteWord(0x48);
                 break;
-            case 2: // Timer
+            case InterruptController::Timer: // Timer
                 PC.WriteWord(0x50);
                 break;
-            case 3: // Serial
+            case InterruptController::Serial: // Serial
                 PC.WriteWord(0x58);
                 break;
-            case 4: // Joypad
+            case InterruptController::Joypad: // Joypad
                 PC.WriteWord(0x60);
                 break;
             default:
-                DMG_WARN("Interrupt returned a flag that is not supported: {}", value);
+                DMG_WARN("Interrupt returned a flag that is not supported: {}", result);
                 break;
             }
 

@@ -24,9 +24,6 @@ namespace dmg
         void increase(uint16_t value) { m_data += value; }
         void JumpRelative(int8_t value) {m_data = static_cast<uint16_t>(static_cast<int32_t>(m_data) + value); }
 
-        //uint16_t increment() override { return m_data++; }
-        //uint16_t decrement() override { return --m_data; }
-
         uint16_t operator++() override { return ++m_data; }
         uint16_t operator++(int) override { return m_data++; }
         uint16_t operator--() override { return --m_data; }

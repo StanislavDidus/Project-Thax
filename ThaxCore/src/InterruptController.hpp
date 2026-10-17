@@ -42,19 +42,9 @@ namespace dmg
             IF &= ~value;
         }
 
-        [[nodiscard]] std::optional<uint8_t> GetSharedBit() const
+        [[nodiscard]] uint8_t GetPendingInterrupt() const
         {
-            // NOTE: We don't have to go through all 8 bits because
-            // the last three are not used.
-            for (int i = 0; i < 5; ++i)
-            {
-                if (getBit(IF, i) && getBit(IE, i))
-                {
-                    return i;
-                }
-            }
-
-            return std::nullopt;
+            return IF & IE & 0x1F;
         }
 
         static constexpr uint8_t VBLANK = 0b1;

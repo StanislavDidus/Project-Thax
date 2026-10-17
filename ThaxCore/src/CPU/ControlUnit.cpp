@@ -10,10 +10,8 @@ dmg::ControlUnit::ControlUnit(CPU& cpu)
 {
 }
 
-uint32_t dmg::ControlUnit::Step()
+uint32_t dmg::ControlUnit::ExecuteOpcode(const uint32_t opcode)
 {
-    const uint8_t opcode = m_cpu.Fetch();
-
     switch (opcode)
     {
         // 0x0 Column
