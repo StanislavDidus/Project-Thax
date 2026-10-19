@@ -72,4 +72,37 @@ namespace dmg
 
         DMG_INFO("Graphics Context was destroyed.");
     }
+
+    struct RGBColor
+    {
+        uint8_t r = 0;
+        uint8_t g = 0;
+        uint8_t b = 0;
+    };
+
+    template<std::size_t N>
+    std::array<uint8_t, N * 3> ConvertBufferToRGB(std::array<uint8_t, N> buffer)
+    {
+        std::array<uint8_t, N * 3> rgb;
+
+        static RGBColor c00 = {.r = 139,.g = 172, .b = 15};
+        static RGBColor c01 = {.r = 48, .g = 98, .b = 48};
+        static RGBColor c10 = {.r = 15, .g = 56, .b = 15};
+        static RGBColor c11 = {.r = 15, .g = 56, .b = 15};
+
+        for (int i = 0; i < buffer.size(); ++i)
+        {
+            RGBColor color{};
+            if (buffer[i] == 0b00) color = c00;
+            else if (buffer[i] == 0b01) color = c01;
+            else if (buffer[i] == 0b10) color = c10;
+            else if (buffer[i] == 0b11) color = c11;
+
+           rgb[i * 3 + 0] = color.r;
+           rgb[i * 3 + 1] = color.g;
+           rgb[i * 3 + 2] = color.b;
+        }
+
+        return rgb;
+    }
 }

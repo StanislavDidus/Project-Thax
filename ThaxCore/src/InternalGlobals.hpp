@@ -16,7 +16,7 @@ namespace dmg
 
 }
 
-namespace dmg::address
+namespace dmg
 {
     struct Region
     {
@@ -31,6 +31,73 @@ namespace dmg::address
         uint32_t m_size = 0;
     };
 
+    enum class ObjectSize : uint8_t
+    {
+        SIZE_8X8,
+        SIZE_8X16,
+    };
+
+    enum class ObjectPalette : uint8_t
+    {
+        OBP0,
+        OBP1,
+    };
+
+    enum class PPUMode : uint8_t
+    {
+        NONE,
+        MODE0,
+        MODE1,
+        MODE2,
+        MODE3,
+    };
+
+    enum class PixelSource : uint8_t
+    {
+        BG,
+        OBP0,
+        OBP1,
+    };
+}
+
+namespace dmg::globals
+{
+    // PPU MODES
+    inline constexpr uint32_t PPU_MODE_0_LENGTH = 376;
+    inline constexpr uint32_t PPU_MODE_1_LENGTH = 4560;
+    inline constexpr uint32_t PPU_MODE_2_LENGTH = 80;
+    inline constexpr uint32_t PPU_MODE_3_LENGTH = 289;
+
+    inline constexpr uint32_t TILE_BYTE_SIZE = 16;
+    inline constexpr uint32_t TILE_PIXEl_SIZE = 8;
+    inline constexpr uint32_t LCD_WIDTH = 160;
+    inline constexpr uint32_t LCD_HEIGHT = 144;
+    inline constexpr uint32_t TILEMAP_TILE_SIZE = 32;
+
+    inline constexpr uint32_t TILE_REGION_SIZE = 0x1800;
+    inline constexpr Region TILE_BLOCK_0 {0x0000, 0x800};
+    inline constexpr Region TILE_BLOCK_1 {0x0800, 0x800};
+    inline constexpr Region TILE_BLOCK_2 {0x1000, 0x800};
+    inline constexpr Region TILE_REGION {0x8000, TILE_REGION_SIZE};
+
+    static_assert(TILE_BLOCK_0.m_size +
+                  TILE_BLOCK_1.m_size +
+                  TILE_BLOCK_2.m_size == TILE_REGION_SIZE);
+
+    // TILEMAP_ARE are the coordinates inside of the VRAM memory
+    inline constexpr uint32_t TILEMAP_AREA_SIZE = 0x400;
+    inline constexpr Region TILEMAP_AREA_1 {0x1800, 0x400};
+    inline constexpr Region TILEMAP_AREA_2 {0x1C00, 0x400};
+    ////////////////////////////////////////////////////////////
+
+    inline constexpr uint8_t COLOR_WHITE = 0b00;
+    inline constexpr uint8_t COLOR_LIGHT_GRAY = 0b01;
+    inline constexpr uint8_t COLOR_DARK_GRAY = 0b10;
+    inline constexpr uint8_t COLOR_BLACk = 0b11;
+
+    inline constexpr uint32_t MAX_OBJECTS = 40;
+    inline constexpr uint32_t MAX_OBJECTS_PER_SCANLINE = 10;
+
     inline constexpr uint32_t RAM_SIZE = 0x10000;
 
     inline constexpr Region ROM_0 {0x0000, 0x4000};
@@ -42,6 +109,8 @@ namespace dmg::address
     inline constexpr Region OAM {0xFE00, 0x00A0};
     inline constexpr Region UNUSABLE {0xFEA0, 0x0060};
     inline constexpr Region IO {0xFF00, 0x0080};
+    inline constexpr Region PPU_IO {0xFF40, 12};
+
     inline constexpr Region HRAM {0xFF80, 0x007F};
     inline constexpr Region IE {0xFFFF, 0x0001};
 

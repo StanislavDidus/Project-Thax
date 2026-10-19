@@ -2,6 +2,7 @@
 
 #include <filesystem>
 
+#include "ExternalGlobals.hpp"
 #include "Input.hpp"
 #include "RegisterInfo.hpp"
 
@@ -15,6 +16,7 @@ namespace dmg
 
     class Cartridge;
     class CPU;
+    class PPU;
     class Bus;
     class InterruptController;
     class Timer;
@@ -57,6 +59,9 @@ namespace dmg
         // Setters and getters that are needed for objects outside of DMG class
         PlayState GetState() { return m_play_state; }
 
+        [[nodiscard]] const globals::LCD_BUFFER& getLCDBuffer() const;
+        [[nodiscard]] globals::TILE_DATA_BUFFER getTileDataBuffer() const;
+
         void Reset();
 
         void SetRegisters(const RegisterInfo& register_info);
@@ -76,6 +81,7 @@ namespace dmg
         std::unique_ptr<InterruptController> m_interrupt_controller {};
         std::unique_ptr<Bus> m_bus {};
         std::unique_ptr<CPU> m_cpu {};
+        std::unique_ptr<PPU> m_ppu {};
 
         PlayState m_play_state = PlayState::NONE;
         InitState m_init_state = InitState::STANDARD;

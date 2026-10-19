@@ -1,4 +1,4 @@
-#include "Timers/Timer.hpp"
+#include "Timer.hpp"
 
 #include "DMG/Utils/Log.hpp"
 

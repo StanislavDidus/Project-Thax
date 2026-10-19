@@ -11,7 +11,7 @@
 #include "Registers/ByteRegisterPair.hpp"
 #include "Registers/FlagRegister.hpp"
 #include "Registers/TwoByteRegister.hpp"
-#include "InterruptController.hpp"
+#include "Miscellaneous/InterruptController.hpp"
 
 namespace dmg
 {
@@ -26,7 +26,6 @@ namespace dmg
         };
 
         explicit CPU(Bus& bus, InterruptController& interrupt_controller);
-
 
         uint32_t Step();
         void Reset();

@@ -2,9 +2,9 @@
 #include <cstdint>
 #include <iostream>
 
-#include "Constants.hpp"
+#include "../InternalGlobals.hpp"
 #include "InterruptController.hpp"
-#include "Utils/Math.hpp"
+#include "../Utils/Math.hpp"
 
 namespace dmg
 {

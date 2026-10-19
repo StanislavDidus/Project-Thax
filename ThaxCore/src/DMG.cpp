@@ -1,13 +1,14 @@
 #include "DMG/DMG.hpp"
 
 #include "CPU/CPU.hpp"
+#include "PPU/PPU.hpp"
 #include "DMG/Utils/Log.hpp"
 #include "MemoryBus/StandardBus.hpp"
 #include "MemoryBus/TestBus.hpp"
-#include "Cartridge.hpp"
-#include "Timers/Timer.hpp"
-#include "SerialPort.hpp"
-#include "Joypad.hpp"
+#include "Miscellaneous/Cartridge.hpp"
+#include "Miscellaneous/Timer.hpp"
+#include "Miscellaneous/SerialPort.hpp"
+#include "Miscellaneous/Joypad.hpp"
 
 dmg::DMG::DMG(InitState init_state)
     : m_init_state(init_state)
@@ -19,7 +20,15 @@ dmg::DMG::DMG(InitState init_state)
         m_timer = std::make_unique<Timer>(*m_interrupt_controller);
         m_serial_port = std::make_unique<SerialPort>(*m_interrupt_controller);
         m_joypad = std::make_unique<Joypad>(*m_interrupt_controller);
-        m_bus = std::make_unique<StandardBus>(*m_cartridge, *m_interrupt_controller, *m_timer, *m_serial_port, *m_joypad);
+        m_ppu = std::make_unique<PPU>(*m_interrupt_controller);
+        m_bus = std::make_unique<StandardBus>(
+            *m_cartridge,
+            *m_interrupt_controller,
+            *m_timer,
+            *m_serial_port,
+            *m_joypad,
+            *m_ppu
+            );
         m_cpu = std::make_unique<CPU>(*m_bus, *m_interrupt_controller);
     }
     else if (init_state == InitState::TEST)
@@ -112,6 +121,7 @@ void dmg::DMG::StepInstruction()
 
     if (m_timer) m_timer->Update(cycles);
     if (m_serial_port) m_serial_port->Update(cycles);
+    if (m_ppu) m_ppu->Update(cycles);
 }
 
 void dmg::DMG::StepFrame()
@@ -168,6 +178,22 @@ void dmg::DMG::SetState(PlayState state)
     default:
         break;
     }
+}
+
+const dmg::globals::LCD_BUFFER& dmg::DMG::getLCDBuffer() const
+{
+    if (m_ppu)
+        return m_ppu->getLCDBuffer();
+
+    throw std::runtime_error{"Trying to get LCD Buffer without an existing PPU."};
+}
+
+dmg::globals::TILE_DATA_BUFFER dmg::DMG::getTileDataBuffer() const
+{
+    if (m_ppu)
+        return m_ppu->getTileDataBuffer();
+
+    throw std::runtime_error{"Trying to get LCD Buffer without an existing PPU."};
 }
 
 void dmg::DMG::Reset()

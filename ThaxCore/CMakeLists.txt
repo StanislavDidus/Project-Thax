@@ -21,18 +21,24 @@ set(HEADER_FILES
         src/CPU/Registers/FlagRegister.hpp
         src/CPU/Registers/AByteRegister.hpp
         src/CPU/Registers/Address.hpp
-        #src/Test/Test.hpp
-        #include/DMGInitState.hpp
         include/DMG/RegisterInfo.hpp
-        src/Timers/Timer.hpp
-        src/Cartridge.hpp
-        src/Constants.hpp
+        src/Miscellaneous/Timer.hpp
+        src/Miscellaneous/Cartridge.hpp
+        src/InternalGlobals.hpp
         src/MemoryBus/StandardBus.hpp
         src/MemoryBus/TestBus.hpp
-        src/InterruptController.hpp
-        src/SerialPort.hpp
-        src/Joypad.hpp
-        src/Joypad.cpp
+        src/Miscellaneous/InterruptController.hpp
+        src/Miscellaneous/SerialPort.hpp
+        src/Miscellaneous/Joypad.hpp
+        src/PPU/PPU.hpp
+        src/PPU/Tile.hpp
+        src/PPU/Tilemap.hpp
+        src/PPU/Object.hpp
+        src/PPU/PixelFetcher.hpp
+        src/PPU/Registers/LCDCRegister.hpp
+        include/DMG/ExternalGlobals.hpp
+        src/PPU/Registers/STATRegister.hpp
+        src/PPU/FIFO.hpp
 )
 
 set(SOURCE_FILES
@@ -40,10 +46,16 @@ set(SOURCE_FILES
         src/CPU/ControlUnit.cpp
         src/DMG.cpp
         src/CPU/CPU.cpp
-        src/Timers/Timer.cpp
-        src/InterruptController.cpp
+        src/Miscellaneous/Timer.cpp
+        src/Miscellaneous/Joypad.cpp
+        src/Miscellaneous/InterruptController.cpp
         src/CPU/Opcodes_Impl.cpp
         src/CPU/CB_Opcodes_Impl.cpp
+        src/PPU/PPU.cpp
+        src/PPU/Object.cpp
+        src/PPU/Registers/LCDCRegister.cpp
+        src/PPU/Registers/STATRegister.cpp
+        src/PPU/FIFO.cpp
 )
 
 set(ALL_FILES

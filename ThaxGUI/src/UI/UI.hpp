@@ -203,48 +203,65 @@ namespace dmg
         value >> 4 & 1 ? ImGui::Text("C") : ImGui::Text("-");
     }
 
-    inline void DrawRegisterWindow(const RegisterInfo& register_info, const DMG& dmg)
+    inline void DrawAssetWindow(unsigned int gl_texture)
     {
-        if (ImGui::Begin("Registers"))
+        if (ImGui::Begin("Asset Viewport"))
         {
-            ImGui::SeparatorText("CPU Registers");
+            ImGui::Image(static_cast<ImTextureID>(gl_texture), ImVec2{400.0f, 400.0f});
+        }
+        ImGui::End();
+    }
 
-            if (ImGui::BeginTable("##anything", 2))
+    inline void DrawInfoWindow(const RegisterInfo& register_info, const DMG& dmg)
+    {
+        if (ImGui::Begin("Info"))
+        {
+            if (ImGui::CollapsingHeader("State"))
             {
-                ImGui::TableNextColumn();
-                PrintRegisterValue("PC: ", register_info.PC);
-                PrintRegisterValue("A: ", register_info.A);
-                PrintRegisterValue("B: ", register_info.B);
-                PrintRegisterValue("D: ", register_info.D);
-                PrintRegisterValue("H: ", register_info.H);
-                ImGui::TableNextColumn();
-                PrintRegisterValue("SP: ", register_info.SP);
-                PrintFRegisterValue(register_info.F);
-                PrintRegisterValue("C: ", register_info.C);
-                PrintRegisterValue("E: ", register_info.E);
-                PrintRegisterValue("L: ", register_info.L);
+                ImGui::SeparatorText("CPU State");
             }
-            ImGui::EndTable();
+            if (ImGui::CollapsingHeader("Registers"))
+            {
+                ImGui::SeparatorText("CPU Registers");
 
-            ImGui::SeparatorText("Memory Mapped Registers");
-            if (ImGui::BeginTable("##anything", 2))
-            {
-                ImGui::TableNextColumn();
-                PrintRegisterValue("DIV: ", dmg.ReadMemory(0xFF04));
-                PrintRegisterValue("TIMA: ", dmg.ReadMemory(0xFF05));
-                ImGui::TableNextColumn();
-                PrintRegisterValue("TMA: ", dmg.ReadMemory(0xFF06));
-                PrintRegisterValue("TAC: ", dmg.ReadMemory(0xFF07));
-            }
-            ImGui::EndTable();
+                if (ImGui::BeginTable("##anything", 2))
+                {
+                    ImGui::TableNextColumn();
+                    PrintRegisterValue("PC: ", register_info.PC);
+                    PrintRegisterValue("A: ", register_info.A);
+                    PrintRegisterValue("B: ", register_info.B);
+                    PrintRegisterValue("D: ", register_info.D);
+                    PrintRegisterValue("H: ", register_info.H);
+                    ImGui::TableNextColumn();
+                    PrintRegisterValue("SP: ", register_info.SP);
+                    PrintFRegisterValue(register_info.F);
+                    PrintRegisterValue("C: ", register_info.C);
+                    PrintRegisterValue("E: ", register_info.E);
+                    PrintRegisterValue("L: ", register_info.L);
+                }
+                ImGui::EndTable();
 
-            ImGui::SeparatorText("Others");
-            if (ImGui::BeginTable("##anything", 2))
-            {
-                //ImGui::TableNextColumn();
-                //ImGui::TableNextColumn();
+                ImGui::SeparatorText("Memory Mapped Registers");
+                if (ImGui::BeginTable("##anything", 2))
+                {
+                    ImGui::TableNextColumn();
+                    PrintRegisterValue("DIV: ", dmg.ReadMemory(0xFF04));
+                    PrintRegisterValue("TIMA: ", dmg.ReadMemory(0xFF05));
+                    ImGui::TableNextColumn();
+                    PrintRegisterValue("TMA: ", dmg.ReadMemory(0xFF06));
+                    PrintRegisterValue("TAC: ", dmg.ReadMemory(0xFF07));
+                }
+                ImGui::EndTable();
+
+                ImGui::SeparatorText("Others");
+                if (ImGui::BeginTable("##anything", 2))
+                {
+                    //ImGui::TableNextColumn();
+                    //ImGui::TableNextColumn();
+                }
+                ImGui::EndTable();
             }
-            ImGui::EndTable();
+
         }
         ImGui::End();
     }

@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <utility>
 
-#include "Constants.hpp"
+#include "../InternalGlobals.hpp"
 #include "DMG/Utils/Log.hpp"
 
 dmg::CPU::CPU(Bus& bus, InterruptController& interrupt_controller)

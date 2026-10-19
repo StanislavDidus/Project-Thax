@@ -1,4 +1,3 @@
-#include "Input/Input.hpp"
 #ifdef _WIN32
 #include <windows.h>
 #include <timeapi.h>
@@ -6,6 +5,7 @@
 #endif
 
 #include "DMG/DMG.hpp"
+#include "Input/Input.hpp"
 #include "Graphics/Graphics.hpp"
 #include "DMG/Utils/Log.hpp"
 #include "UI/UI.hpp"
@@ -33,6 +33,15 @@ int main()
     constexpr std::chrono::duration<double> FRAME_DURATION {1.0 / 59.7};
     std::chrono::time_point<std::chrono::high_resolution_clock> frame_start = std::chrono::high_resolution_clock::now();
 
+    // Initialize Tile Data Texture
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
     while (!glfwWindowShouldClose(graphics_context.window))
     {
         glfwPollEvents();
@@ -41,11 +50,21 @@ int main()
         glfwGetFramebufferSize(graphics_context.window, &width, &height);
         glViewport(0, 0, width, height);
 
+        ///// UPDATE /////
+
         dmg::HandleInput(graphics_context, dmg);
 
         dmg.Update();
 
+        ///// RENDER /////
+
         glClear(GL_COLOR_BUFFER_BIT);
+
+        auto tile_data_buffer = dmg.getTileDataBuffer();
+        auto tile_data_buffer_rgb = dmg::ConvertBufferToRGB(tile_data_buffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 144, 168, 0, GL_RGB,
+            GL_UNSIGNED_BYTE, tile_data_buffer_rgb.data());
+        glGenerateMipmap(GL_TEXTURE_2D);
 
         dmg::StartImGuiFrame();
 
@@ -53,7 +72,8 @@ int main()
 
         dmg::RegisterInfo registers = dmg.GetRegisters();
 
-        dmg::DrawRegisterWindow(registers, dmg);
+        dmg::DrawAssetWindow(texture);
+        dmg::DrawInfoWindow(registers, dmg);
         dmg::DrawControlWindow(dmg);
         dmg::DrawMemoryWindow(dmg, registers);
         dmg::DrawMain(dmg, imgui_context, current_config);

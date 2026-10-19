@@ -2,11 +2,11 @@
 #include <array>
 
 #include "Bus.hpp"
-#include "Cartridge.hpp"
-#include "Constants.hpp"
-#include "Timers/Timer.hpp"
-#include "Joypad.hpp"
-#include "SerialPort.hpp"
+#include "Miscellaneous/Cartridge.hpp"
+#include "../InternalGlobals.hpp"
+#include "Miscellaneous/Timer.hpp"
+#include "Miscellaneous/Joypad.hpp"
+#include "Miscellaneous/SerialPort.hpp"
 
 namespace dmg
 {
@@ -18,13 +18,15 @@ namespace dmg
             InterruptController& interrupt_controller,
             Timer& timer,
             SerialPort& serial_port,
-            Joypad& joypad
+            Joypad& joypad,
+            PPU& ppu
             )
             : m_cartridge(cartridge)
             , m_interrupt_controller(interrupt_controller)
             , m_timer(timer)
             , m_serial_port(serial_port)
             , m_joypad(joypad)
+            , m_ppu(ppu)
         {
 
         }
@@ -32,7 +34,7 @@ namespace dmg
 
         void Clear() override
         {
-            for (int i = 0; i < address::RAM_SIZE; ++i)
+            for (int i = 0; i < globals::RAM_SIZE; ++i)
             {
                 Write(i, 0);
             }
@@ -40,40 +42,45 @@ namespace dmg
 
         [[nodiscard]] uint8_t Read(const uint16_t address) const override
         {
-            if (address::ROM_0.Contains(address))
+            if (globals::ROM_0.Contains(address))
             {
                 return m_cartridge.Read(address);
             }
-            if (address::ROM_N.Contains(address))
+            if (globals::ROM_N.Contains(address))
             {
                 return m_cartridge.Read(address);
             }
-            if (address::VRAM.Contains(address))
+            if (globals::VRAM.Contains(address))
             {
-                return VRAM[address - address::VRAM.m_start];
+                return m_ppu.ReadVRAM(address - globals::VRAM.m_start);
             }
-            if (address::RAM_N.Contains(address))
+            if (globals::RAM_N.Contains(address))
             {
-                return RAM_N[address - address::RAM_N.m_start];
+                return RAM_N[address - globals::RAM_N.m_start];
             }
-            if (address::WRAM.Contains(address))
+            if (globals::WRAM.Contains(address))
             {
-               return WRAM[address - address::WRAM.m_start];
+               return WRAM[address - globals::WRAM.m_start];
             }
-            if (address::ECHO.Contains(address))
+            if (globals::ECHO.Contains(address))
             {
-               return WRAM[address - address::ECHO.m_start];
+               return WRAM[address - globals::ECHO.m_start];
             }
-            if (address::OAM.Contains(address))
+            if (globals::OAM.Contains(address))
             {
-                return OAM[address - address::OAM.m_start];
+                return m_ppu.ReadOAM(address - globals::OAM.m_start);
             }
-            if (address::UNUSABLE.Contains(address))
+            if (globals::UNUSABLE.Contains(address))
             {
                 return 0xFF;
             }
-            if (address::IO.Contains(address))
+            if (globals::IO.Contains(address))
             {
+                if (globals::PPU_IO.Contains(address))
+                {
+                    return m_ppu.ReadIO(address - globals::PPU_IO.m_start);
+                }
+
                 switch (address)
                 {
                 case 0xFF00:
@@ -95,14 +102,14 @@ namespace dmg
                 case 0xFF44:
                     return 0x90;
                 default:
-                    return IO[address - address::IO.m_start];
+                    return IO[address - globals::IO.m_start];
                 }
             }
-            if (address::HRAM.Contains(address))
+            if (globals::HRAM.Contains(address))
             {
-                return HRAM[address - address::HRAM.m_start];
+                return HRAM[address - globals::HRAM.m_start];
             }
-            if (address::IE.Contains(address))
+            if (globals::IE.Contains(address))
             {
                 return m_interrupt_controller.ReadIE();
             }
@@ -114,35 +121,40 @@ namespace dmg
         {
             AddDirtyAddress(address);
 
-            if (address::ROM_0.Contains(address) || address::ROM_N.Contains(address))
+            if (globals::ROM_0.Contains(address) || globals::ROM_N.Contains(address))
             {
             }
-            else if (address::VRAM.Contains(address))
+            else if (globals::VRAM.Contains(address))
             {
-                VRAM[address - address::VRAM.m_start] = value;
+                m_ppu.WriteVRAM(address - globals::VRAM.m_start, value);
             }
-            else if (address::RAM_N.Contains(address))
+            else if (globals::RAM_N.Contains(address))
             {
-                RAM_N[address - address::RAM_N.m_start] = value;
+                RAM_N[address - globals::RAM_N.m_start] = value;
             }
-            else if (address::WRAM.Contains(address))
+            else if (globals::WRAM.Contains(address))
             {
-               WRAM[address - address::WRAM.m_start] = value;
+               WRAM[address - globals::WRAM.m_start] = value;
             }
-            else if (address::ECHO.Contains(address))
+            else if (globals::ECHO.Contains(address))
             {
-                WRAM[address - address::ECHO.m_start] = value;
+                WRAM[address - globals::ECHO.m_start] = value;
             }
-            else if (address::OAM.Contains(address))
+            else if (globals::OAM.Contains(address))
             {
-                OAM[address - address::OAM.m_start] = value;
+                m_ppu.WriteOAM(address - globals::OAM.m_start, value);
             }
-            else if (address::UNUSABLE.Contains(address))
+            else if (globals::UNUSABLE.Contains(address))
             {
                 //
             }
-            else if (address::IO.Contains(address))
+            else if (globals::IO.Contains(address))
             {
+                if (globals::PPU_IO.Contains(address))
+                {
+                    m_ppu.WriteIO(address - globals::PPU_IO.m_start, value);
+                }
+
                 switch (address)
                 {
                 case 0xFF00:
@@ -170,15 +182,15 @@ namespace dmg
                     m_timer.WriteTAC(value);
                     break;
                 default:
-                    IO[address - address::IO.m_start] = value;
+                    IO[address - globals::IO.m_start] = value;
                     break;
                 }
             }
-            else if (address::HRAM.Contains(address))
+            else if (globals::HRAM.Contains(address))
             {
-                HRAM[address - address::HRAM.m_start] = value;
+                HRAM[address - globals::HRAM.m_start] = value;
             }
-            else if (address::IE.Contains(address))
+            else if (globals::IE.Contains(address))
             {
                 m_interrupt_controller.WriteIE(value);
             }
@@ -189,12 +201,11 @@ namespace dmg
         Timer& m_timer;
         SerialPort& m_serial_port;
         Joypad& m_joypad;
+        PPU& m_ppu;
 
-        std::array<uint8_t, address::VRAM.m_size> VRAM   {};
-        std::array<uint8_t, address::RAM_N.m_size> RAM_N {};
-        std::array<uint8_t, address::WRAM.m_size> WRAM   {};
-        std::array<uint8_t, address::OAM.m_size> OAM     {};
-        std::array<uint8_t, address::IO.m_size> IO       {};
-        std::array<uint8_t, address::HRAM.m_size> HRAM   {};
+        std::array<uint8_t, globals::RAM_N.m_size> RAM_N {};
+        std::array<uint8_t, globals::WRAM.m_size> WRAM   {};
+        std::array<uint8_t, globals::IO.m_size> IO       {};
+        std::array<uint8_t, globals::HRAM.m_size> HRAM   {};
     };
 }

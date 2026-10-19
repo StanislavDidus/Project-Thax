@@ -6,7 +6,7 @@
 #include <fstream>
 
 #include "DMG/Utils/Log.hpp"
-#include "Constants.hpp"
+#include "../InternalGlobals.hpp"
 
 namespace dmg
 {
@@ -54,6 +54,6 @@ namespace dmg
         }
 
     private:
-        std::array<uint8_t, address::ROM_0.m_size + address::ROM_N.m_size> ROM {};
+        std::array<uint8_t, globals::ROM_0.m_size + globals::ROM_N.m_size> ROM {};
     };
 }

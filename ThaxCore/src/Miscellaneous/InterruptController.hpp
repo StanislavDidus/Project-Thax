@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <optional>
 
-#include "Utils/Math.hpp"
+#include "../Utils/Math.hpp"
 
 namespace dmg
 {

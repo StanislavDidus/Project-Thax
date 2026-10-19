@@ -2,7 +2,7 @@
 #include <array>
 
 #include "Bus.hpp"
-#include "Constants.hpp"
+#include "../InternalGlobals.hpp"
 
 namespace dmg
 {
@@ -28,6 +28,6 @@ namespace dmg
             m_data[address] = value;
         }
     private:
-        std::array<uint8_t, address::RAM_SIZE> m_data {0};
+        std::array<uint8_t, globals::RAM_SIZE> m_data {0};
     };
 }
