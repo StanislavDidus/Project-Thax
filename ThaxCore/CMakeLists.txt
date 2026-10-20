@@ -56,6 +56,7 @@ set(SOURCE_FILES
         src/PPU/Registers/LCDCRegister.cpp
         src/PPU/Registers/STATRegister.cpp
         src/PPU/FIFO.cpp
+        src/PPU/PixelFetcher.cpp
 )
 
 set(ALL_FILES

@@ -63,15 +63,13 @@ namespace dmg
 namespace dmg::globals
 {
     // PPU MODES
-    inline constexpr uint32_t PPU_MODE_0_LENGTH = 376;
+    inline constexpr uint32_t PPU_MODE_0_LENGTH = 204;
     inline constexpr uint32_t PPU_MODE_1_LENGTH = 4560;
     inline constexpr uint32_t PPU_MODE_2_LENGTH = 80;
-    inline constexpr uint32_t PPU_MODE_3_LENGTH = 289;
+    inline constexpr uint32_t PPU_MODE_3_LENGTH = 172;
 
     inline constexpr uint32_t TILE_BYTE_SIZE = 16;
     inline constexpr uint32_t TILE_PIXEl_SIZE = 8;
-    inline constexpr uint32_t LCD_WIDTH = 160;
-    inline constexpr uint32_t LCD_HEIGHT = 144;
     inline constexpr uint32_t TILEMAP_TILE_SIZE = 32;
 
     inline constexpr uint32_t TILE_REGION_SIZE = 0x1800;

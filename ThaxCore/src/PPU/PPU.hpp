@@ -7,7 +7,6 @@
 #include "Tile.hpp"
 #include "Object.hpp"
 #include "CPU/Registers/ByteRegister.hpp"
-#include "Tilemap.hpp"
 #include "DMG/ExternalGlobals.hpp"
 #include "Registers/LCDCRegister.hpp"
 #include "Registers/STATRegister.hpp"
@@ -34,14 +33,9 @@ namespace dmg
         [[nodiscard]] uint8_t ReadOAM(uint16_t address) const;
         [[nodiscard]] uint8_t ReadIO(uint16_t address) const;
     private:
-        struct FIFO_Pixel
-        {
-
-        };
-
         void SetMode(PPUMode mode);
         void EnterMode(PPUMode mode);
-        void UpdateMode(PPUMode mode);
+        void UpdateMode(PPUMode mode, uint32_t cycles);
         void ExitMode(PPUMode mode);
 
         Tile GetTileWindowBG(uint32_t index) const;
@@ -66,6 +60,7 @@ namespace dmg
         std::array<uint8_t, globals::OAM.m_size> OAM {};
 
         FIFO m_fifo {};
+        PixelFetcher m_pixel_fetcher {*this, m_fifo};
 
         uint32_t fetcher_x = 0;
         uint32_t fetcher_y = 0;
@@ -75,5 +70,7 @@ namespace dmg
 
         uint32_t m_current_cycles = 0;
         PPUMode m_mode = PPUMode::NONE;
+
+        friend class PixelFetcher;
     };
 }

@@ -54,10 +54,8 @@ namespace dmg
         {
             return globals::TILEMAP_AREA_1.m_start;
         }
-        else
-        {
-            return globals::TILEMAP_AREA_2.m_start;
-        }
+
+        return globals::TILEMAP_AREA_2.m_start;
     }
 
     ObjectSize LCDCRegister::GetObjectSize() const

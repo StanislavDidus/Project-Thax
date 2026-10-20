@@ -29,7 +29,7 @@ namespace dmg
 
             std::streamsize file_size = file.tellg();
 
-            // TODO: Optionally check for the ROM size
+            assert(file_size <= 32768);
 
             file.seekg(0, std::ios::beg);
 

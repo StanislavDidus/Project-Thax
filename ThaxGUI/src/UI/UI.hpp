@@ -207,7 +207,18 @@ namespace dmg
     {
         if (ImGui::Begin("Asset Viewport"))
         {
-            ImGui::Image(static_cast<ImTextureID>(gl_texture), ImVec2{400.0f, 400.0f});
+            ImVec2 window_size = ImGui::GetWindowSize();
+            ImGui::Image(static_cast<ImTextureID>(gl_texture), window_size);
+        }
+        ImGui::End();
+    }
+
+    inline void DrawViewport(unsigned int viewport_texture)
+    {
+        if (ImGui::Begin("Viewport"))
+        {
+            ImVec2 window_size = ImGui::GetWindowSize();
+            ImGui::Image(static_cast<ImTextureID>(viewport_texture), window_size);
         }
         ImGui::End();
     }

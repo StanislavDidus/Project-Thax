@@ -15,11 +15,11 @@ namespace dmg
 
     void PPU::Update(const uint32_t cycles)
     {
-        //if (!LCDC.IsLCDEnabled()) return;
+        if (!LCDC.IsLCDEnabled()) return;
 
         m_current_cycles += cycles;
 
-        UpdateMode(m_mode);
+        UpdateMode(m_mode, cycles);
     }
 
     const globals::LCD_BUFFER& PPU::getLCDBuffer() const
@@ -31,24 +31,27 @@ namespace dmg
     {
         globals::TILE_DATA_BUFFER tile_data_buffer {};
 
-        for (int row = 0; row < 8; ++row)
+        for (int y = 0; y < globals::TILE_DATA_HEIGHT; ++y)
         {
-            for (int i = 0; i < 384; ++i)
+            for (int row = 0; row < 8; ++row)
             {
-                Tile tile {static_cast<uint16_t>(i * 16)};
-
-                const Tile::TileRow tile_row = tile.GetRow(row, VRAM);
-                uint8_t low = tile_row.first;
-                uint8_t high = tile_row.second;
-
-                for (int j = 0; j < 8; ++j)
+                for (int x = 0; x < globals::TILE_DATA_WIDTH; ++x)
                 {
-                    uint8_t color = (getBit(high, (7 - j)) << 1) | getBit(low, (7 - j));
-                    tile_data_buffer[i * 8 + j + row * 384 * 8] = color;
+                    int i = x + y * 16;
+                    Tile tile {static_cast<uint16_t>(i * 16)};
 
-                    int x = (i % 16) * 8 + j;
-                    int y = (i / 16) * 8 + row;
-                    tile_data_buffer[y * 128 + x] = color;
+                    const Tile::TileRow tile_row = tile.GetRow(row, VRAM);
+                    uint8_t low = tile_row.first;
+                    uint8_t high = tile_row.second;
+
+                    for (int j = 0; j < 8; ++j)
+                    {
+                        uint8_t color = (getBit(high, (7 - j)) << 1) | getBit(low, (7 - j));
+
+                        int px = x * 8 + j;
+                        int py = y * 8 + row;
+                        tile_data_buffer[py * globals::TILE_DATA_VIEW_WIDTH + px] = color;
+                    }
                 }
             }
         }
@@ -70,19 +73,19 @@ namespace dmg
     {
         switch (address)
         {
-        case 0x00: LCDC.Write(value);
-        case 0x01: STAT.Write(value);
-        case 0x02: SCY.Write(value);
-        case 0x03: SCX.Write(value);
-        case 0x04: LY.Write(value);
-        case 0x05: LYC.Write(value);
-        case 0x06: DMA.Write(value);
-        case 0x07: BGP.Write(value);
-        case 0x08: OBP0.Write(value);
-        case 0x09: OBP1.Write(value);
-        case 0x0A: WY.Write(value);
-        case 0x0B: WX.Write(value);
-        default: ;
+        case 0x00: LCDC.Write(value); break;
+        case 0x01: STAT.Write(value); break;
+        case 0x02: SCY.Write(value); break;
+        case 0x03: SCX.Write(value); break;
+        case 0x04: break;
+        case 0x05: LYC.Write(value); break;
+        case 0x06: DMA.Write(value); break;
+        case 0x07: BGP.Write(value); break;
+        case 0x08: OBP0.Write(value); break;
+        case 0x09: OBP1.Write(value); break;
+        case 0x0A: WY.Write(value); break;
+        case 0x0B: WX.Write(value); break;
+        default: break;
         }
     }
 
@@ -136,28 +139,41 @@ namespace dmg
             break;
         case PPUMode::MODE1:
             m_interrupt_controller.SetIF(InterruptController::VBLANK);
+            m_fifo.Reset();
             break;
         case PPUMode::MODE2:
             break;
         case PPUMode::MODE3:
-            fetcher_x = 0;
-            fetcher_y = 0;
+            m_pixel_fetcher.Reset();
+            m_fifo.ResetBuffer();
             break;
         }
     }
 
-    void PPU::UpdateMode(const PPUMode mode)
+    void PPU::UpdateMode(const PPUMode mode, uint32_t cycles)
     {
         switch (mode)
         {
         case PPUMode::MODE0:
             if (m_current_cycles >= globals::PPU_MODE_0_LENGTH)
             {
-                SetMode(PPUMode::MODE1);
-                m_current_cycles = 0;
+                LY.Write(LY.Read() + 1);
+
+                if (LY.Read() >= 144)
+                {
+                    SetMode(PPUMode::MODE1);
+                    m_current_cycles = 0;
+                }
+                else
+                {
+                    SetMode(PPUMode::MODE2);
+                    m_current_cycles = 0;
+                }
             }
             break;
         case PPUMode::MODE1:
+            LY.Write(144 + m_current_cycles / 456);
+
             if (m_current_cycles >= globals::PPU_MODE_1_LENGTH)
             {
                 SetMode(PPUMode::MODE2);
@@ -173,30 +189,27 @@ namespace dmg
             break;
         case PPUMode::MODE3:
             {
-                if (m_current_cycles >= globals::PPU_MODE_3_LENGTH)
+                if (m_fifo.IsDone() || m_fifo.IsScanlineDone())
                 {
                     SetMode(PPUMode::MODE0);
                     m_current_cycles = 0;
                 }
-                /*const uint32_t fx = ((SCX.Read() / 8) + fetcher_x) & 0x1F;
-                const uint32_t fy = (LY.Read() + SCY.Read()) & 255;
-                const uint32_t row = fy / 8;
-                const uint32_t line_in_tile = row % 8;
-
-                const uint8_t tile_ref = VRAM[globals::TILEMAP_AREA_1.m_start + fx + row * 32];
-                Tile tile = GetTileWindowBG(tile_ref);
-                const Tile::TileRow tile_row = tile.GetRow(line_in_tile, VRAM);
-                const uint8_t low = tile_row.first;
-                const uint8_t high = tile_row.second;
-                if (m_fifo.IsEmpty())
-                    m_fifo.PushPixels(low, high);
-
-                fetcher_x += 1;
-                if (fetcher_x > 31)
+                else
                 {
-                    fetcher_x = 0;
-                    fetcher_y += 1;
-                }*/
+                    for (int i = 0; i < cycles; ++i)
+                    {
+                        m_pixel_fetcher.Step();
+                        m_fifo.SendPixelToLCD(m_lcd);
+
+                        if (m_fifo.IsDone() || m_fifo.IsScanlineDone())
+                        {
+                            SetMode(PPUMode::MODE0);
+                            m_current_cycles = 0;
+                            break;
+                        }
+                    }
+                }
+
             }
             break;
         }
@@ -207,10 +220,9 @@ namespace dmg
         switch (mode)
         {
         case PPUMode::MODE0:
-            LY.Write(LY.Read() + 1);
-            if (LY.Read() >= 154) LY.Write(0);
             break;
         case PPUMode::MODE1:
+            LY.Write(0);
             break;
         case PPUMode::MODE2:
             break;
@@ -221,6 +233,13 @@ namespace dmg
 
     Tile PPU::GetTileWindowBG(const uint32_t index) const
     {
-        return Tile{VRAM[LCDC.GetBGWindowTileDataArea() + index * 16]};
+        //return Tile{static_cast<uint16_t>(LCDC.GetBGWindowTileDataArea() + index * 16)};
+
+        if (getBit(LCDC.Read(), 4))
+        {
+            return Tile{static_cast<uint16_t>(globals::TILE_BLOCK_0.m_start + index * 16)};
+        }
+        const int offset = static_cast<int8_t>(index) * 16;
+        return Tile{static_cast<uint16_t>(globals::TILE_BLOCK_2.m_start + offset)};
     }
 }

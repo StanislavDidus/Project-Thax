@@ -34,9 +34,16 @@ int main()
     std::chrono::time_point<std::chrono::high_resolution_clock> frame_start = std::chrono::high_resolution_clock::now();
 
     // Initialize Tile Data Texture
-    unsigned int texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    unsigned int tile_data_texture;
+    glGenTextures(1, &tile_data_texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // Initialize LCD Buffer texture
+    unsigned int lcd_texture;
+    glGenTextures(1, &lcd_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -60,11 +67,22 @@ int main()
 
         glClear(GL_COLOR_BUFFER_BIT);
 
+        glBindTexture(GL_TEXTURE_2D, tile_data_texture);
         auto tile_data_buffer = dmg.getTileDataBuffer();
         auto tile_data_buffer_rgb = dmg::ConvertBufferToRGB(tile_data_buffer);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 144, 168, 0, GL_RGB,
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+            dmg::globals::TILE_DATA_VIEW_WIDTH, dmg::globals::TILE_DATA_VIEW_HEIGHT,
+            0, GL_RGB,
             GL_UNSIGNED_BYTE, tile_data_buffer_rgb.data());
-        glGenerateMipmap(GL_TEXTURE_2D);
+
+
+        glBindTexture(GL_TEXTURE_2D, lcd_texture);
+        auto lcd_buffer_rgb = dmg::ConvertBufferToRGB(dmg.getLCDBuffer());
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+            dmg::globals::LCD_WIDTH, dmg::globals::LCD_HEIGHT,
+            0, GL_RGB,
+            GL_UNSIGNED_BYTE, lcd_buffer_rgb.data());
+
 
         dmg::StartImGuiFrame();
 
@@ -72,7 +90,8 @@ int main()
 
         dmg::RegisterInfo registers = dmg.GetRegisters();
 
-        dmg::DrawAssetWindow(texture);
+        dmg::DrawAssetWindow(tile_data_texture);
+        dmg::DrawViewport(lcd_texture);
         dmg::DrawInfoWindow(registers, dmg);
         dmg::DrawControlWindow(dmg);
         dmg::DrawMemoryWindow(dmg, registers);

@@ -24,6 +24,6 @@ namespace dmg
         }
 
     private:
-        uint8_t m_address = 0;
+        uint16_t m_address = 0;
     };
 }
