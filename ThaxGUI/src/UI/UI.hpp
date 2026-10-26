@@ -223,13 +223,13 @@ namespace dmg
         ImGui::End();
     }
 
-    inline void DrawInfoWindow(const RegisterInfo& register_info, const DMG& dmg)
+    inline void DrawInfoWindow(const DMGInfo& info, const DMG& dmg)
     {
         if (ImGui::Begin("Info"))
         {
             if (ImGui::CollapsingHeader("State"))
             {
-                ImGui::SeparatorText("CPU State");
+                ImGui::Text("CPU State: %d", info.CPU_State);
             }
             if (ImGui::CollapsingHeader("Registers"))
             {
@@ -238,37 +238,57 @@ namespace dmg
                 if (ImGui::BeginTable("##anything", 2))
                 {
                     ImGui::TableNextColumn();
-                    PrintRegisterValue("PC: ", register_info.PC);
-                    PrintRegisterValue("A: ", register_info.A);
-                    PrintRegisterValue("B: ", register_info.B);
-                    PrintRegisterValue("D: ", register_info.D);
-                    PrintRegisterValue("H: ", register_info.H);
+                    PrintRegisterValue("PC: ", info.PC);
+                    PrintRegisterValue("A: ", info.A);
+                    PrintRegisterValue("B: ", info.B);
+                    PrintRegisterValue("D: ", info.D);
+                    PrintRegisterValue("H: ", info.H);
                     ImGui::TableNextColumn();
-                    PrintRegisterValue("SP: ", register_info.SP);
-                    PrintFRegisterValue(register_info.F);
-                    PrintRegisterValue("C: ", register_info.C);
-                    PrintRegisterValue("E: ", register_info.E);
-                    PrintRegisterValue("L: ", register_info.L);
+                    PrintRegisterValue("SP: ", info.SP);
+                    PrintFRegisterValue(info.F);
+                    PrintRegisterValue("C: ", info.C);
+                    PrintRegisterValue("E: ", info.E);
+                    PrintRegisterValue("L: ", info.L);
                 }
                 ImGui::EndTable();
 
-                ImGui::SeparatorText("Memory Mapped Registers");
-                if (ImGui::BeginTable("##anything", 2))
+                ImGui::SeparatorText("General Component Registers");
+                if (ImGui::BeginTable("##anything", 3))
                 {
                     ImGui::TableNextColumn();
-                    PrintRegisterValue("DIV: ", dmg.ReadMemory(0xFF04));
-                    PrintRegisterValue("TIMA: ", dmg.ReadMemory(0xFF05));
+                    PrintRegisterValue("DIV: ", info.DIV);
+                    PrintRegisterValue("TIMA: ", info.TIMA);
+                    PrintRegisterValue("TMA: ", info.TMA);
+                    PrintRegisterValue("TAC: ", info.TAC);
                     ImGui::TableNextColumn();
-                    PrintRegisterValue("TMA: ", dmg.ReadMemory(0xFF06));
-                    PrintRegisterValue("TAC: ", dmg.ReadMemory(0xFF07));
+                    PrintRegisterValue("IF: ", info.IF);
+                    PrintRegisterValue("IE: ", info.IE);
+                    PrintRegisterValue("*IME: ", info.IME);
+                    ImGui::TableNextColumn();
+                    PrintRegisterValue("P1: ", info.P1);
+                    PrintRegisterValue("SB: ", info.SB);
+                    PrintRegisterValue("SC: ", info.SC);
                 }
                 ImGui::EndTable();
 
-                ImGui::SeparatorText("Others");
-                if (ImGui::BeginTable("##anything", 2))
+                ImGui::SeparatorText("PPU Registers");
+                if (ImGui::BeginTable("##anything", 3))
                 {
-                    //ImGui::TableNextColumn();
-                    //ImGui::TableNextColumn();
+                    ImGui::TableNextColumn();
+                    PrintRegisterValue("LCDC: ", info.LCDC);
+                    PrintRegisterValue("STAT: ", info.STAT);
+                    PrintRegisterValue("SCY: ", info.SCY);
+                    PrintRegisterValue("SCX: ", info.SCX);
+                    ImGui::TableNextColumn();
+                    PrintRegisterValue("LY: ", info.LY);
+                    PrintRegisterValue("LYC: ", info.LYC);
+                    PrintRegisterValue("WX: ", info.WX);
+                    PrintRegisterValue("WY: ", info.WY);
+                    ImGui::TableNextColumn();
+                    PrintRegisterValue("DMA: ", info.DMA);
+                    PrintRegisterValue("BGP: ", info.BGP);
+                    PrintRegisterValue("OBP0: ", info.OBP0);
+                    PrintRegisterValue("OBP1: ", info.OBP1);
                 }
                 ImGui::EndTable();
             }
@@ -362,7 +382,7 @@ namespace dmg
         ImGui::End();
     }
 
-    inline void DrawMemoryWindow(const DMG& dmg, const RegisterInfo& register_info)
+    inline void DrawMemoryWindow(const DMG& dmg, const DMGInfo& register_info)
     {
         static MemoryEditor mem_edit;
         mem_edit.OptShowAscii = false;

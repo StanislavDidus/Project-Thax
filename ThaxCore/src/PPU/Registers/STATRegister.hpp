@@ -16,13 +16,14 @@ namespace dmg
         [[nodiscard]] uint8_t Read() const override;
         void Write(uint8_t data) override;
 
+        bool Update(PPUMode mode, bool lcyly);
+    private:
         [[nodiscard]] bool IsLYCIntSelect() const;
         [[nodiscard]] bool IsMode2InSelect() const;
         [[nodiscard]] bool IsMode1InSelect() const;
         [[nodiscard]] bool IsMode0InSelect() const;
-        [[nodiscard]] bool isLYCeqLC() const;
-        [[nodiscard]] PPUMode getPPUMode() const;
-    private:
+
         uint8_t m_data = 0;
+        bool m_active = false;
     };
 }

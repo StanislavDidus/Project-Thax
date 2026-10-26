@@ -7,6 +7,7 @@
 #include "Tile.hpp"
 #include "Object.hpp"
 #include "CPU/Registers/ByteRegister.hpp"
+#include "DMG/Info.hpp"
 #include "DMG/ExternalGlobals.hpp"
 #include "Registers/LCDCRegister.hpp"
 #include "Registers/STATRegister.hpp"
@@ -32,13 +33,17 @@ namespace dmg
         [[nodiscard]] uint8_t ReadVRAM(uint16_t address) const;
         [[nodiscard]] uint8_t ReadOAM(uint16_t address) const;
         [[nodiscard]] uint8_t ReadIO(uint16_t address) const;
+
+        [[nodiscard]] PPUInfo GetPPUInfo() const;
     private:
         void SetMode(PPUMode mode);
         void EnterMode(PPUMode mode);
         void UpdateMode(PPUMode mode, uint32_t cycles);
         void ExitMode(PPUMode mode);
 
-        Tile GetTileWindowBG(uint32_t index) const;
+        void CheckSTATRegister();
+
+        [[nodiscard]] Tile GetTileWindowBG(uint32_t index) const;
 
         InterruptController& m_interrupt_controller;
 

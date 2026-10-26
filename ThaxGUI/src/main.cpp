@@ -88,13 +88,13 @@ int main()
 
         ImGui::DockSpaceOverViewport();
 
-        dmg::RegisterInfo registers = dmg.GetRegisters();
+        dmg::DMGInfo dmg_info = dmg.GetDMGInfo();
 
         dmg::DrawAssetWindow(tile_data_texture);
         dmg::DrawViewport(lcd_texture);
-        dmg::DrawInfoWindow(registers, dmg);
+        dmg::DrawInfoWindow(dmg_info, dmg);
         dmg::DrawControlWindow(dmg);
-        dmg::DrawMemoryWindow(dmg, registers);
+        dmg::DrawMemoryWindow(dmg, dmg_info);
         dmg::DrawMain(dmg, imgui_context, current_config);
         ImGui::ShowDemoWindow();
 

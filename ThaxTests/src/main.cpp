@@ -1,5 +1,5 @@
 #include "DMG/DMG.hpp"
-#include "DMG/RegisterInfo.hpp"
+#include "DMG/Info.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -21,7 +21,7 @@ namespace dmg
 
     inline bool CompareDMGStates(dmg::DMG& dmg, const json& data)
     {
-        RegisterInfo register_info = dmg.GetRegisters();
+        CPUInfo register_info = dmg.GetRegisters();
         bool all_ok = true;
 
         auto check = [&](const char* name, uint16_t actual, uint16_t exp)
@@ -71,7 +71,7 @@ namespace dmg
 
     inline void LoadRegisters(dmg::DMG& dmg, const json& data)
     {
-        dmg::RegisterInfo register_info{};
+        dmg::CPUInfo register_info{};
         std::string name = "initial";
         std::string test_name = data["name"];
         register_info.PC = data[name]["pc"];

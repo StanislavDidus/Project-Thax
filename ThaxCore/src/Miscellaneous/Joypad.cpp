@@ -6,35 +6,34 @@ namespace dmg
 {
     void Joypad::KeyPressed(const JoypadButton button)
     {
-        KeyChanged(button, 0);
+        KeyChanged(button, true);
     }
 
     void Joypad::KeyReleased(const JoypadButton button)
     {
-        KeyChanged(button, 1);
+        KeyChanged(button, false);
     }
 
     uint8_t Joypad::Read() const
     {
-        return P1 == 0x30 ? P1 | 0x0F : P1;
+        uint8_t low = 0x0F;
+        if (!(m_select & 0x10)) low &= m_dpad;
+        if (!(m_select & 0x20)) low &= m_buttons;
+        uint8_t result =  0xC0 | m_select | low;
+        //printf("P1 read: sel=%02X buttons=%02X dpad=%02X -> %02X\n", m_select, m_buttons, m_dpad, result);
+        return result;
     }
 
     void Joypad::Write(const uint8_t value)
     {
-        P1 = value & 0xF0;
+        const uint8_t before = Read() & 0x0F;
+        m_select = value & 0x30;
+        const uint8_t after = Read() & 0x0F;
+        if (before & ~after)
+            m_interrupt_controller.SetIF(InterruptController::Joypad);
     }
 
-    bool Joypad::IsButtonSelect() const
-    {
-        return getBit(P1, 5);
-    }
-
-    bool Joypad::IsDPADSelect() const
-    {
-        return getBit(P1, 4);
-    }
-
-    void Joypad::SetP1Bit(Buttons button, const uint8_t value)
+    /*void Joypad::SetP1Bit(Buttons button, const uint8_t value)
     {
         const auto bit = static_cast<uint8_t>(button);
 
@@ -47,50 +46,32 @@ namespace dmg
         {
             m_interrupt_controller.SetIF(InterruptController::Joypad);
         }
-    }
+    }*/
 
-    void Joypad::KeyChanged(const JoypadButton button, const uint8_t value)
+    void Joypad::KeyChanged(const JoypadButton button, const bool pressed)
     {
-        if (IsButtonSelect())
+        const uint8_t before = Read() & 0x0F;
+
+        uint8_t* group = nullptr;
+        uint8_t mask = 0;
+        switch (button)
         {
-            switch (button)
-            {
-            case JoypadButton::A:
-                setBit(P1, static_cast<uint8_t>(Buttons::A_RIGHT), value);
-                break;
-            case JoypadButton::B:
-                setBit(P1, static_cast<uint8_t>(Buttons::B_LEFT), value);
-                break;
-            case JoypadButton::SELECT:
-                setBit(P1, static_cast<uint8_t>(Buttons::SELECT_UP), value);
-                break;
-            case JoypadButton::START:
-                setBit(P1, static_cast<uint8_t>(Buttons::START_DOWN), value);
-                break;
-            default:
-                break;
-            }
+        case JoypadButton::DPAD_RIGHT: group = &m_dpad;    mask = 0x01; break;
+        case JoypadButton::DPAD_LEFT:  group = &m_dpad;    mask = 0x02; break;
+        case JoypadButton::DPAD_UP:    group = &m_dpad;    mask = 0x04; break;
+        case JoypadButton::DPAD_DOWN:  group = &m_dpad;    mask = 0x08; break;
+        case JoypadButton::A:          group = &m_buttons; mask = 0x01; break;
+        case JoypadButton::B:          group = &m_buttons; mask = 0x02; break;
+        case JoypadButton::SELECT:     group = &m_buttons; mask = 0x04; break;
+        case JoypadButton::START:      group = &m_buttons; mask = 0x08; break;
+        default: return;
         }
 
-        if (IsDPADSelect())
-        {
-            switch (button)
-            {
-            case JoypadButton::DPAD_RIGHT:
-                setBit(P1, static_cast<uint8_t>(Buttons::A_RIGHT), value);
-                break;
-            case JoypadButton::DPAD_LEFT:
-                setBit(P1, static_cast<uint8_t>(Buttons::B_LEFT), value);
-                break;
-            case JoypadButton::DPAD_UP:
-                setBit(P1, static_cast<uint8_t>(Buttons::SELECT_UP), value);
-                break;
-            case JoypadButton::DPAD_DOWN:
-                setBit(P1, static_cast<uint8_t>(Buttons::START_DOWN), value);
-                break;
-            default:
-                break;
-            }
-        }
+        if (pressed) *group &= ~mask;
+        else *group |= mask;
+
+        const uint8_t after = Read() & 0x0F;
+        if (before & ~after)
+            m_interrupt_controller.SetIF(InterruptController::Joypad);
     }
 }

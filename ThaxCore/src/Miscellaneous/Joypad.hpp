@@ -19,8 +19,11 @@ namespace dmg
         [[nodiscard]] uint8_t Read() const;
         void Write(uint8_t value);
     private:
-        uint8_t P1 = 0;
+        uint8_t m_dpad = 0x0F;
+        uint8_t m_buttons = 0x0F;
+        uint8_t m_select = 0x30;
 
+        /*
         enum class Buttons : uint8_t
         {
             A_RIGHT        = 0,
@@ -30,11 +33,12 @@ namespace dmg
             SELECT_DPAD    = 4,
             SELECT_BUTTONS = 5,
         };
+        */
 
-        [[nodiscard]] bool IsButtonSelect() const;
-        [[nodiscard]] bool IsDPADSelect() const;
-        void SetP1Bit(Buttons button , uint8_t value);
-        void KeyChanged(JoypadButton button, uint8_t value);
+        //[[nodiscard]] bool IsButtonSelect() const;
+        //[[nodiscard]] bool IsDPADSelect() const;
+        //void SetP1Bit(Buttons button , uint8_t value);
+        void KeyChanged(JoypadButton button, bool pressed);
 
         InterruptController& m_interrupt_controller;
     };

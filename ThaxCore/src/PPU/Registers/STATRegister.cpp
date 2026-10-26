@@ -14,6 +14,19 @@ namespace dmg
         m_data = data & 0b11111000;
     }
 
+    bool STATRegister::Update(PPUMode mode, bool lcyly)
+    {
+        const bool line =
+        (IsLYCIntSelect()   && lcyly) ||
+        (IsMode2InSelect()  && mode == PPUMode::MODE2) ||
+        (IsMode1InSelect()  && mode == PPUMode::MODE1) ||
+        (IsMode0InSelect()  && mode == PPUMode::MODE0);
+
+        const bool rising = line && !m_active;
+        m_active = line;
+        return rising;
+    }
+
     bool STATRegister::IsLYCIntSelect() const
     {
         return getBit(m_data, 6);
@@ -32,22 +45,5 @@ namespace dmg
     bool STATRegister::IsMode0InSelect() const
     {
         return getBit(m_data, 3);
-    }
-
-    bool STATRegister::isLYCeqLC() const
-    {
-        return getBit(m_data, 2);
-    }
-
-    PPUMode STATRegister::getPPUMode() const
-    {
-        switch (m_data & 0b11)
-        {
-        case 0b00: return PPUMode::MODE0;
-        case 0b01: return PPUMode::MODE1;
-        case 0b10: return PPUMode::MODE2;
-        case 0b11: return PPUMode::MODE3;
-        default: return PPUMode::MODE0;
-        }
     }
 }

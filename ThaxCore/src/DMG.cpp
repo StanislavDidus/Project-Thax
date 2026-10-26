@@ -201,14 +201,51 @@ void dmg::DMG::Reset()
     m_cpu->Reset();
 }
 
-void dmg::DMG::SetRegisters(const RegisterInfo& register_info)
+void dmg::DMG::SetRegisters(const CPUInfo& register_info)
 {
     m_cpu->SetRegisters(register_info);
 }
 
-dmg::RegisterInfo dmg::DMG::GetRegisters() const
+dmg::DMGInfo dmg::DMG::GetDMGInfo() const
 {
-    return m_cpu->GetRegisterInfo();
+    const CPUInfo cpu_info = m_cpu->GetCPUInfo();
+    const PPUInfo ppu_info = m_ppu->GetPPUInfo();
+    return DMGInfo
+    {
+        .F = cpu_info.F,
+        .A = cpu_info.A,
+        .B = cpu_info.B,
+        .C = cpu_info.C,
+        .D = cpu_info.D,
+        .E = cpu_info.E,
+        .H = cpu_info.H,
+        .L = cpu_info.L,
+        .PC = cpu_info.PC,
+        .SP = cpu_info.SP,
+        .CPU_State = cpu_info.CPU_State,
+        .IF = m_interrupt_controller->ReadIF(),
+        .IE = m_interrupt_controller->ReadIE(),
+        .IME = cpu_info.IME,
+        .DIV = m_timer->ReadDIV(),
+        .TIMA = m_timer->ReadTIMA(),
+        .TMA = m_timer->ReadTMA(),
+        .TAC = m_timer->ReadTAC(),
+        .P1 = m_joypad->Read(),
+        .SB = m_serial_port->ReadSB(),
+        .SC = m_serial_port->ReadSC(),
+        .LCDC = ppu_info.LCDC,
+        .STAT = ppu_info.STAT,
+        .SCY = ppu_info.SCY,
+        .SCX = ppu_info.SCX,
+        .LY = ppu_info.LY,
+        .LYC = ppu_info.LYC,
+        .WX = ppu_info.WX,
+        .WY = ppu_info.WY,
+        .DMA = ppu_info.DMA,
+        .BGP = ppu_info.BGP,
+        .OBP0 = ppu_info.OBP0,
+        .OBP1 = ppu_info.OBP1
+    };
 }
 
 void dmg::DMG::ClearMemory()
