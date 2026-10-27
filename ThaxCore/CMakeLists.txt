@@ -39,6 +39,7 @@ set(HEADER_FILES
         include/DMG/ExternalGlobals.hpp
         src/PPU/Registers/STATRegister.hpp
         src/PPU/FIFO.hpp
+        src/Precompiled.hpp
 )
 
 set(SOURCE_FILES
@@ -57,12 +58,14 @@ set(SOURCE_FILES
         src/PPU/Registers/STATRegister.cpp
         src/PPU/FIFO.cpp
         src/PPU/PixelFetcher.cpp
+        src/Precompiled.hpp
 )
 
 set(ALL_FILES
         ${HEADER_FILES}
         ${SOURCE_FILES}
         include/DMG/Input.hpp
+        #src/Precompiled.hpp
 )
 
 add_library(ThaxCore ${ALL_FILES})
@@ -76,6 +79,10 @@ add_library(ThaxCore ${ALL_FILES})
 target_include_directories(ThaxCore
         PRIVATE src/
         PUBLIC include/
+)
+
+target_precompile_headers(ThaxCore
+    PRIVATE src/Precompiled.hpp
 )
 
 #target_link_libraries(GameBoyEm PUBLIC spdlog::spdlog glfw imgui nlohmann_json::nlohmann_json)

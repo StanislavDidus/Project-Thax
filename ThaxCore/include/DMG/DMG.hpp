@@ -1,10 +1,15 @@
 #pragma once
 
-#include <filesystem>
-
 #include "ExternalGlobals.hpp"
 #include "Input.hpp"
 #include "RegisterInfo.hpp"
+
+#include <memory>
+
+namespace std::filesystem
+{
+    class path;
+}
 
 namespace dmg
 {

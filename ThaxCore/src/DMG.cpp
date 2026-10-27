@@ -1,5 +1,7 @@
 #include "DMG/DMG.hpp"
 
+#include "Precompiled.hpp"
+
 #include "CPU/CPU.hpp"
 #include "PPU/PPU.hpp"
 #include "DMG/Utils/Log.hpp"

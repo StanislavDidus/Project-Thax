@@ -1,5 +1,30 @@
 #pragma once
 
-namespace dmg
-{
-}
+#include <iostream>
+#include <vector>
+#include <array>
+#include <string>
+#include <map>
+#include <algorithm>
+#include <memory>
+#include <utility>
+#include <functional>
+#include <string_view>
+#include <list>
+#include <map>
+#include <unordered_map>
+#include <set>
+#include <unordered_set>
+#include <filesystem>
+#include <fstream>
+#include <ostream>
+#include <format>
+#include <chrono>
+#include <tuple>
+#include <type_traits>
+#include <optional>
+#include <variant>
+
+#include "DMG/ExternalGlobals.hpp"
+#include "InternalGlobals.hpp"
+#include "Utils/Math.hpp"
