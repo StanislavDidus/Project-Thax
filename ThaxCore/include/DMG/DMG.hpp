@@ -2,7 +2,7 @@
 
 #include "ExternalGlobals.hpp"
 #include "Input.hpp"
-#include "RegisterInfo.hpp"
+#include "Info.hpp"
 
 #include <memory>
 
@@ -69,8 +69,8 @@ namespace dmg
 
         void Reset();
 
-        void SetRegisters(const RegisterInfo& register_info);
-        [[nodiscard]] RegisterInfo GetRegisters() const;
+        void SetRegisters(const CPUInfo& register_info);
+        [[nodiscard]] DMGInfo GetDMGInfo() const;
 
         void ClearMemory();
         [[nodiscard]] uint8_t ReadMemory(uint16_t address) const;

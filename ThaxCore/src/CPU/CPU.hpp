@@ -5,7 +5,7 @@
 #include <iosfwd>
 
 #include "ControlUnit.hpp"
-#include "DMG/RegisterInfo.hpp"
+#include "DMG/Info.hpp"
 #include "MemoryBus/Bus.hpp"
 #include "Registers/ByteRegister.hpp"
 #include "Registers/ByteRegisterPair.hpp"
@@ -18,11 +18,11 @@ namespace dmg
     class CPU
     {
     public:
-        enum class State
+        enum class State: uint8_t
         {
             NORMAL,
-            STOP,
             HALT,
+            STOP,
         };
 
         explicit CPU(Bus& bus, InterruptController& interrupt_controller);
@@ -39,8 +39,8 @@ namespace dmg
 
         [[nodiscard]] bool IsIMESet() const;
 
-        [[nodiscard]] RegisterInfo GetRegisterInfo() const;
-        void SetRegisters(const RegisterInfo& register_info);
+        [[nodiscard]] CPUInfo GetCPUInfo() const;
+        void SetRegisters(const CPUInfo& register_info);
     private:
 
         uint8_t Fetch();

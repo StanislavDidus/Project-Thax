@@ -21,7 +21,7 @@ dmg::CPU::CPU(Bus& bus, InterruptController& interrupt_controller)
     }
 }
 
-void dmg::CPU::SetRegisters(const RegisterInfo& register_info)
+void dmg::CPU::SetRegisters(const CPUInfo& register_info)
 {
     PC.WriteWord(register_info.PC);
     SP.WriteWord(register_info.SP);
@@ -148,9 +148,9 @@ bool dmg::CPU::IsIMESet() const
     return IME;
 }
 
-dmg::RegisterInfo dmg::CPU::GetRegisterInfo() const
+dmg::CPUInfo dmg::CPU::GetCPUInfo() const
 {
-    return RegisterInfo
+    return CPUInfo
     {
         .F = F.Read(),
         .A = A.Read(),
@@ -162,6 +162,8 @@ dmg::RegisterInfo dmg::CPU::GetRegisterInfo() const
         .L = L.Read(),
         .PC = PC.ReadWord(),
         .SP = SP.ReadWord(),
+        .IME = IME,
+        .CPU_State = static_cast<uint8_t>(m_current_state)
     };
 }
 

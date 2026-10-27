@@ -20,6 +20,11 @@ namespace dmg
         m_current_cycles += cycles;
 
         UpdateMode(m_mode, cycles);
+
+        if (STAT.Update(m_mode, LYC.Read() == LY.Read()))
+        {
+            m_interrupt_controller.SetIF(InterruptController::LCD);
+        }
     }
 
     const globals::LCD_BUFFER& PPU::getLCDBuffer() const
@@ -61,11 +66,16 @@ namespace dmg
 
     void PPU::WriteVRAM(const uint16_t address, const uint8_t value)
     {
+        //if (m_mode == PPUMode::MODE3) return;
+
         VRAM[address] = value;
     }
 
     void PPU::WriteOAM(const uint16_t address, const uint8_t value)
     {
+        //if (m_mode == PPUMode::MODE3) return;
+        //if (m_mode == PPUMode::MODE2) return;
+
         OAM[address] = value;
     }
 
@@ -91,11 +101,16 @@ namespace dmg
 
     uint8_t PPU::ReadVRAM(const uint16_t address) const
     {
+        //if (m_mode == PPUMode::MODE3) return 0xFF;
+
         return VRAM[address];
     }
 
     uint8_t PPU::ReadOAM(const uint16_t address) const
     {
+        //if (m_mode == PPUMode::MODE3) return 0xFF;
+        //if (m_mode == PPUMode::MODE2) return 0xFF;
+
         return OAM[address];
     }
 
@@ -117,6 +132,25 @@ namespace dmg
         case 0x0B: return WX.Read();
         default: return 0xFF;
         }
+    }
+
+    PPUInfo PPU::GetPPUInfo() const
+    {
+        return PPUInfo
+        {
+            .LCDC = LCDC.Read(),
+            .STAT = STAT.Read(),
+            .SCY = SCY.Read(),
+            .SCX = SCX.Read(),
+            .LY = LY.Read(),
+            .LYC = LYC.Read(),
+            .WX = WX.Read(),
+            .WY = WY.Read(),
+            .DMA = DMA.Read(),
+            .BGP = BGP.Read(),
+            .OBP0 = OBP0.Read(),
+            .OBP1 = OBP1.Read()
+        };
     }
 
     void PPU::SetMode(const PPUMode mode)
@@ -229,6 +263,11 @@ namespace dmg
         case PPUMode::MODE3:
             break;
         }
+    }
+
+    void PPU::CheckSTATRegister()
+    {
+
     }
 
     Tile PPU::GetTileWindowBG(const uint32_t index) const
