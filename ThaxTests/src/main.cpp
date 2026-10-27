@@ -21,7 +21,7 @@ namespace dmg
 
     inline bool CompareDMGStates(dmg::DMG& dmg, const json& data)
     {
-        CPUInfo register_info = dmg.GetRegisters();
+        DMGInfo dmg_info = dmg.GetDMGInfo();
         bool all_ok = true;
 
         auto check = [&](const char* name, uint16_t actual, uint16_t exp)
@@ -35,16 +35,16 @@ namespace dmg
             }
         };
 
-        check("PC", register_info.PC, data["final"]["pc"]);
-        check("SP", register_info.SP, data["final"]["sp"]);
-        check("A",  register_info.A,  data["final"]["a"]);
-        check("B",  register_info.B,  data["final"]["b"]);
-        check("C",  register_info.C,  data["final"]["c"]);
-        check("D",  register_info.D,  data["final"]["d"]);
-        check("E",  register_info.E,  data["final"]["e"]);
-        check("F",  register_info.F,  data["final"]["f"]);
-        check("H",  register_info.H,  data["final"]["h"]);
-        check("L",  register_info.L,  data["final"]["l"]);
+        check("PC", dmg_info.PC, data["final"]["pc"]);
+        check("SP", dmg_info.SP, data["final"]["sp"]);
+        check("A",  dmg_info.A,  data["final"]["a"]);
+        check("B",  dmg_info.B,  data["final"]["b"]);
+        check("C",  dmg_info.C,  data["final"]["c"]);
+        check("D",  dmg_info.D,  data["final"]["d"]);
+        check("E",  dmg_info.E,  data["final"]["e"]);
+        check("F",  dmg_info.F,  data["final"]["f"]);
+        check("H",  dmg_info.H,  data["final"]["h"]);
+        check("L",  dmg_info.L,  data["final"]["l"]);
 
         json ram = data["final"]["ram"];
         for (auto & i : ram)

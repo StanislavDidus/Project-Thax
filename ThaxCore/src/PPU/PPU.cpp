@@ -66,15 +66,15 @@ namespace dmg
 
     void PPU::WriteVRAM(const uint16_t address, const uint8_t value)
     {
-        if (m_mode == PPUMode::MODE3) return;
+        //if (m_mode == PPUMode::MODE3) return;
 
         VRAM[address] = value;
     }
 
     void PPU::WriteOAM(const uint16_t address, const uint8_t value)
     {
-        if (m_mode == PPUMode::MODE3) return;
-        if (m_mode == PPUMode::MODE2) return;
+        //if (m_mode == PPUMode::MODE3) return;
+        //if (m_mode == PPUMode::MODE2) return;
 
         OAM[address] = value;
     }
@@ -101,15 +101,15 @@ namespace dmg
 
     uint8_t PPU::ReadVRAM(const uint16_t address) const
     {
-        if (m_mode == PPUMode::MODE3) return 0xFF;
+        //if (m_mode == PPUMode::MODE3) return 0xFF;
 
         return VRAM[address];
     }
 
     uint8_t PPU::ReadOAM(const uint16_t address) const
     {
-        if (m_mode == PPUMode::MODE3) return 0xFF;
-        if (m_mode == PPUMode::MODE2) return 0xFF;
+        //if (m_mode == PPUMode::MODE3) return 0xFF;
+        //if (m_mode == PPUMode::MODE2) return 0xFF;
 
         return OAM[address];
     }
