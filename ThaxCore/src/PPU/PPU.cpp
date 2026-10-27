@@ -174,12 +174,18 @@ namespace dmg
         case PPUMode::MODE1:
             m_interrupt_controller.SetIF(InterruptController::VBLANK);
             m_fifo.Reset();
+            m_y_condition = false;
             break;
         case PPUMode::MODE2:
             break;
         case PPUMode::MODE3:
-            m_pixel_fetcher.Reset();
-            m_fifo.ResetBuffer();
+            m_pixel_fetcher.StartScanline();
+            m_fifo.StartScanline();
+
+            if (LY.Read() == WY.Read())
+                m_y_condition = true;
+
+            m_x_counter = 7;
             break;
         }
     }
@@ -235,6 +241,21 @@ namespace dmg
                         m_pixel_fetcher.Step();
                         m_fifo.SendPixelToLCD(m_lcd);
 
+                        m_x_counter += 1;
+
+                        if (m_x_counter == WX.Read() && m_y_condition && LCDC.IsWindowEnabled())
+                        {
+                            m_fifo.MakeEmpty();
+                            m_pixel_fetcher.StartScanline();
+                            m_pixel_fetcher.SetWindow(true);
+                        }
+                        /*
+                        if (!LCDC.IsWindowEnabled())
+                        {
+                            m_pixel_fetcher.SetWindow(false);
+                        }
+                        */
+
                         if (m_fifo.IsDone() || m_fifo.IsScanlineDone())
                         {
                             SetMode(PPUMode::MODE0);
@@ -261,6 +282,7 @@ namespace dmg
         case PPUMode::MODE2:
             break;
         case PPUMode::MODE3:
+            m_pixel_fetcher.EndScanline();
             break;
         }
     }
@@ -272,8 +294,6 @@ namespace dmg
 
     Tile PPU::GetTileWindowBG(const uint32_t index) const
     {
-        //return Tile{static_cast<uint16_t>(LCDC.GetBGWindowTileDataArea() + index * 16)};
-
         if (getBit(LCDC.Read(), 4))
         {
             return Tile{static_cast<uint16_t>(globals::TILE_BLOCK_0.m_start + index * 16)};

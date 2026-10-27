@@ -12,6 +12,7 @@
 #include "IconsFontAwesome4.h"
 
 #include "imfilebrowser.h"
+#include "imgui_internal.h"
 #include "Data/Data.hpp"
 
 #include "Graphics/Graphics.hpp"
@@ -207,8 +208,26 @@ namespace dmg
     {
         if (ImGui::Begin("Asset Viewport"))
         {
-            ImVec2 window_size = ImGui::GetWindowSize();
-            ImGui::Image(static_cast<ImTextureID>(gl_texture), window_size);
+            ImVec2 avail_size = ImGui::GetContentRegionAvail();
+
+            const float scale_x = avail_size.x / globals::TILE_DATA_VIEW_WIDTH;
+            const float scale_y = avail_size.y / globals::TILE_DATA_VIEW_HEIGHT;
+            const float final_scale = scale_x < scale_y ? scale_x : scale_y;
+            ImVec2 viewport_size
+            {
+                globals::TILE_DATA_VIEW_WIDTH * final_scale,
+                globals::TILE_DATA_VIEW_HEIGHT * final_scale,
+            };
+
+            const ImVec2 cursor = ImGui::GetCursorPos();
+            const float offset_x = (avail_size.x - viewport_size.x) * 0.5f;
+            const float offset_y = (avail_size.y - viewport_size.y) * 0.5f;
+
+            ImGui::SetCursorPos(ImVec2(
+                cursor.x + (offset_x > 0.0f ? offset_x : 0.0f),
+                cursor.y + (offset_y > 0.0f ? offset_y : 0.0f)));
+
+            ImGui::Image(static_cast<ImTextureID>(gl_texture), viewport_size);
         }
         ImGui::End();
     }
@@ -217,8 +236,26 @@ namespace dmg
     {
         if (ImGui::Begin("Viewport"))
         {
-            ImVec2 window_size = ImGui::GetWindowSize();
-            ImGui::Image(static_cast<ImTextureID>(viewport_texture), window_size);
+            ImVec2 avail_size = ImGui::GetContentRegionAvail();
+
+            const float scale_x = avail_size.x / globals::LCD_WIDTH;
+            const float scale_y = avail_size.y / globals::LCD_HEIGHT;
+            const float final_scale = scale_x < scale_y ? scale_x : scale_y;
+            ImVec2 viewport_size
+            {
+                globals::LCD_WIDTH * final_scale,
+                globals::LCD_HEIGHT * final_scale,
+            };
+
+            const ImVec2 cursor = ImGui::GetCursorPos();
+            const float offset_x = (avail_size.x - viewport_size.x) * 0.5f;
+            const float offset_y = (avail_size.y - viewport_size.y) * 0.5f;
+
+            ImGui::SetCursorPos(ImVec2(
+                cursor.x + (offset_x > 0.0f ? offset_x : 0.0f),
+                cursor.y + (offset_y > 0.0f ? offset_y : 0.0f)));
+
+            ImGui::Image(static_cast<ImTextureID>(viewport_texture), viewport_size);
         }
         ImGui::End();
     }

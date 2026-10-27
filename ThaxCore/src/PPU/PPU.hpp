@@ -64,7 +64,11 @@ namespace dmg
         std::array<uint8_t, globals::VRAM.m_size> VRAM {};
         std::array<uint8_t, globals::OAM.m_size> OAM {};
 
-        FIFO m_fifo {};
+        // Window
+        bool m_y_condition = false;
+        uint16_t m_x_counter = 7;
+
+        FIFO m_fifo {*this};
         PixelFetcher m_pixel_fetcher {*this, m_fifo};
 
         uint32_t fetcher_x = 0;
@@ -77,5 +81,6 @@ namespace dmg
         PPUMode m_mode = PPUMode::NONE;
 
         friend class PixelFetcher;
+        friend class FIFO;
     };
 }

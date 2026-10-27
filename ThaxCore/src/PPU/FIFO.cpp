@@ -1,11 +1,17 @@
 #include "FIFO.hpp"
 
-#include <iostream>
+#include "Precompiled.hpp"
 
+#include "PPU.hpp"
 #include "Utils/Math.hpp"
 
 namespace dmg
 {
+    FIFO::FIFO(PPU& ppu)
+        : m_ppu(ppu)
+    {
+    }
+
     bool FIFO::IsEmpty() const
     {
         return m_size == 0;
@@ -28,6 +34,15 @@ namespace dmg
             AddPixel(low, high, i);
         }
         m_size += 8;
+
+        // Discard first SCX % 8 pixels from the FIFO
+        if (!m_fine_scroll)
+        {
+            const uint32_t remove = m_ppu.SCX.Read() % 8;
+            m_size -= remove;
+            std::move(m_pixels.begin() + remove, m_pixels.end(), m_pixels.begin());
+            m_fine_scroll = true;
+        }
     }
 
     void FIFO::SendPixelToLCD(globals::LCD_BUFFER& lcd)
@@ -36,7 +51,6 @@ namespace dmg
         {
             lcd[m_address++] = m_pixels[0].m_color;
             std::move(m_pixels.begin() + 1, m_pixels.end(), m_pixels.begin());
-            m_pixels.back() = FIFOPixel{};
             m_size--;
             m_scanline_progress += 1;
         }
@@ -53,6 +67,18 @@ namespace dmg
     {
         m_address = 0;
         ResetBuffer();
+    }
+
+    void FIFO::MakeEmpty()
+    {
+        m_size = 0;
+    }
+
+    void FIFO::StartScanline()
+    {
+        m_size = 0;
+        m_scanline_progress = 0;
+        m_fine_scroll = false;
     }
 
     void FIFO::AddPixel(const uint8_t low, const uint8_t high, const uint8_t index)

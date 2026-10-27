@@ -16,7 +16,10 @@ namespace dmg
         ~PixelFetcher() = default;
 
         void Step();
-        void Reset();
+        void StartScanline();
+        void EndScanline();
+
+        void SetWindow(bool value);
 
     private:
         enum class State
@@ -24,7 +27,6 @@ namespace dmg
             GET_TILE_DATA,
             GET_TILE_DATA_LOW,
             GET_TILE_DATA_HIGH,
-            SLEEP,
             PUSH,
         };
 
@@ -32,11 +34,16 @@ namespace dmg
         uint32_t m_progress = 0;
 
         uint32_t m_x = 0;
-        uint32_t m_y = 0;
 
-        Tile::TileRow m_tile_row {};
-        uint8_t m_tile_low {};
-        uint8_t m_tile_high {};
+        uint16_t m_tile_ref = 0;
+        uint8_t m_tile_row = 0;
+        uint8_t m_tile_low = 0;
+        uint8_t m_tile_high = 0;
+
+        // Window
+        bool m_inside_window = false;
+        uint16_t m_x_window = 0;
+        uint16_t m_y_window = 0;
 
         PPU& m_ppu;
         FIFO& m_fifo;

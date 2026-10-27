@@ -31,7 +31,7 @@ namespace dmg
         }
     }
 
-    bool LCDCRegister::isWindowEnabled() const
+    bool LCDCRegister::IsWindowEnabled() const
     {
         return getBit(m_data, 5);
     }

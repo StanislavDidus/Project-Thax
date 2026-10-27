@@ -197,5 +197,8 @@ int main(int argc, char* argv[])
     std::cout << std::format("Opcode tests finished {}/500", finished_opcode_tests) << std::endl;
     std::cout << std::format("Opcode specific tests finished {}", finished_specific_tests) << std::endl;
 
+    if (finished_opcode_tests != 500)
+        return -1;
+
     return 0;
 }

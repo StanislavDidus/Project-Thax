@@ -18,7 +18,7 @@ namespace dmg
 
         [[nodiscard]] bool IsLCDEnabled() const;
         [[nodiscard]] uint16_t GetWindowTileMapArea() const;
-        [[nodiscard]] bool isWindowEnabled() const;
+        [[nodiscard]] bool IsWindowEnabled() const;
         [[nodiscard]] uint16_t GetBGWindowTileDataArea() const;
         [[nodiscard]] uint16_t GetBGTileMapArea() const;
         [[nodiscard]] ObjectSize GetObjectSize() const;
