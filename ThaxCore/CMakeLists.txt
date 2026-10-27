@@ -21,7 +21,7 @@ set(HEADER_FILES
         src/CPU/Registers/FlagRegister.hpp
         src/CPU/Registers/AByteRegister.hpp
         src/CPU/Registers/Address.hpp
-        include/DMG/CPUInfo.hpp
+        include/DMG/Info.hpp
         src/Miscellaneous/Timer.hpp
         src/Miscellaneous/Cartridge.hpp
         src/InternalGlobals.hpp
