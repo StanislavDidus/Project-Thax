@@ -29,23 +29,22 @@ namespace dmg
 
     void FIFO::PushPixels(const uint8_t low, const uint8_t high)
     {
-        for (int i = 0; i < 8; ++i)
+        int start_point = 0;
+
+        if (m_discard_pixels > 0)
+        {
+            start_point = m_discard_pixels;
+            m_discard_pixels = 0;
+        }
+
+        for (int i = start_point; i < 8; ++i)
         {
             AddPixel(low, high, i);
         }
-        m_size += 8;
-
-        // Discard first SCX % 8 pixels from the FIFO
-        if (!m_fine_scroll)
-        {
-            const uint32_t remove = m_ppu.SCX.Read() % 8;
-            m_size -= remove;
-            std::move(m_pixels.begin() + remove, m_pixels.end(), m_pixels.begin());
-            m_fine_scroll = true;
-        }
+        m_size += (8 - start_point);
     }
 
-    void FIFO::SendPixelToLCD(globals::LCD_BUFFER& lcd)
+    bool FIFO::SendPixelToLCD(globals::LCD_BUFFER& lcd)
     {
         if (!IsEmpty())
         {
@@ -53,7 +52,11 @@ namespace dmg
             std::move(m_pixels.begin() + 1, m_pixels.end(), m_pixels.begin());
             m_size--;
             m_scanline_progress += 1;
+
+            return true;
         }
+
+        return false;
     }
 
     void FIFO::ResetBuffer()
@@ -78,7 +81,13 @@ namespace dmg
     {
         m_size = 0;
         m_scanline_progress = 0;
-        m_fine_scroll = false;
+        m_discard_pixels = 0;
+        //m_fine_scroll = false;
+    }
+
+    void FIFO::DiscardPixels(const int discard_pixels)
+    {
+        m_discard_pixels += discard_pixels;
     }
 
     void FIFO::AddPixel(const uint8_t low, const uint8_t high, const uint8_t index)

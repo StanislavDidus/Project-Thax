@@ -175,6 +175,7 @@ namespace dmg
             m_interrupt_controller.SetIF(InterruptController::VBLANK);
             m_fifo.Reset();
             m_y_condition = false;
+            m_pixel_fetcher.Reset();
             break;
         case PPUMode::MODE2:
             break;
@@ -186,6 +187,9 @@ namespace dmg
                 m_y_condition = true;
 
             m_x_counter = 7;
+
+            //int discard_pixels = SCX.Read() % 8;
+            m_fifo.DiscardPixels(SCX.Read() % 8);
             break;
         }
     }
@@ -239,16 +243,19 @@ namespace dmg
                     for (int i = 0; i < cycles; ++i)
                     {
                         m_pixel_fetcher.Step();
-                        m_fifo.SendPixelToLCD(m_lcd);
-
-                        m_x_counter += 1;
-
-                        if (m_x_counter == WX.Read() && m_y_condition && LCDC.IsWindowEnabled())
+                        if (m_fifo.SendPixelToLCD(m_lcd))
                         {
-                            m_fifo.MakeEmpty();
-                            m_pixel_fetcher.StartScanline();
-                            m_pixel_fetcher.SetWindow(true);
+                            m_x_counter += 1;
+
+                            if (m_x_counter == WX.Read() && m_y_condition && LCDC.IsWindowEnabled())
+                            {
+                                m_fifo.MakeEmpty();
+                                m_pixel_fetcher.StartScanline();
+                                m_pixel_fetcher.SetWindow(true);
+                            }
                         }
+
+
                         /*
                         if (!LCDC.IsWindowEnabled())
                         {

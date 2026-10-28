@@ -18,6 +18,7 @@ namespace dmg
         void Step();
         void StartScanline();
         void EndScanline();
+        void Reset();
 
         void SetWindow(bool value);
 

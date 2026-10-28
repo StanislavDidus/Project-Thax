@@ -18,7 +18,7 @@ namespace dmg
             PixelSource m_source = PixelSource::BG;
         };
 
-        FIFO(PPU& ppu);
+        explicit FIFO(PPU& ppu);
         ~FIFO() = default;
 
         [[nodiscard]] bool IsEmpty() const;
@@ -26,11 +26,13 @@ namespace dmg
         [[nodiscard]] bool IsScanlineDone() const;
 
         void PushPixels(uint8_t low, uint8_t high);
-        void SendPixelToLCD(globals::LCD_BUFFER& lcd);
+        bool SendPixelToLCD(globals::LCD_BUFFER& lcd);
         void ResetBuffer();
         void Reset();
         void MakeEmpty();
         void StartScanline();
+
+        void DiscardPixels(int discard_pixels);
     private:
         void AddPixel(uint8_t low, uint8_t high, uint8_t index);
 
@@ -42,5 +44,7 @@ namespace dmg
         PPU& m_ppu;
 
         bool m_fine_scroll = false;
+
+        int m_discard_pixels = 0;
     };
 }

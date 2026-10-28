@@ -18,10 +18,12 @@ namespace dmg
             {
                 if (m_progress == 0)
                 {
-                    uint32_t fx = ((m_ppu.SCX.Read() / 8) + m_x) & 0x1F;
+                    uint32_t pixel_x = m_ppu.SCX.Read() + m_x * 8;
+                    //uint32_t fx = ((m_ppu.SCX.Read() / 8) + m_x) & 0x1F;
+                    uint32_t fx = (pixel_x / 8) & 0x1F;
                     uint32_t fy = (m_ppu.LY.Read() + m_ppu.SCY.Read()) & 255;
 
-                    uint16_t tile_map_area = m_inside_window ? m_ppu.LCDC.GetWindowTileMapArea() : m_ppu.LCDC.GetBGTileMapArea();
+                    const uint16_t tile_map_area = m_inside_window ? m_ppu.LCDC.GetWindowTileMapArea() : m_ppu.LCDC.GetBGTileMapArea();
 
                     if (m_inside_window)
                     {
@@ -98,10 +100,14 @@ namespace dmg
         if (m_inside_window)
         {
             m_y_window += 1;
-            if (m_y_window > 18) m_y_window = 0;
         }
 
         m_inside_window = false;
+    }
+
+    void PixelFetcher::Reset()
+    {
+        m_y_window = 0;
     }
 
     void PixelFetcher::SetWindow(bool value)
