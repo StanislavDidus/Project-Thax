@@ -3,13 +3,17 @@
 #include <iostream>
 
 #include "Miscellaneous/InterruptController.hpp"
+#include "Miscellaneous/DMAController.hpp"
 #include "Utils/Math.hpp"
 
 namespace dmg
 {
-    PPU::PPU(InterruptController& interrupt_controller)
+    PPU::PPU(InterruptController& interrupt_controller, DMAController& dma_controller)
         : m_interrupt_controller(interrupt_controller)
+        , m_dma_controller(dma_controller)
     {
+        m_objects.reserve(globals::MAX_OBJECTS);
+
         SetMode(PPUMode::MODE2);
     }
 
@@ -19,11 +23,17 @@ namespace dmg
 
         m_current_cycles += cycles;
 
-        UpdateMode(m_mode, cycles);
-
-        if (STAT.Update(m_mode, LYC.Read() == LY.Read()))
+        for (int i = 0; i < cycles / 4; ++i)
         {
-            m_interrupt_controller.SetIF(InterruptController::LCD);
+            UpdateMode(m_mode, 4);
+
+            if (m_dma_controller.IsActive())
+                m_dma_controller.Update();
+
+            if (STAT.Update(m_mode, LYC.Read() == LY.Read()))
+            {
+                m_interrupt_controller.SetIF(InterruptController::LCD);
+            }
         }
     }
 
@@ -89,7 +99,7 @@ namespace dmg
         case 0x03: SCX.Write(value); break;
         case 0x04: break;
         case 0x05: LYC.Write(value); break;
-        case 0x06: DMA.Write(value); break;
+        case 0x06: m_dma_controller.Write(value); break;
         case 0x07: BGP.Write(value); break;
         case 0x08: OBP0.Write(value); break;
         case 0x09: OBP1.Write(value); break;
@@ -124,7 +134,7 @@ namespace dmg
         case 0x03: return SCX.Read();
         case 0x04: return LY.Read();
         case 0x05: return LYC.Read();
-        case 0x06: return DMA.Read();
+        case 0x06: return m_dma_controller.Read();
         case 0x07: return BGP.Read();
         case 0x08: return OBP0.Read();
         case 0x09: return OBP1.Read();
@@ -146,10 +156,13 @@ namespace dmg
             .LYC = LYC.Read(),
             .WX = WX.Read(),
             .WY = WY.Read(),
-            .DMA = DMA.Read(),
+            .DMA = m_dma_controller.Read(),
             .BGP = BGP.Read(),
             .OBP0 = OBP0.Read(),
-            .OBP1 = OBP1.Read()
+            .OBP1 = OBP1.Read(),
+            .ppu_mode = m_mode,
+            .pixel_fetcher_state = m_pixel_fetcher.GetState(),
+            .fifo_pixels = m_fifo.GetSize()
         };
     }
 
@@ -178,6 +191,7 @@ namespace dmg
             m_pixel_fetcher.Reset();
             break;
         case PPUMode::MODE2:
+            FindObjectsOnScanline();
             break;
         case PPUMode::MODE3:
             m_pixel_fetcher.StartScanline();
@@ -189,7 +203,8 @@ namespace dmg
             m_x_counter = 7;
 
             //int discard_pixels = SCX.Read() % 8;
-            m_fifo.DiscardPixels(SCX.Read() % 8);
+            m_fifo.SetDiscardPixels(SCX.Read() % 8);
+
             break;
         }
     }
@@ -250,18 +265,14 @@ namespace dmg
                             if (m_x_counter == WX.Read() && m_y_condition && LCDC.IsWindowEnabled())
                             {
                                 m_fifo.MakeEmpty();
-                                m_pixel_fetcher.StartScanline();
-                                m_pixel_fetcher.SetWindow(true);
+                                m_pixel_fetcher.StartWindow();
+                            }
+
+                            if (auto object = GetObject())
+                            {
+                                m_pixel_fetcher.FetchObject(object.value());
                             }
                         }
-
-
-                        /*
-                        if (!LCDC.IsWindowEnabled())
-                        {
-                            m_pixel_fetcher.SetWindow(false);
-                        }
-                        */
 
                         if (m_fifo.IsDone() || m_fifo.IsScanlineDone())
                         {
@@ -294,9 +305,39 @@ namespace dmg
         }
     }
 
-    void PPU::CheckSTATRegister()
+    void PPU::FindObjectsOnScanline()
     {
+        m_objects.clear();
 
+        // Find all objects that intersect the Y scanline line
+        for (int i = 0; i < 40; ++i)
+        {
+            Object object {static_cast<uint16_t>(i * 4), OAM};
+            const uint8_t object_y = object.GetYPosition() - 16;
+
+            if (LY.Read() >= object_y && LY.Read() < object_y + globals::TILE_HEIGHT)
+            {
+                m_objects.push_back(object);
+            }
+        }
+
+        // Sort objects by their x position and their address
+        std::sort(m_objects.begin(), m_objects.end());
+
+        // Pick first 10 objects
+        if (m_objects.size() > globals::MAX_OBJECTS_PER_SCANLINE)
+            m_objects.erase(m_objects.begin() + globals::MAX_OBJECTS_PER_SCANLINE, m_objects.end());
+    }
+
+    std::optional<Object> PPU::GetObject() const
+    {
+        for (const auto& object : m_objects)
+        {
+            if (object.GetXPosition() - 8 == m_x_counter)
+                return object;
+        }
+
+        return std::nullopt;
     }
 
     Tile PPU::GetTileWindowBG(const uint32_t index) const
@@ -307,5 +348,10 @@ namespace dmg
         }
         const int offset = static_cast<int8_t>(index) * 16;
         return Tile{static_cast<uint16_t>(globals::TILE_BLOCK_2.m_start + offset)};
+    }
+
+    Tile PPU::GetObjectTile(const uint32_t index) const
+    {
+        return Tile{static_cast<uint16_t>(globals::TILE_BLOCK_0.m_start + index * 16)};
     }
 }

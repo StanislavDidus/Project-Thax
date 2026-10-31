@@ -11,8 +11,9 @@
 #include "Miscellaneous/Timer.hpp"
 #include "Miscellaneous/SerialPort.hpp"
 #include "Miscellaneous/Joypad.hpp"
+#include "Miscellaneous/DMAController.hpp"
 
-dmg::DMG::DMG(InitState init_state)
+dmg::DMG::DMG(const InitState init_state)
     : m_init_state(init_state)
 {
     if (init_state == InitState::STANDARD)
@@ -22,15 +23,18 @@ dmg::DMG::DMG(InitState init_state)
         m_timer = std::make_unique<Timer>(*m_interrupt_controller);
         m_serial_port = std::make_unique<SerialPort>(*m_interrupt_controller);
         m_joypad = std::make_unique<Joypad>(*m_interrupt_controller);
-        m_ppu = std::make_unique<PPU>(*m_interrupt_controller);
-        m_bus = std::make_unique<StandardBus>(
+        m_dma_controller = std::make_unique<DMAController>();
+        m_ppu = std::make_unique<PPU>(*m_interrupt_controller, *m_dma_controller);
+        m_bus = std::make_shared<StandardBus>(
             *m_cartridge,
             *m_interrupt_controller,
             *m_timer,
             *m_serial_port,
             *m_joypad,
-            *m_ppu
+            *m_ppu,
+            *m_dma_controller
             );
+        m_dma_controller->Initialize(m_bus);
         m_cpu = std::make_unique<CPU>(*m_bus, *m_interrupt_controller);
     }
     else if (init_state == InitState::TEST)
@@ -235,18 +239,7 @@ dmg::DMGInfo dmg::DMG::GetDMGInfo() const
         .P1 = m_joypad->Read(),
         .SB = m_serial_port->ReadSB(),
         .SC = m_serial_port->ReadSC(),
-        .LCDC = ppu_info.LCDC,
-        .STAT = ppu_info.STAT,
-        .SCY = ppu_info.SCY,
-        .SCX = ppu_info.SCX,
-        .LY = ppu_info.LY,
-        .LYC = ppu_info.LYC,
-        .WX = ppu_info.WX,
-        .WY = ppu_info.WY,
-        .DMA = ppu_info.DMA,
-        .BGP = ppu_info.BGP,
-        .OBP0 = ppu_info.OBP0,
-        .OBP1 = ppu_info.OBP1
+        .ppu_info = ppu_info
     };
 }
 

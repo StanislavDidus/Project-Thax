@@ -17,6 +17,10 @@ namespace dmg
         uint8_t LCDC, STAT, SCY, SCX;
         uint8_t LY, LYC, WX, WY;
         uint8_t DMA, BGP, OBP0, OBP1;
+
+        PPUMode ppu_mode;
+        PixelFetcherState pixel_fetcher_state;
+        int fifo_pixels;
     };
 
     struct DMGInfo
@@ -40,9 +44,6 @@ namespace dmg
         // Serial Port
         uint8_t SB, SC;
 
-        // PPU
-        uint8_t LCDC, STAT, SCY, SCX;
-        uint8_t LY, LYC, WX, WY;
-        uint8_t DMA, BGP, OBP0, OBP1;
+        PPUInfo ppu_info;
     };
 }

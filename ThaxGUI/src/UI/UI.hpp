@@ -267,6 +267,29 @@ namespace dmg
             if (ImGui::CollapsingHeader("State"))
             {
                 ImGui::Text("CPU State: %d", info.CPU_State);
+
+                std::string ppu_state;
+                switch(info.ppu_info.ppu_mode)
+                {
+                case PPUMode::MODE0: ppu_state = "MODE0"; break;
+                case PPUMode::MODE1: ppu_state = "MODE1"; break;
+                case PPUMode::MODE2: ppu_state = "MODE2"; break;
+                case PPUMode::MODE3: ppu_state = "MODE3"; break;
+                case PPUMode::NONE: ppu_state = "NONE"; break;
+                }
+                ImGui::Text("PPU State: %s", ppu_state.c_str());
+
+                std::string pixel_fetcher_state;
+                switch (info.ppu_info.pixel_fetcher_state)
+                {
+                case PixelFetcherState::GET_TILE_DATA: pixel_fetcher_state = "GET_TILE_DATA"; break;
+                case PixelFetcherState::GET_TILE_DATA_LOW: pixel_fetcher_state = "GET_TILE_DATA_LOW"; break;
+                case PixelFetcherState::GET_TILE_DATA_HIGH: pixel_fetcher_state = "GET_TILE_DATA_HIGH"; break;
+                case PixelFetcherState::PUSH: pixel_fetcher_state = "PUSH"; break;
+                default: pixel_fetcher_state = "NONE"; break;
+                }
+                ImGui::Text("Pixel Fetcher State: %s", pixel_fetcher_state.c_str());
+                ImGui::Text("FIFO Size: %d", info.ppu_info.fifo_pixels);
             }
             if (ImGui::CollapsingHeader("Registers"))
             {
@@ -311,21 +334,22 @@ namespace dmg
                 ImGui::SeparatorText("PPU Registers");
                 if (ImGui::BeginTable("##anything", 3))
                 {
+                    const auto& ppu_info = info.ppu_info;
                     ImGui::TableNextColumn();
-                    PrintRegisterValue("LCDC: ", info.LCDC);
-                    PrintRegisterValue("STAT: ", info.STAT);
-                    PrintRegisterValue("SCY: ", info.SCY);
-                    PrintRegisterValue("SCX: ", info.SCX);
+                    PrintRegisterValue("LCDC: ", ppu_info.LCDC);
+                    PrintRegisterValue("STAT: ", ppu_info.STAT);
+                    PrintRegisterValue("SCY: ", ppu_info.SCY);
+                    PrintRegisterValue("SCX: ", ppu_info.SCX);
                     ImGui::TableNextColumn();
-                    PrintRegisterValue("LY: ", info.LY);
-                    PrintRegisterValue("LYC: ", info.LYC);
-                    PrintRegisterValue("WX: ", info.WX);
-                    PrintRegisterValue("WY: ", info.WY);
+                    PrintRegisterValue("LY: ", ppu_info.LY);
+                    PrintRegisterValue("LYC: ", ppu_info.LYC);
+                    PrintRegisterValue("WX: ", ppu_info.WX);
+                    PrintRegisterValue("WY: ", ppu_info.WY);
                     ImGui::TableNextColumn();
-                    PrintRegisterValue("DMA: ", info.DMA);
-                    PrintRegisterValue("BGP: ", info.BGP);
-                    PrintRegisterValue("OBP0: ", info.OBP0);
-                    PrintRegisterValue("OBP1: ", info.OBP1);
+                    PrintRegisterValue("DMA: ", ppu_info.DMA);
+                    PrintRegisterValue("BGP: ", ppu_info.BGP);
+                    PrintRegisterValue("OBP0: ", ppu_info.OBP0);
+                    PrintRegisterValue("OBP1: ", ppu_info.OBP1);
                 }
                 ImGui::EndTable();
             }

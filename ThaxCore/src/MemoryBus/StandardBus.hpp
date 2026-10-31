@@ -3,10 +3,11 @@
 
 #include "Bus.hpp"
 #include "Miscellaneous/Cartridge.hpp"
-#include "../InternalGlobals.hpp"
+#include "InternalGlobals.hpp"
 #include "Miscellaneous/Timer.hpp"
 #include "Miscellaneous/Joypad.hpp"
 #include "Miscellaneous/SerialPort.hpp"
+#include "Miscellaneous/DMAController.hpp"
 
 namespace dmg
 {
@@ -19,7 +20,8 @@ namespace dmg
             Timer& timer,
             SerialPort& serial_port,
             Joypad& joypad,
-            PPU& ppu
+            PPU& ppu,
+            DMAController& dma_controller
             )
             : m_cartridge(cartridge)
             , m_interrupt_controller(interrupt_controller)
@@ -27,6 +29,7 @@ namespace dmg
             , m_serial_port(serial_port)
             , m_joypad(joypad)
             , m_ppu(ppu)
+            , m_dma_controller(dma_controller)
         {
 
         }
@@ -202,6 +205,7 @@ namespace dmg
         SerialPort& m_serial_port;
         Joypad& m_joypad;
         PPU& m_ppu;
+        DMAController& m_dma_controller;
 
         std::array<uint8_t, globals::RAM_N.m_size> RAM_N {};
         std::array<uint8_t, globals::WRAM.m_size> WRAM   {};

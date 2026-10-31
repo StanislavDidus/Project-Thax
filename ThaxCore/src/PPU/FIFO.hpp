@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include "InternalGlobals.hpp"
+#include "CPU/Registers/AByteRegister.hpp"
 #include "DMG/ExternalGlobals.hpp"
 
 namespace dmg
@@ -24,19 +25,24 @@ namespace dmg
         [[nodiscard]] bool IsEmpty() const;
         [[nodiscard]] bool IsDone() const;
         [[nodiscard]] bool IsScanlineDone() const;
+        [[nodiscard]] int GetSize() const;
 
         void PushPixels(uint8_t low, uint8_t high);
+        void PushObjectPixels(uint8_t low, uint8_t high, ObjectPalette palette);
         bool SendPixelToLCD(globals::LCD_BUFFER& lcd);
-        void ResetBuffer();
         void Reset();
         void MakeEmpty();
         void StartScanline();
 
-        void DiscardPixels(int discard_pixels);
+        void SetDiscardPixels(int discard_pixels);
     private:
-        void AddPixel(uint8_t low, uint8_t high, uint8_t index);
+        [[nodiscard]] static uint8_t GetColorByID(const AByteRegister& reg, uint8_t id);
+        [[nodiscard]] uint8_t GetColorFromPalette(const FIFOPixel& pixel) const;
+
+        void CombineTwoFIFOs();
 
         std::array<FIFOPixel, 16> m_pixels {};
+        std::array<FIFOPixel, 16> m_pixels_objects {};
         uint32_t m_address = 0;
         uint32_t m_size = 0;
         uint32_t m_scanline_progress = 0;

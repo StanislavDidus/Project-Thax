@@ -28,3 +28,4 @@
 #include "DMG/ExternalGlobals.hpp"
 #include "InternalGlobals.hpp"
 #include "Utils/Math.hpp"
+#include "DMG/Utils/Log.hpp"

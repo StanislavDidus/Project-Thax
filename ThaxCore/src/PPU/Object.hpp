@@ -1,33 +1,33 @@
 #pragma once
 #include <array>
 #include <cstdint>
-
-#include "InternalGlobals.hpp"
+#include <span>
 
 namespace dmg
 {
     class Object
     {
     public:
-        Object() = default;
+        Object(uint16_t address, std::span<const uint8_t> oam);
         ~Object() = default;
 
-        void Write(uint16_t address, uint8_t value);
+        [[nodiscard]] uint8_t GetYPosition () const;
+        [[nodiscard]] uint8_t GetXPosition () const;
+        [[nodiscard]] uint8_t GetTileIndex () const;
+        [[nodiscard]] bool GetPriority     () const;
+        [[nodiscard]] bool IsYFlipped      () const;
+        [[nodiscard]] bool IsXFlipped      () const;
+        [[nodiscard]] ObjectPalette GetPalette() const;
 
-        // READS & GETTERS
-        [[nodiscard]] uint8_t Read(uint8_t address) const;
-        [[nodiscard]] uint8_t GetY() const;
-        [[nodiscard]] uint8_t GetX() const;
-        [[nodiscard]] uint8_t GetTileIndex() const;
-        [[nodiscard]] uint8_t GetAttributes() const;
-        [[nodiscard]] bool GetPriority() const;
-        [[nodiscard]] bool IsYFlip() const;
-        [[nodiscard]] bool IsXFlip() const;
-        [[nodiscard]] ObjectPalette GetDMGPalette() const;
+        bool operator<(const Object& other) const
+        {
+            if (GetXPosition() != other.GetXPosition())
+                return GetXPosition() < other.GetXPosition();
+            return m_address < other.m_address;
+        }
+
     private:
-        uint8_t m_y          = 0;
-        uint8_t m_x          = 0;
-        uint8_t m_tile_index = 0;
-        uint8_t m_attributes = 0;
+        std::span<const uint8_t> m_oam;
+        uint16_t m_address = 0;
     };
 }

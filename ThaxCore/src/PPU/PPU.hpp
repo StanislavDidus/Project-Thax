@@ -15,11 +15,12 @@
 namespace dmg
 {
     class InterruptController;
+    class DMAController;
 
     class PPU
     {
     public:
-        explicit PPU(InterruptController& interrupt_controller);
+        explicit PPU(InterruptController& interrupt_controller, DMAController& dma_controller);
         ~PPU() = default;
 
         void Update(uint32_t cycles);
@@ -41,11 +42,14 @@ namespace dmg
         void UpdateMode(PPUMode mode, uint32_t cycles);
         void ExitMode(PPUMode mode);
 
-        void CheckSTATRegister();
+        void FindObjectsOnScanline();
+        [[nodiscard]] std::optional<Object> GetObject() const;
 
         [[nodiscard]] Tile GetTileWindowBG(uint32_t index) const;
+        [[nodiscard]] Tile GetObjectTile(uint32_t index) const;
 
         InterruptController& m_interrupt_controller;
+        DMAController& m_dma_controller;
 
         // IO Registers
         LCDCRegister LCDC {};
@@ -54,7 +58,6 @@ namespace dmg
         ByteRegister SCX {};
         ByteRegister LY {};
         ByteRegister LYC {};
-        ByteRegister DMA {};
         ByteRegister BGP {};
         ByteRegister OBP0 {};
         ByteRegister OBP1 {};
@@ -79,6 +82,8 @@ namespace dmg
 
         uint32_t m_current_cycles = 0;
         PPUMode m_mode = PPUMode::NONE;
+
+        std::vector<Object> m_objects {};
 
         friend class PixelFetcher;
         friend class FIFO;

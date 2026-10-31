@@ -40,6 +40,8 @@ set(HEADER_FILES
         src/PPU/Registers/STATRegister.hpp
         src/PPU/FIFO.hpp
         src/Precompiled.hpp
+        src/PPU/Registers/PaletteRegister.hpp
+        src/Miscellaneous/DMAController.hpp
 )
 
 set(SOURCE_FILES
@@ -59,6 +61,8 @@ set(SOURCE_FILES
         src/PPU/FIFO.cpp
         src/PPU/PixelFetcher.cpp
         src/Precompiled.hpp
+        src/PPU/Registers/PaletteRegister.cpp
+        src/Miscellaneous/DMAController.cpp
 )
 
 set(ALL_FILES

@@ -9,7 +9,7 @@ namespace dmg
     public:
         static void Init();
 
-        inline static std::shared_ptr<spdlog::logger>& GetLogger() { return m_logger; }
+        static std::shared_ptr<spdlog::logger>& GetLogger() { return m_logger; }
     private:
         static std::shared_ptr<spdlog::logger> m_logger;
     };

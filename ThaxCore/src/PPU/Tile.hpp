@@ -12,10 +12,11 @@ namespace dmg
     public:
         using TileRow = std::pair<uint8_t, uint8_t>;
 
+        Tile() = default;
         explicit Tile(const uint16_t address) : m_address(address) {}
         ~Tile() = default;
 
-        [[nodiscard]] TileRow GetRow(uint32_t row, const std::span<uint8_t, globals::VRAM.m_size> memory) const
+        [[nodiscard]] TileRow GetRow(const uint32_t row, const std::span<uint8_t> memory) const
         {
             return TileRow{
                 memory[m_address + row * 2],

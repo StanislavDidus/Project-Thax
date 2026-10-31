@@ -43,12 +43,12 @@ namespace dmg
             DMG_INFO("ROM loaded: {}", path.filename().string());
         }
 
-        uint8_t Read(uint16_t address) const
+        [[nodiscard]] uint8_t Read(const uint16_t address) const
         {
             return ROM[address];
         }
 
-        void Write(uint16_t address, uint8_t value)
+        void Write(uint16_t address, const uint8_t value)
         {
             ROM[address] = value;
         }

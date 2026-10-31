@@ -36,18 +36,32 @@ int main()
     // Initialize Tile Data Texture
     unsigned int tile_data_texture;
     glGenTextures(1, &tile_data_texture);
+    glBindTexture(GL_TEXTURE_2D, tile_data_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+        dmg::globals::TILE_DATA_VIEW_WIDTH, dmg::globals::TILE_DATA_VIEW_HEIGHT,
+        0, GL_RGB,
+        GL_UNSIGNED_BYTE, nullptr);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     // Initialize LCD Buffer texture
     unsigned int lcd_texture;
     glGenTextures(1, &lcd_texture);
+    glBindTexture(GL_TEXTURE_2D, lcd_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+        dmg::globals::LCD_WIDTH, dmg::globals::LCD_HEIGHT,
+        0, GL_RGB,
+        GL_UNSIGNED_BYTE, nullptr);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     while (!glfwWindowShouldClose(graphics_context.window))
     {
@@ -70,18 +84,15 @@ int main()
         glBindTexture(GL_TEXTURE_2D, tile_data_texture);
         auto tile_data_buffer = dmg.getTileDataBuffer();
         auto tile_data_buffer_rgb = dmg::ConvertBufferToRGB(tile_data_buffer);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
             dmg::globals::TILE_DATA_VIEW_WIDTH, dmg::globals::TILE_DATA_VIEW_HEIGHT,
-            0, GL_RGB,
-            GL_UNSIGNED_BYTE, tile_data_buffer_rgb.data());
-
+            GL_RGB, GL_UNSIGNED_BYTE, tile_data_buffer_rgb.data());
 
         glBindTexture(GL_TEXTURE_2D, lcd_texture);
         auto lcd_buffer_rgb = dmg::ConvertBufferToRGB(dmg.getLCDBuffer());
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
             dmg::globals::LCD_WIDTH, dmg::globals::LCD_HEIGHT,
-            0, GL_RGB,
-            GL_UNSIGNED_BYTE, lcd_buffer_rgb.data());
+            GL_RGB, GL_UNSIGNED_BYTE, lcd_buffer_rgb.data());
 
 
         dmg::StartImGuiFrame();

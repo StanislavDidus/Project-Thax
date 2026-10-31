@@ -23,7 +23,7 @@ namespace dmg
         [[nodiscard]] uint16_t GetBGTileMapArea() const;
         [[nodiscard]] ObjectSize GetObjectSize() const;
         [[nodiscard]] bool AreObjectsEnabled() const;
-        [[nodiscard]] bool IsBGWindowPriorityEnabled() const;
+        [[nodiscard]] bool IsBGWindowEnabled() const;
     private:
         uint8_t m_data = 0;
     };

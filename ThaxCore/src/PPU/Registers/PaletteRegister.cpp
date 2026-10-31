@@ -1,8 +1,7 @@
-//
-// Created by Stanislav on 10/29/2026.
-//
-
+#include "Precompiled.hpp"
+#include "PaletteRegister.hpp"
 
 namespace dmg
 {
+
 }

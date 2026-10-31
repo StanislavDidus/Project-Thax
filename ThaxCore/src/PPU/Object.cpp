@@ -6,64 +6,44 @@
 
 namespace dmg
 {
-    void Object::Write(const uint16_t address, const uint8_t value)
+    Object::Object(const uint16_t address, const std::span<const uint8_t> oam)
+        : m_oam(oam)
+        , m_address(address)
     {
-        if (address == 0) m_y = value;
-        if (address == 1) m_x = value;
-        if (address == 2) m_tile_index = value;
-        if (address == 3) m_attributes = value;
-
-        throw std::runtime_error{"Trying to access bytes outside of the object's memory."};
     }
 
-    uint8_t Object::Read(const uint8_t address) const
+    uint8_t Object::GetYPosition() const
     {
-        if (address == 0) return m_y;
-        if (address == 1) return m_x;
-        if (address == 2) return m_tile_index;
-        if (address == 3) return m_attributes;
-
-        throw std::runtime_error{"Trying to access bytes outside of the object's memory."};
-        return 0;
+        return m_oam[m_address];
     }
 
-    uint8_t Object::GetY() const
+    uint8_t Object::GetXPosition() const
     {
-        return m_y;
-    }
-
-    uint8_t Object::GetX() const
-    {
-        return m_x;
+        return m_oam[m_address + 1];
     }
 
     uint8_t Object::GetTileIndex() const
     {
-        return m_tile_index;
-    }
-
-    uint8_t Object::GetAttributes() const
-    {
-        return m_attributes;
+        return m_oam[m_address + 2];
     }
 
     bool Object::GetPriority() const
     {
-        return getBit(m_attributes, 7);
+        return getBit(m_oam[m_address + 3], 7);
     }
 
-    bool Object::IsYFlip() const
+    bool Object::IsYFlipped() const
     {
-        return getBit(m_attributes, 6);
+        return getBit(m_oam[m_address + 3], 6);
     }
 
-    bool Object::IsXFlip() const
+    bool Object::IsXFlipped() const
     {
-        return getBit(m_attributes, 5);
+        return getBit(m_oam[m_address + 3], 5);
     }
 
-    ObjectPalette Object::GetDMGPalette() const
+    ObjectPalette Object::GetPalette() const
     {
-        return getBit(m_attributes, 4) == 0 ? ObjectPalette::OBP0 : ObjectPalette::OBP1;
+        return getBit(m_oam[m_address + 3], 4) == 0 ? ObjectPalette::OBP0 : ObjectPalette::OBP1;
     }
 }

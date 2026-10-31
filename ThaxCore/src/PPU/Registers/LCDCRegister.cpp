@@ -75,7 +75,7 @@ namespace dmg
         return getBit(m_data, 1);
     }
 
-    bool LCDCRegister::IsBGWindowPriorityEnabled() const
+    bool LCDCRegister::IsBGWindowEnabled() const
     {
         return getBit(m_data, 0);
     }

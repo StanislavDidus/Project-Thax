@@ -27,6 +27,7 @@ namespace dmg
     class Timer;
     class SerialPort;
     class Joypad;
+    class DMAController;
 
     class DMG
     {
@@ -84,7 +85,8 @@ namespace dmg
         std::unique_ptr<SerialPort> m_serial_port {};
         std::unique_ptr<Joypad> m_joypad {};
         std::unique_ptr<InterruptController> m_interrupt_controller {};
-        std::unique_ptr<Bus> m_bus {};
+        std::unique_ptr<DMAController> m_dma_controller {};
+        std::shared_ptr<Bus> m_bus {};
         std::unique_ptr<CPU> m_cpu {};
         std::unique_ptr<PPU> m_ppu {};
 

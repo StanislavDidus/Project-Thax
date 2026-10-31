@@ -42,16 +42,6 @@ namespace dmg
         OBP0,
         OBP1,
     };
-
-    enum class PPUMode : uint8_t
-    {
-        NONE,
-        MODE0,
-        MODE1,
-        MODE2,
-        MODE3,
-    };
-
     enum class PixelSource : uint8_t
     {
         BG,
@@ -82,7 +72,10 @@ namespace dmg::globals
                   TILE_BLOCK_1.m_size +
                   TILE_BLOCK_2.m_size == TILE_REGION_SIZE);
 
-    // TILEMAP_ARE are the coordinates inside of the VRAM memory
+    inline constexpr uint32_t TILE_WIDTH = 8;
+    inline constexpr uint32_t TILE_HEIGHT = 8;
+
+    // AREA are the coordinates inside of the VRAM memory
     inline constexpr uint32_t TILEMAP_AREA_SIZE = 0x400;
     inline constexpr Region TILEMAP_AREA_1 {0x1800, 0x400};
     inline constexpr Region TILEMAP_AREA_2 {0x1C00, 0x400};
