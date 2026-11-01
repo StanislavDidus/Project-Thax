@@ -61,7 +61,7 @@ namespace dmg
         ByteRegister L {0x4D};
         ByteRegisterPair AF, BC, DE, HL;
 
-        TwoByteRegister PC {0x100};
+        TwoByteRegister PC {0x000};
         TwoByteRegister SP {0xFFFE};
 
         ControlUnit m_control_unit {*this};

@@ -49,11 +49,8 @@ namespace dmg
     {
         for (int i = 0; i < 8; ++i)
         {
-            uint8_t color_id = 0;
-            if (!object.IsXFlipped())
-                color_id = static_cast<uint8_t>((getBit(high, (7 - i)) << 1) | getBit(low, (7 - i)));
-            else
-                color_id = static_cast<uint8_t>((getBit(high, (i) << 1) | getBit(low, i)));
+            const int bit = object.IsXFlipped() ? i : 7 - i;
+            const auto color_id = static_cast<uint8_t>((getBit(high, bit) << 1) | getBit(low, bit));
 
             const FIFOPixel p2 {
                 .m_color = color_id,

@@ -34,7 +34,7 @@ namespace dmg
 
     void DMAController::Update()
     {
-        const uint16_t source = Read() & 0x100;
+        const uint16_t source = Read() * 0x100;
         constexpr uint16_t destination = 0xFE00;
         constexpr uint8_t size = 0xA0;
 

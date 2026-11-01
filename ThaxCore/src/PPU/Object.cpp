@@ -46,4 +46,14 @@ namespace dmg
     {
         return getBit(m_oam[m_address + 3], 4) == 0 ? ObjectPalette::OBP0 : ObjectPalette::OBP1;
     }
+
+    void Object::SetFetched()
+    {
+        m_fetched = true;
+    }
+
+    bool Object::IsFetched() const
+    {
+        return m_fetched;
+    }
 }

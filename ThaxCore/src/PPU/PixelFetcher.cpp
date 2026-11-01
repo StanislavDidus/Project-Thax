@@ -74,12 +74,17 @@ namespace dmg
 
                 if (auto object = m_ppu.GetObject())
                 {
-                    //m_ppu.m_pixel_fetcher.FetchObject(object.value());
-                    //m_fifo.SetStop(true);
+                    FetchData s = m_last_fetch;
+                    m_ppu.m_pixel_fetcher.FetchObject(object.value());
+                    m_last_fetch = s;
+                    m_fifo.SetStop(true);
+                }
+                else
+                {
+                    m_current_fetch = m_last_fetch;
+                    m_ppu.m_fifo.SetStop(false);
                 }
 
-                m_current_fetch = m_last_fetch;
-                m_ppu.m_fifo.SetStop(false);
             }
             else if (m_current_fetch.m_type == FetchType::TILE)
             {

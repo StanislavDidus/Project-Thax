@@ -20,7 +20,6 @@ namespace dmg
         if (!(m_select & 0x10)) low &= m_dpad;
         if (!(m_select & 0x20)) low &= m_buttons;
         uint8_t result =  0xC0 | m_select | low;
-        //printf("P1 read: sel=%02X buttons=%02X dpad=%02X -> %02X\n", m_select, m_buttons, m_dpad, result);
         return result;
     }
 
@@ -32,21 +31,6 @@ namespace dmg
         if (before & ~after)
             m_interrupt_controller.SetIF(InterruptController::Joypad);
     }
-
-    /*void Joypad::SetP1Bit(Buttons button, const uint8_t value)
-    {
-        const auto bit = static_cast<uint8_t>(button);
-
-        const uint8_t old = getBit(P1, bit);
-        setBit(P1, bit, value);
-        const uint8_t now = getBit(P1, bit);
-
-        // If button was not pressed and now is pressed - we send an interrupt
-        if (old && !now && !value)
-        {
-            m_interrupt_controller.SetIF(InterruptController::Joypad);
-        }
-    }*/
 
     void Joypad::KeyChanged(const JoypadButton button, const bool pressed)
     {

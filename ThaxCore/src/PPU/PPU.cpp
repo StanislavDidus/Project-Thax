@@ -243,40 +243,37 @@ namespace dmg
             break;
         case PPUMode::MODE3:
             {
-                if (m_fifo.IsScanlineDone())
+                for (int i = 0; i < cycles; ++i)
                 {
-                    SetMode(PPUMode::MODE0);
-                    m_current_cycles = 0;
-                }
-                else
-                {
-                    for (int i = 0; i < cycles; ++i)
+                    m_pixel_fetcher.Step();
+                    if (m_fifo.SendPixelToLCD(m_lcd))
                     {
-                        m_pixel_fetcher.Step();
-                        if (m_fifo.SendPixelToLCD(m_lcd))
+                        if (m_fifo.GetXCounter() == WX.Read() && m_y_condition && LCDC.IsWindowEnabled())
                         {
-                            if (m_fifo.GetXCounter() == WX.Read() && m_y_condition && LCDC.IsWindowEnabled())
+                            m_fifo.Clear();
+                            m_pixel_fetcher.StartWindow();
+                        }
+                        if (LCDC.AreObjectsEnabled())
+                        {
+                            if (auto object = GetObject())
                             {
-                                m_fifo.Clear();
-                                m_pixel_fetcher.StartWindow();
-                            }
-
-                            if (LCDC.AreObjectsEnabled())
-                            {
-                                if (auto object = GetObject())
-                                {
-                                    m_pixel_fetcher.FetchObject(object.value());
-                                    m_fifo.SetStop(true);
-                                }
+                                m_fetch_object = object;
                             }
                         }
+                    }
 
-                        if (m_fifo.IsScanlineDone())
-                        {
-                            SetMode(PPUMode::MODE0);
-                            m_current_cycles = 0;
-                            break;
-                        }
+                    if (m_fetch_object.has_value() && m_fifo.GetSize() >= 8)
+                    {
+                        m_pixel_fetcher.FetchObject(m_fetch_object.value());
+                        m_fifo.SetStop(true);
+                        m_fetch_object = std::nullopt;
+                    }
+
+                    if (m_fifo.IsScanlineDone())
+                    {
+                        SetMode(PPUMode::MODE0);
+                        m_current_cycles = 0;
+                        break;
                     }
                 }
 
@@ -317,7 +314,7 @@ namespace dmg
             {
                 m_objects.push_back(object);
 
-                if (m_objects.size() >= 10) break;
+                if (m_objects.size() >= globals::MAX_OBJECTS_PER_SCANLINE) break;
             }
         }
 
@@ -325,19 +322,18 @@ namespace dmg
         std::sort(m_objects.begin(), m_objects.end());
 
         // Pick first 10 objects
-        if (m_objects.size() > globals::MAX_OBJECTS_PER_SCANLINE)
-            m_objects.erase(m_objects.begin() + globals::MAX_OBJECTS_PER_SCANLINE, m_objects.end());
+        //if (m_objects.size() > globals::MAX_OBJECTS_PER_SCANLINE)
+            //m_objects.erase(m_objects.begin() + globals::MAX_OBJECTS_PER_SCANLINE, m_objects.end());
     }
 
     std::optional<Object> PPU::GetObject()
     {
-        for (const auto& object : m_objects)
+        for (auto& object : m_objects)
         {
-            if (object.GetXPosition() == m_fifo.GetXCounter())
+            if (object.GetXPosition() - globals::OBJECT_X_OFFSET <= m_fifo.GetXCounter() - 7 && !object.IsFetched())
             {
-                Object obj = object;
-                std::move(m_objects.begin() + 1, m_objects.end(), m_objects.begin());
-                return obj;
+                object.SetFetched();
+                return object;
             }
         }
 

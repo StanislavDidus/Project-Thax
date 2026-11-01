@@ -67,6 +67,8 @@ namespace dmg
         std::array<uint8_t, globals::VRAM.m_size> VRAM {};
         std::array<uint8_t, globals::OAM.m_size> OAM {};
 
+        std::optional<Object> m_fetch_object = std::nullopt;
+
         // Window
         bool m_y_condition = false;
 

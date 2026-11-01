@@ -72,7 +72,7 @@ uint32_t dmg::CPU::Step()
 
 void dmg::CPU::Reset()
 {
-    PC.WriteWord(0x100);
+    PC.WriteWord(0x000);
     SP.WriteWord(0);
     A.Write(0);
     F.Write(0);

@@ -20,6 +20,9 @@ namespace dmg
         [[nodiscard]] bool IsXFlipped      () const;
         [[nodiscard]] ObjectPalette GetPalette() const;
 
+        void SetFetched();
+        [[nodiscard]] bool IsFetched() const;
+
         bool operator<(const Object& other) const
         {
             if (GetXPosition() != other.GetXPosition())
@@ -30,5 +33,6 @@ namespace dmg
     private:
         std::span<uint8_t> m_oam;
         uint16_t m_address = 0;
+        bool m_fetched = false;
     };
 }
