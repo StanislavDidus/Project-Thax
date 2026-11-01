@@ -73,7 +73,7 @@ namespace dmg
             }
             else if (m_current_fetch.m_type == FetchType::TILE)
             {
-                if (m_fifo.IsEmpty())
+                if (m_fifo.CanPush())
                 {
                     m_fifo.PushPixels(m_tile_low, m_tile_high);
                     m_state = PixelFetcherState::GET_TILE_DATA;

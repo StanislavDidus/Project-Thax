@@ -10,19 +10,14 @@ namespace dmg
     {
     }
 
-    bool FIFO::IsEmpty() const
+    bool FIFO::CanPush() const
     {
         return m_size <= 8;
     }
 
-    bool FIFO::IsDone() const
-    {
-        return m_address == globals::LCD_WIDTH * globals::LCD_HEIGHT;
-    }
-
     bool FIFO::IsScanlineDone() const
     {
-        return m_scanline_progress == globals::LCD_WIDTH;
+        return m_scanline_progress >= globals::LCD_WIDTH + globals::LX_START;
     }
 
     int FIFO::GetSize() const
@@ -30,17 +25,14 @@ namespace dmg
         return static_cast<int>(m_size);
     }
 
+    int FIFO::GetXCounter() const
+    {
+        return static_cast<int>(m_scanline_progress);
+    }
+
     void FIFO::PushPixels(const uint8_t low, const uint8_t high)
     {
-        int start_point = 0;
-
-        if (m_discard_pixels > 0)
-        {
-            start_point = m_discard_pixels;
-            m_discard_pixels = 0;
-        }
-
-        for (int i = start_point; i < 8; ++i)
+        for (int i = 0; i < 8; ++i)
         {
             const auto color_id = static_cast<uint8_t>((getBit(high, i) << 1) | getBit(low, i));
 
@@ -49,35 +41,38 @@ namespace dmg
                 .m_source = PixelSource::BG
             };
         }
-        m_size += 8 - start_point;
+        m_size += 8;
     }
 
-    void FIFO::PushObjectPixels(uint8_t low, uint8_t high, ObjectPalette palette)
+    void FIFO::PushObjectPixels(const uint8_t low, const uint8_t high, const ObjectPalette palette)
     {
-        int start_point = 0;
-
-        if (m_discard_pixels > 0)
+        for (int i = 0; i < 8; ++i)
         {
-            start_point = m_discard_pixels;
-            m_discard_pixels = 0;
-        }
-
-        for (int i = start_point; i < 8; ++i)
-        {
-            const auto color_id = static_cast<uint8_t>((getBit(high, i) << 1) | getBit(low, i));
-
-            m_pixels_objects[7 - i] = FIFOPixel{
+            const auto color_id = static_cast<uint8_t>((getBit(high, (7 - i)) << 1) | getBit(low, (7 - i)));
+            const FIFOPixel p2 {
                 .m_color = color_id,
                 .m_source = palette == ObjectPalette::OBP0 ? PixelSource::OBP0 : PixelSource::OBP1
             };
+
+            FIFOPixel& p1 = m_pixels[i];
+
+            if (p2.m_color == 0) continue;
+            if (p1.m_source != PixelSource::BG) continue;
+            p1 = p2;
         }
-        CombineTwoFIFOs();
     }
 
     bool FIFO::SendPixelToLCD(globals::LCD_BUFFER& lcd)
     {
-        if (!IsEmpty())
+        if (!CanPush())
         {
+            if (m_discard_pixels > 0)
+            {
+                std::move(m_pixels.begin() + m_discard_pixels, m_pixels.end(), m_pixels.begin());
+                m_size -= m_discard_pixels;
+                m_discard_pixels = 0;
+            }
+
             const FIFOPixel pixel = m_pixels[0];
             uint8_t final_color = GetColorFromPalette(pixel);
 
@@ -87,7 +82,7 @@ namespace dmg
             lcd[m_address++] = final_color;
             std::move(m_pixels.begin() + 1, m_pixels.end(), m_pixels.begin());
             m_size--;
-            m_scanline_progress += 1;
+            m_scanline_progress++;
 
             return true;
         }
@@ -97,30 +92,23 @@ namespace dmg
 
     void FIFO::Reset()
     {
-        MakeEmpty();
+        StartScanline();
         m_address = 0;
-        m_scanline_progress = 0;
-        m_discard_pixels = 0;
     }
 
-    void FIFO::MakeEmpty()
+    void FIFO::Clear()
     {
         m_size = 0;
     }
 
     void FIFO::StartScanline()
     {
-        MakeEmpty();
-        m_scanline_progress = 0;
-        m_discard_pixels = 0;
+        Clear();
+        m_scanline_progress = globals::LX_START;
+        m_discard_pixels = m_ppu.SCX.Read() % globals::TILE_WIDTH;
     }
 
-    void FIFO::SetDiscardPixels(const int discard_pixels)
-    {
-        m_discard_pixels = discard_pixels;
-    }
-
-    uint8_t FIFO::GetColorByID(const AByteRegister& reg, uint8_t id)
+    uint8_t FIFO::GetColorByID(const AByteRegister& reg, const uint8_t id)
     {
         switch (id & 0b11)
         {
@@ -151,20 +139,5 @@ namespace dmg
         case PixelSource::OBP1: return GetColorByID(m_ppu.OBP1, pixel.m_color);
         default: return 0;
         }
-    }
-
-    void FIFO::CombineTwoFIFOs()
-    {
-        for (int i = 0; i < 8; ++i)
-        {
-            FIFOPixel& p1 = m_pixels[i];
-            const FIFOPixel& p2 = m_pixels_objects[i];
-
-            if (p2.m_color == 0) continue;
-            if (p1.m_source != PixelSource::BG) continue;
-            p1 = p2;
-        }
-
-        std::ranges::fill(m_pixels_objects, FIFOPixel{});
     }
 }

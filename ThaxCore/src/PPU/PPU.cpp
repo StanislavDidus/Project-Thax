@@ -200,11 +200,6 @@ namespace dmg
             if (LY.Read() == WY.Read())
                 m_y_condition = true;
 
-            m_x_counter = 7;
-
-            //int discard_pixels = SCX.Read() % 8;
-            m_fifo.SetDiscardPixels(SCX.Read() % 8);
-
             break;
         }
     }
@@ -248,7 +243,7 @@ namespace dmg
             break;
         case PPUMode::MODE3:
             {
-                if (m_fifo.IsDone() || m_fifo.IsScanlineDone())
+                if (m_fifo.IsScanlineDone())
                 {
                     SetMode(PPUMode::MODE0);
                     m_current_cycles = 0;
@@ -260,11 +255,9 @@ namespace dmg
                         m_pixel_fetcher.Step();
                         if (m_fifo.SendPixelToLCD(m_lcd))
                         {
-                            m_x_counter += 1;
-
-                            if (m_x_counter == WX.Read() && m_y_condition && LCDC.IsWindowEnabled())
+                            if (m_fifo.GetXCounter() == WX.Read() && m_y_condition && LCDC.IsWindowEnabled())
                             {
-                                m_fifo.MakeEmpty();
+                                m_fifo.Clear();
                                 m_pixel_fetcher.StartWindow();
                             }
 
@@ -274,7 +267,7 @@ namespace dmg
                             }
                         }
 
-                        if (m_fifo.IsDone() || m_fifo.IsScanlineDone())
+                        if (m_fifo.IsScanlineDone())
                         {
                             SetMode(PPUMode::MODE0);
                             m_current_cycles = 0;
@@ -313,7 +306,7 @@ namespace dmg
         for (int i = 0; i < 40; ++i)
         {
             Object object {static_cast<uint16_t>(i * 4), OAM};
-            const uint8_t object_y = object.GetYPosition() - 16;
+            const uint8_t object_y = object.GetYPosition() - globals::OBJECT_Y_OFFSET;
 
             if (LY.Read() >= object_y && LY.Read() < object_y + globals::TILE_HEIGHT)
             {
@@ -333,7 +326,7 @@ namespace dmg
     {
         for (const auto& object : m_objects)
         {
-            if (object.GetXPosition() - 8 == m_x_counter)
+            if (object.GetXPosition() - globals::OBJECT_X_OFFSET == m_fifo.GetXCounter())
                 return object;
         }
 

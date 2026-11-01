@@ -69,7 +69,6 @@ namespace dmg
 
         // Window
         bool m_y_condition = false;
-        uint16_t m_x_counter = 7;
 
         FIFO m_fifo {*this};
         PixelFetcher m_pixel_fetcher {*this, m_fifo};

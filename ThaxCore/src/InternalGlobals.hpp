@@ -68,12 +68,17 @@ namespace dmg::globals
     inline constexpr Region TILE_BLOCK_2 {0x1000, 0x800};
     inline constexpr Region TILE_REGION {0x8000, TILE_REGION_SIZE};
 
+    inline constexpr int LX_START = 7;
+    inline constexpr int OBJECT_X_OFFSET = 8;
+    inline constexpr int OBJECT_Y_OFFSET = 16;
+    inline constexpr int WINDOW_X_OFFSET = 16;
+
     static_assert(TILE_BLOCK_0.m_size +
                   TILE_BLOCK_1.m_size +
                   TILE_BLOCK_2.m_size == TILE_REGION_SIZE);
 
-    inline constexpr uint32_t TILE_WIDTH = 8;
-    inline constexpr uint32_t TILE_HEIGHT = 8;
+    inline constexpr uint8_t TILE_WIDTH = 8;
+    inline constexpr uint8_t TILE_HEIGHT = 8;
 
     // AREA are the coordinates inside of the VRAM memory
     inline constexpr uint32_t TILEMAP_AREA_SIZE = 0x400;
