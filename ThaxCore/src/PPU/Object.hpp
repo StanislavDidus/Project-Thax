@@ -8,7 +8,8 @@ namespace dmg
     class Object
     {
     public:
-        Object(uint16_t address, std::span<const uint8_t> oam);
+        Object() = default;
+        Object(uint16_t address, std::span<uint8_t> oam);
         ~Object() = default;
 
         [[nodiscard]] uint8_t GetYPosition () const;
@@ -27,7 +28,7 @@ namespace dmg
         }
 
     private:
-        std::span<const uint8_t> m_oam;
+        std::span<uint8_t> m_oam;
         uint16_t m_address = 0;
     };
 }

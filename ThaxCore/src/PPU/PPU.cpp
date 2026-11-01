@@ -261,9 +261,13 @@ namespace dmg
                                 m_pixel_fetcher.StartWindow();
                             }
 
-                            if (auto object = GetObject())
+                            if (LCDC.AreObjectsEnabled())
                             {
-                                m_pixel_fetcher.FetchObject(object.value());
+                                if (auto object = GetObject())
+                                {
+                                    m_pixel_fetcher.FetchObject(object.value());
+                                    m_fifo.SetStop(true);
+                                }
                             }
                         }
 
@@ -306,11 +310,14 @@ namespace dmg
         for (int i = 0; i < 40; ++i)
         {
             Object object {static_cast<uint16_t>(i * 4), OAM};
-            const uint8_t object_y = object.GetYPosition() - globals::OBJECT_Y_OFFSET;
+            const int object_y = static_cast<int>(object.GetYPosition() - globals::OBJECT_Y_OFFSET);
 
-            if (LY.Read() >= object_y && LY.Read() < object_y + globals::TILE_HEIGHT)
+            const int object_height = LCDC.GetObjectSize() == ObjectSize::SIZE_8X8 ? 8 : 16;
+            if (LY.Read() >= object_y && LY.Read() < object_y + object_height)
             {
                 m_objects.push_back(object);
+
+                if (m_objects.size() >= 10) break;
             }
         }
 
@@ -322,12 +329,16 @@ namespace dmg
             m_objects.erase(m_objects.begin() + globals::MAX_OBJECTS_PER_SCANLINE, m_objects.end());
     }
 
-    std::optional<Object> PPU::GetObject() const
+    std::optional<Object> PPU::GetObject()
     {
         for (const auto& object : m_objects)
         {
-            if (object.GetXPosition() - globals::OBJECT_X_OFFSET == m_fifo.GetXCounter())
-                return object;
+            if (object.GetXPosition() == m_fifo.GetXCounter())
+            {
+                Object obj = object;
+                std::move(m_objects.begin() + 1, m_objects.end(), m_objects.begin());
+                return obj;
+            }
         }
 
         return std::nullopt;

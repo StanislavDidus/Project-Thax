@@ -8,6 +8,7 @@
 
 namespace dmg
 {
+    class Object;
     class PPU;
 
     class FIFO
@@ -22,12 +23,14 @@ namespace dmg
         [[nodiscard]] int GetXCounter() const;
 
         void PushPixels(uint8_t low, uint8_t high);
-        void PushObjectPixels(uint8_t low, uint8_t high, ObjectPalette palette);
+        void PushObjectPixels(uint8_t low, uint8_t high, const Object& object);
         bool SendPixelToLCD(globals::LCD_BUFFER& lcd); // Returns true on success
 
         void Reset();
         void Clear();
         void StartScanline();
+
+        void SetStop(bool value);
     private:
         struct FIFOPixel
         {
@@ -43,6 +46,7 @@ namespace dmg
         uint32_t m_size = 0;
         uint32_t m_scanline_progress = 0;
         int m_discard_pixels = 0;
+        bool m_stopped = false;
 
         PPU& m_ppu;
     };

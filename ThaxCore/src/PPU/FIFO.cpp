@@ -1,6 +1,7 @@
 #include "Precompiled.hpp"
 #include "FIFO.hpp"
 #include "PPU.hpp"
+#include "Object.hpp"
 #include "Registers/PaletteRegister.hpp"
 
 namespace dmg
@@ -44,18 +45,24 @@ namespace dmg
         m_size += 8;
     }
 
-    void FIFO::PushObjectPixels(const uint8_t low, const uint8_t high, const ObjectPalette palette)
+    void FIFO::PushObjectPixels(const uint8_t low, const uint8_t high, const Object& object)
     {
         for (int i = 0; i < 8; ++i)
         {
-            const auto color_id = static_cast<uint8_t>((getBit(high, (7 - i)) << 1) | getBit(low, (7 - i)));
+            uint8_t color_id = 0;
+            if (!object.IsXFlipped())
+                color_id = static_cast<uint8_t>((getBit(high, (7 - i)) << 1) | getBit(low, (7 - i)));
+            else
+                color_id = static_cast<uint8_t>((getBit(high, (i) << 1) | getBit(low, i)));
+
             const FIFOPixel p2 {
                 .m_color = color_id,
-                .m_source = palette == ObjectPalette::OBP0 ? PixelSource::OBP0 : PixelSource::OBP1
+                .m_source = object.GetPalette() == ObjectPalette::OBP0 ? PixelSource::OBP0 : PixelSource::OBP1
             };
 
             FIFOPixel& p1 = m_pixels[i];
 
+            if (object.GetPriority() && p1.m_source == PixelSource::BG && p1.m_color != 0) continue;
             if (p2.m_color == 0) continue;
             if (p1.m_source != PixelSource::BG) continue;
             p1 = p2;
@@ -64,7 +71,7 @@ namespace dmg
 
     bool FIFO::SendPixelToLCD(globals::LCD_BUFFER& lcd)
     {
-        if (!CanPush())
+        if (!CanPush() && !m_stopped)
         {
             if (m_discard_pixels > 0)
             {
@@ -106,6 +113,11 @@ namespace dmg
         Clear();
         m_scanline_progress = globals::LX_START;
         m_discard_pixels = m_ppu.SCX.Read() % globals::TILE_WIDTH;
+    }
+
+    void FIFO::SetStop(const bool value)
+    {
+        m_stopped = value;
     }
 
     uint8_t FIFO::GetColorByID(const AByteRegister& reg, const uint8_t id)

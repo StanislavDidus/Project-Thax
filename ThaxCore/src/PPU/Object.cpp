@@ -6,7 +6,7 @@
 
 namespace dmg
 {
-    Object::Object(const uint16_t address, const std::span<const uint8_t> oam)
+    Object::Object(const uint16_t address, const std::span<uint8_t> oam)
         : m_oam(oam)
         , m_address(address)
     {

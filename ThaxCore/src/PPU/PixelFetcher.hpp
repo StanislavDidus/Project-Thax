@@ -32,9 +32,9 @@ namespace dmg
         struct FetchData
         {
             FetchType m_type = FetchType::TILE;
-            ObjectPalette m_object_palette = ObjectPalette::OBP0;
             uint16_t m_address = 0;
             uint8_t m_tile_row = 0;
+            Object m_object{};
         };
 
         void FetchTile();
@@ -51,7 +51,6 @@ namespace dmg
         uint8_t m_tile_row = 0;
         uint8_t m_tile_low = 0;
         uint8_t m_tile_high = 0;
-        //std::optional<uint16_t> m_tile_address = std::nullopt;
 
         // Window
         bool m_inside_window = false;

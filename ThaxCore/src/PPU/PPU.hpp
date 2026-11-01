@@ -43,7 +43,7 @@ namespace dmg
         void ExitMode(PPUMode mode);
 
         void FindObjectsOnScanline();
-        [[nodiscard]] std::optional<Object> GetObject() const;
+        [[nodiscard]] std::optional<Object> GetObject();
 
         [[nodiscard]] Tile GetTileWindowBG(uint32_t index) const;
         [[nodiscard]] Tile GetObjectTile(uint32_t index) const;

@@ -22,6 +22,7 @@ namespace dmg
                         m_tile_ref = m_ppu.VRAM[m_current_fetch.m_address];
                     else if (m_current_fetch.m_type == FetchType::OBJECT)
                         m_tile_ref = m_current_fetch.m_address;
+
                     m_tile_row = m_current_fetch.m_tile_row;
                 }
                 if (++m_progress >= 2)
@@ -66,10 +67,19 @@ namespace dmg
         case PixelFetcherState::PUSH:
             if (m_current_fetch.m_type == FetchType::OBJECT)
             {
-                m_fifo.PushObjectPixels(m_tile_low, m_tile_high,  m_current_fetch.m_object_palette);
+                m_fifo.PushObjectPixels(m_tile_low, m_tile_high,  m_current_fetch.m_object);
                 m_state = PixelFetcherState::GET_TILE_DATA;
                 m_progress = 0;
-                    FetchTile();
+
+
+                if (auto object = m_ppu.GetObject())
+                {
+                    //m_ppu.m_pixel_fetcher.FetchObject(object.value());
+                    //m_fifo.SetStop(true);
+                }
+
+                m_current_fetch = m_last_fetch;
+                m_ppu.m_fifo.SetStop(false);
             }
             else if (m_current_fetch.m_type == FetchType::TILE)
             {
@@ -115,14 +125,19 @@ namespace dmg
 
     void PixelFetcher::StartWindow()
     {
-        StartScanline();
         m_inside_window = true;
-        FetchTile();
+        StartScanline();
     }
 
     void PixelFetcher::Reset()
     {
+        m_x = 0;
+        m_x_window = 0;
+
         m_y_window = 0;
+
+        m_state = PixelFetcherState::GET_TILE_DATA;
+        m_progress = 0;
     }
 
     PixelFetcherState PixelFetcher::GetState() const
@@ -159,13 +174,46 @@ namespace dmg
         m_last_fetch = m_current_fetch;
 
         const uint32_t fy = m_ppu.LY.Read() & 255;
-        const uint32_t line_in_tile = fy - (object.GetYPosition() - 16);
+        uint32_t line_in_tile = fy - (object.GetYPosition() - globals::OBJECT_Y_OFFSET);
+        uint16_t address = static_cast<uint16_t>(object.GetTileIndex());
+
+        // 8x16 objects
+        if (m_ppu.LCDC.GetObjectSize() == ObjectSize::SIZE_8X16)
+        {
+            if (line_in_tile > 7)
+            {
+                line_in_tile -= 8;
+
+                if (object.IsYFlipped())
+                {
+                    address &= 0xFE;
+                }
+                else
+                {
+                    address |= 0x01;
+                }
+            }
+            else
+            {
+                if (object.IsYFlipped())
+                {
+                    address |= 0x01;
+                }
+                else
+                {
+                    address &= 0xFE;
+                }
+            }
+        }
+
+        if (object.IsYFlipped())
+            line_in_tile = 7 - line_in_tile;
 
         m_current_fetch = FetchData{
             .m_type = FetchType::OBJECT,
-            .m_object_palette = object.GetPalette(),
-            .m_address = static_cast<uint16_t>(object.GetTileIndex()),
-            .m_tile_row = static_cast<uint8_t>(line_in_tile)
+            .m_address = address,
+            .m_tile_row = static_cast<uint8_t>(line_in_tile),
+            .m_object = object
         };
 
         m_state = PixelFetcherState::GET_TILE_DATA;
