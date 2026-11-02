@@ -96,6 +96,8 @@ namespace dmg::globals
 
     inline constexpr uint32_t RAM_SIZE = 0x10000;
 
+    inline constexpr uint8_t BOOTROM_SIZE = 0x100;
+
     inline constexpr Region ROM_0 {0x0000, 0x4000};
     inline constexpr Region ROM_N {0x4000, 0x4000};
     inline constexpr Region VRAM {0x8000, 0x2000};

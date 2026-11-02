@@ -50,6 +50,7 @@ namespace dmg
         ~DMG();
 
         void LoadROM(const std::filesystem::path& path);
+        void LoadBootrom(const std::filesystem::path& path);
 
         void Update();
 

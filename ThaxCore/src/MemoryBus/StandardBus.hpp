@@ -184,6 +184,9 @@ namespace dmg
                 case 0xFF07:
                     m_timer.WriteTAC(value);
                     break;
+                case 0xFF50:
+                    m_cartridge.UnmapBootrom();
+                    break;
                 default:
                     IO[address - globals::IO.m_start] = value;
                     break;

@@ -13,47 +13,20 @@ namespace dmg
     class Cartridge
     {
     public:
-        Cartridge() = default;
+        Cartridge();
         ~Cartridge() = default;
 
-        void Load(const std::filesystem::path& path)
-        {
-            // Reset ROM
-            std::fill_n(ROM.data(), ROM.size(), 0);
+        void Load(const std::filesystem::path& path);
+        void LoadBootrom(const std::filesystem::path& path);
 
-            std::ifstream file(path, std::ios::binary | std::ios::ate);
-            if (!file)
-            {
-                throw std::runtime_error{"Could not open file for reading."};
-            }
+        void UnmapBootrom();
 
-            std::streamsize file_size = file.tellg();
-
-            assert(file_size <= 32768);
-
-            file.seekg(0, std::ios::beg);
-
-            file.read(reinterpret_cast<char*>(ROM.data()), file_size);
-
-            if (file.bad())
-            {
-                throw std::runtime_error{"Failed to ream from a file"};
-            }
-
-            DMG_INFO("ROM loaded: {}", path.filename().string());
-        }
-
-        [[nodiscard]] uint8_t Read(const uint16_t address) const
-        {
-            return ROM[address];
-        }
-
-        void Write(uint16_t address, const uint8_t value)
-        {
-            ROM[address] = value;
-        }
+        [[nodiscard]] uint8_t Read(uint16_t address) const;
+        void Write(uint16_t address, uint8_t value);
 
     private:
-        std::array<uint8_t, globals::ROM_0.m_size + globals::ROM_N.m_size> ROM {};
+        std::vector<uint8_t> ROM {};
+        std::array<uint8_t, 256> BOOTROM {};
+        bool m_bootrom_mapped = false;
     };
 }

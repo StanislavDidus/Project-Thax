@@ -63,6 +63,7 @@ set(SOURCE_FILES
         src/Precompiled.hpp
         src/PPU/Registers/PaletteRegister.cpp
         src/Miscellaneous/DMAController.cpp
+        src/Miscellaneous/Cartridge.cpp
 )
 
 set(ALL_FILES

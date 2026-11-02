@@ -57,6 +57,11 @@ void dmg::DMG::LoadROM(const std::filesystem::path& path)
         DMG_ERROR("Trying to load ROM when cartridge is not existed.");
 }
 
+void dmg::DMG::LoadBootrom(const std::filesystem::path& path)
+{
+    if (m_cartridge) m_cartridge->LoadBootrom(path);
+}
+
 void dmg::DMG::StartFrame()
 {
     cycle_target = T_CYCLES_PER_FRAME - cycle_accumulator;
@@ -108,7 +113,7 @@ void dmg::DMG::StepInstruction()
 
     uint32_t cycles = 0;
 
-    if (m_cpu->IsHalted() && m_interrupt_controller->GetPendingInterrupt())
+    if (m_cpu->IsHalted() && m_interrupt_controller->IsInterruptPending())
     {
         m_cpu->UnHalt();
     }

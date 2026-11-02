@@ -104,7 +104,7 @@ int main()
         dmg::DrawAssetWindow(tile_data_texture);
         dmg::DrawViewport(lcd_texture);
         dmg::DrawInfoWindow(dmg_info, dmg);
-        dmg::DrawControlWindow(dmg);
+        dmg::DrawControlWindow(dmg, imgui_context, current_config);
         dmg::DrawMemoryWindow(dmg, dmg_info);
         dmg::DrawMain(dmg, imgui_context, current_config);
         ImGui::ShowDemoWindow();

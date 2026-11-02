@@ -22,6 +22,8 @@ namespace dmg
     struct Config
     {
         std::filesystem::path rom_folder {""};
+        int bootrom_load_option = 0; // 0 - Default values 1 - specify bootrom file
+        std::filesystem::path bootrom_file {""};
     };
 
     inline void ScanDirectory(const std::filesystem::path& path, ROMEntry* parent)
@@ -66,6 +68,22 @@ namespace dmg
         return std::move(root_entry);
     }
 
+    inline std::string LoadString(std::ifstream& f)
+    {
+        uint32_t n = 0;
+        f.read(reinterpret_cast<char*>(&n), sizeof(n));
+        std::string s(n, '\0');
+        f.read(s.data(), n);
+        return s;
+    }
+
+    inline void SaveString(std::ofstream& f, const std::string& s)
+    {
+        const auto n = static_cast<uint32_t>(s.size());
+        f.write(reinterpret_cast<const char*>(&n), sizeof(n));
+        f.write(s.data(), n);
+    }
+
     inline std::optional<Config> LoadConfig()
     {
         std::ifstream file{"data/internal/config.txt"};
@@ -76,11 +94,9 @@ namespace dmg
 
         Config config {};
 
-        uint32_t n = 0;
-        file.read(reinterpret_cast<char*>(&n), sizeof(n));
-        std::string s(n, '\0');
-        file.read(s.data(), n);
-        config.rom_folder = s;
+        config.rom_folder = LoadString(file);
+        file >> config.bootrom_load_option;
+        config.bootrom_file = LoadString(file);
 
         return config;
     }
@@ -95,10 +111,9 @@ namespace dmg
             return;
         }
 
-        const std::string rom_folder_string = config.rom_folder.string();
-        const auto n = static_cast<uint32_t>(rom_folder_string.size());
-        file.write(reinterpret_cast<const char*>(&n), sizeof(n));
-        file.write(rom_folder_string.data(), n);
+        SaveString(file, config.rom_folder.string());
+        file << config.bootrom_load_option;
+        SaveString(file, config.bootrom_file.string());
 
         file.close();
     }

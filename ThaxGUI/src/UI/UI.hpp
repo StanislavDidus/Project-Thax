@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <array>
+#include <span>
 
 #include "DMG/DMG.hpp"
 
@@ -27,8 +28,59 @@ namespace dmg
     {
         ImGui::FileBrowser rom_file_dialog;
         std::unique_ptr<ROMEntry> root_entry = nullptr;
+        std::filesystem::path selected_rom;
     };
 
+    class FileBrowser
+    {
+    public:
+        FileBrowser(std::optional<ImGuiFileBrowserFlags_> flags, const std::string& title, const std::vector<std::string>& filters)
+        {
+            m_file_browser = ImGui::FileBrowser{flags.value()};
+            m_file_browser.SetTitle(title);
+            m_file_browser.SetTypeFilters(filters);
+        }
+        ImGui::FileBrowser m_file_browser;
+    };
+
+    inline void DrawTextInputField(const char* id, const std::string& title, const std::vector<std::string>& filters,
+                                    const std::string& hint, std::filesystem::path& buffer, int flags = 0)
+    {
+        static std::unordered_map<ImGuiID, ImGui::FileBrowser> browsers;
+        ImGui::PushID(id);
+        const ImGuiID key = ImGui::GetID("browser");
+        if (!browsers.contains(key))
+        {
+            browsers[key] = ImGui::FileBrowser{static_cast<unsigned int>(flags)};
+            browsers[key].SetTitle(title);
+            browsers[key].SetTypeFilters(filters);
+        }
+
+        ImGui::FileBrowser& browser = browsers[key];
+
+        std::string b = buffer.string();
+        if (ImGui::InputTextWithHint("##anything", hint.c_str(), &b, ImGuiInputTextFlags_ElideLeft))
+            buffer = b;
+
+        ImGui::SameLine();
+        if (ImGui::Button("Open File Explorer"))
+        {
+            browser.Open();
+        }
+
+        browser.Display();
+
+        if (browser.HasSelected())
+        {
+            std::filesystem::path path = browser.GetSelected();
+
+            const std::string s = path.string();
+            buffer = path.string();
+            browser.ClearSelected();
+        }
+
+        ImGui::PopID();
+    }
 
     void SetupImGuiStyle()
     {
@@ -367,7 +419,7 @@ namespace dmg
         if (condition) ImGui::EndDisabled();
     }
 
-    inline void DrawControlWindow(DMG& dmg)
+    inline void DrawControlWindow(DMG& dmg, const ImGuiContext& imgui_context, const Config& config)
     {
         if (ImGui::Begin("Control"))
         {
@@ -377,6 +429,9 @@ namespace dmg
 
                 if (ImGui::Button(ICON_FA_PLAY " Play"))
                 {
+                    dmg.LoadROM(imgui_context.selected_rom);
+                    if (config.bootrom_load_option == 1)
+                        dmg.LoadBootrom(config.bootrom_file);
                     dmg.SetState(DMG::PlayState::PLAY);
                 }
 
@@ -387,10 +442,13 @@ namespace dmg
 
                 ImGui::TableNextColumn();
 
-                DoIfEnabled(dmg.GetState() != DMG::PlayState::PLAY, [&dmg]
+                DoIfEnabled(dmg.GetState() != DMG::PlayState::PLAY, [&dmg, &imgui_context, &config]
                 {
                     if (ImGui::Button(ICON_FA_PAUSE " Pause"))
                     {
+                        dmg.LoadROM(imgui_context.selected_rom);
+                        if (config.bootrom_load_option == 1)
+                            dmg.LoadBootrom(config.bootrom_file);
                         dmg.SetState(DMG::PlayState::PAUSE);
                     }
                 });
@@ -460,7 +518,7 @@ namespace dmg
         mem_edit.DrawWindow("Memory", memory.data(), memory.size());
     }
 
-    inline void PrintEntry(DMG& dmg, ROMEntry* entry, ROMEntry** selected_rom_entry)
+    inline void PrintEntry(ImGuiContext& context, ROMEntry* entry, ROMEntry** selected_rom_entry)
     {
         static int selected = 0;
         static int i = 0;
@@ -476,6 +534,9 @@ namespace dmg
             sprintf(label, ICON_FA_GAMEPAD " %s", entry->name.c_str());
 
         ImGui::PushID(i);
+        bool is_loaded = context.selected_rom == entry->path;
+        if (is_loaded)
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
         if (ImGui::Selectable(label, selected == i, ImGuiSelectableFlags_SelectOnNav | ImGuiSelectableFlags_AllowDoubleClick))
         {
             selected = i;
@@ -489,10 +550,13 @@ namespace dmg
                 }
                 else if (!entry->is_directory)
                 {
-                    dmg.LoadROM(entry->path);
+                    //dmg.LoadROM(entry->path);
+                    context.selected_rom = entry->path;
                 }
             }
         }
+        if (is_loaded)
+            ImGui::PopStyleColor();
         ImGui::PopID();
         ++i;
 
@@ -501,7 +565,7 @@ namespace dmg
             ImGui::Indent();
             for (const auto& child : entry->children)
             {
-                PrintEntry(dmg, child.get(), selected_rom_entry);
+                PrintEntry(context, child.get(), selected_rom_entry);
             }
             ImGui::Unindent();
         }
@@ -532,7 +596,7 @@ namespace dmg
                 {
                     for ( const auto& child : imgui_context.root_entry->children )
                     {
-                        PrintEntry(dmg, child.get(), &selected_rom_entry);
+                        PrintEntry(imgui_context, child.get(), &selected_rom_entry);
                     }
                 }
                 ImGui::EndChild();
@@ -564,50 +628,33 @@ namespace dmg
 
         if (show_settings)
         {
-            ImGui::FileBrowser& browser = imgui_context.rom_file_dialog;
-            static std::string rom_folder_path_buffer {config.rom_folder.string()};
-
             if (ImGui::Begin("Settings", &show_settings))
             {
-                ImGui::SeparatorText("Choose your ROM folder path");
+                ImGui::SeparatorText("Select a path to your preferred rom folder");
+                DrawTextInputField("1", "Select rom folder", {},
+                    "Select rom folder", config.rom_folder, ImGuiFileBrowserFlags_SelectDirectory);
 
-                ImGui::InputTextWithHint("##anything", "path to your rom directory", &rom_folder_path_buffer, ImGuiInputTextFlags_ElideLeft);
-
-                ImGui::SameLine();
-
-                if (ImGui::Button("Open File Explorer"))
-                {
-                    browser.Open();
-                }
                 if (ImGui::Button("Search for ROMs"))
                 {
-                    //SearchROMs(std::string{rom_folder_path_buffer.data()});
-                    //imgui_context.root_entry = std::move(rom_entries[rom_folder_path_buffer.data()]);
-                    imgui_context.root_entry = std::move(SearchROMs(std::string{rom_folder_path_buffer.data()}));
+                    imgui_context.root_entry = std::move(SearchROMs(config.rom_folder));
+                }
+
+                ImGui::SeparatorText("Load bootrom");
+                static const char* items[] = {"Initialize without a bootrom", "Specify path to bootrom"};
+                int& current_item = config.bootrom_load_option;
+                ImGui::Combo("##combo", &current_item, items, IM_ARRAYSIZE(items));
+
+                if (current_item == 1)
+                {
+                    DrawTextInputField("2", "Select bootrom", {".gb"},
+                        "Select bootrom", config.bootrom_file, 0);
                 }
             }
             ImGui::End();
 
-            browser.Display();
-
-            if (browser.HasSelected())
-            {
-                std::filesystem::path folder = browser.GetSelected();
-
-                const std::string s = folder.string();
-                rom_folder_path_buffer = folder.string();
-                /*
-                std::array<char, 256>& buf = rom_folder_path_buffer;
-                const size_t n = std::min(s.size(), buf.size() - 1);
-                std::copy_n(folder.string().begin(), n, buf.begin());
-                buf[n] = '\0';
-                */
-
-                config.rom_folder = folder;
-
-                browser.ClearSelected();
-            }
         }
     }
+
+
 
 }

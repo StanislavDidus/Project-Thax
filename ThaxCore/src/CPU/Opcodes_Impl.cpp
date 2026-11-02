@@ -29,7 +29,7 @@ namespace dmg
 
      uint32_t dmg::ControlUnit::HALT()
     {
-        if (m_cpu.IME == false && m_cpu.m_interrupt_controller.GetPendingInterrupt() != 0)
+        if (m_cpu.IME == false && m_cpu.m_interrupt_controller.IsInterruptPending() != 0)
         {
             // Halt bug
             m_cpu.m_current_state = CPU::State::NORMAL;

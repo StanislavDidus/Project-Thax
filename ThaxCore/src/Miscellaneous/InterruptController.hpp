@@ -42,7 +42,20 @@ namespace dmg
             IF &= ~value;
         }
 
-        [[nodiscard]] uint8_t GetPendingInterrupt() const
+        [[nodiscard]] std::optional<uint8_t> GetPendingInterrupt() const
+        {
+            for (int i = 0; i < 5; ++i)
+            {
+                if (getBit(IF, i) && getBit(IE, i))
+                {
+                    return 1 << i;
+                }
+            }
+
+            return std::nullopt;
+        }
+
+        [[nodiscard]] bool IsInterruptPending() const
         {
             return IF & IE & 0x1F;
         }

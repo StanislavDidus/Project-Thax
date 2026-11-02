@@ -90,16 +90,16 @@ std::optional<uint32_t> dmg::CPU::HandleInterrupts()
 {
     if (IME)
     {
-        uint8_t result = m_interrupt_controller.GetPendingInterrupt();
-        if (result)
+        auto result = m_interrupt_controller.GetPendingInterrupt();
+        if (result.has_value())
         {
             IME = false;
-            m_interrupt_controller.ResetIF(result);
+            m_interrupt_controller.ResetIF(result.value());
 
             WriteMemory(--SP, PC.ReadHigh());
             WriteMemory(--SP, PC.ReadLow());
 
-            switch (result)
+            switch (result.value())
             {
             case InterruptController::VBLANK: // VBLANK
                 PC.WriteWord(0x40);
@@ -117,7 +117,7 @@ std::optional<uint32_t> dmg::CPU::HandleInterrupts()
                 PC.WriteWord(0x60);
                 break;
             default:
-                DMG_WARN("Interrupt returned a flag that is not supported: {}", result);
+                DMG_WARN("Interrupt returned a flag that is not supported: {}", result.value());
                 break;
             }
 
