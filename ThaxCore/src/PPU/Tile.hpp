@@ -16,7 +16,7 @@ namespace dmg
         explicit Tile(const uint16_t address) : m_address(address) {}
         ~Tile() = default;
 
-        [[nodiscard]] TileRow GetRow(const uint32_t row, const std::span<uint8_t> memory) const
+        [[nodiscard]] TileRow GetRow(const uint32_t row, const std::span<const uint8_t> memory) const
         {
             return TileRow{
                 memory[m_address + row * 2],

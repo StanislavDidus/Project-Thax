@@ -4,6 +4,7 @@
 
 #include "Miscellaneous/InterruptController.hpp"
 #include "Miscellaneous/DMAController.hpp"
+#include "Registers/PaletteRegister.hpp"
 #include "Utils/Math.hpp"
 
 namespace dmg
@@ -37,12 +38,12 @@ namespace dmg
         }
     }
 
-    const globals::LCD_BUFFER& PPU::getLCDBuffer() const
+    const globals::LCD_BUFFER& PPU::GetLCDBuffer() const
     {
         return m_lcd;
     }
 
-    globals::TILE_DATA_BUFFER PPU::getTileDataBuffer()
+    globals::TILE_DATA_BUFFER PPU::GetTileDataBuffer() const
     {
         globals::TILE_DATA_BUFFER tile_data_buffer {};
 
@@ -72,6 +73,72 @@ namespace dmg
         }
 
         return tile_data_buffer;
+    }
+
+    globals::TILEMAP_BUFFER PPU::GetBGTilemapBuffer() const
+    {
+        globals::TILEMAP_BUFFER tilemap_buffer = std::make_unique<std::vector<uint8_t>>();
+        tilemap_buffer->resize(globals::TILEMAP_DATA_WIDTH * globals::TILEMAP_DATA_HEIGHT);
+
+        for (int y = 0; y < globals::TILEMAP_HEIGHT; ++y)
+        {
+            for (int row = 0; row < 8; ++row)
+            {
+                for (int x = 0; x < globals::TILEMAP_WIDTH; ++x)
+                {
+                    uint32_t tile_ref = VRAM[LCDC.GetBGTileMapArea() + x + y * globals::TILEMAP_WIDTH];
+                    Tile tile = GetTileWindowBG(tile_ref);
+
+                    const Tile::TileRow tile_row = tile.GetRow(row, VRAM);
+                    uint8_t low = tile_row.first;
+                    uint8_t high = tile_row.second;
+
+                    for (int j = 0; j < 8; ++j)
+                    {
+                        uint8_t color = GetColorByID(BGP, (getBit(high, (7 - j)) << 1) | getBit(low, (7 - j)));
+
+                        int px = x * 8 + j;
+                        int py = y * 8 + row;
+                        (*tilemap_buffer)[py * globals::TILEMAP_DATA_WIDTH + px] = color;
+                    }
+                }
+            }
+        }
+
+        return std::move(tilemap_buffer);
+    }
+
+    globals::TILEMAP_BUFFER PPU::GetWindowTilemapBuffer() const
+    {
+        globals::TILEMAP_BUFFER tilemap_buffer = std::make_unique<std::vector<uint8_t>>();
+        tilemap_buffer->resize(globals::TILEMAP_DATA_WIDTH * globals::TILEMAP_DATA_HEIGHT);
+
+        for (int y = 0; y < globals::TILEMAP_HEIGHT; ++y)
+        {
+            for (int row = 0; row < 8; ++row)
+            {
+                for (int x = 0; x < globals::TILEMAP_WIDTH; ++x)
+                {
+                    uint32_t tile_ref = VRAM[LCDC.GetWindowTileMapArea() + x + y * globals::TILEMAP_WIDTH];
+                    Tile tile = GetTileWindowBG(tile_ref);
+
+                    const Tile::TileRow tile_row = tile.GetRow(row, VRAM);
+                    uint8_t low = tile_row.first;
+                    uint8_t high = tile_row.second;
+
+                    for (int j = 0; j < 8; ++j)
+                    {
+                        uint8_t color = GetColorByID(BGP, (getBit(high, (7 - j)) << 1) | getBit(low, (7 - j)));
+
+                        int px = x * 8 + j;
+                        int py = y * 8 + row;
+                        (*tilemap_buffer)[py * globals::TILEMAP_DATA_WIDTH + px] = color;
+                    }
+                }
+            }
+        }
+
+        return std::move(tilemap_buffer);
     }
 
     void PPU::WriteVRAM(const uint16_t address, const uint8_t value)

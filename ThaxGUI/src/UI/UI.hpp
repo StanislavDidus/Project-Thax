@@ -26,9 +26,11 @@ namespace dmg
 {
     struct ImGuiContext
     {
-        ImGui::FileBrowser rom_file_dialog;
         std::unique_ptr<ROMEntry> root_entry = nullptr;
-        std::filesystem::path selected_rom;
+
+    	bool show_vram_viewer = false;
+    	bool show_settings_rom = false;
+    	bool show_settings_themes = false;
     };
 
     class FileBrowser
@@ -82,96 +84,185 @@ namespace dmg
         ImGui::PopID();
     }
 
-    void SetupImGuiStyle()
+    inline void SetupImGuiStyleWhite()
+	{
+		// Comfortable Light Orange style by SouthCraftX from ImThemes
+		ImGuiStyle& style = ImGui::GetStyle();
+
+		style.Alpha = 1.0f;
+		style.DisabledAlpha = 1.0f;
+		style.WindowPadding = ImVec2(20.0f, 20.0f);
+		style.WindowRounding = 11.5f;
+		style.WindowBorderSize = 0.0f;
+		style.WindowMinSize = ImVec2(20.0f, 20.0f);
+		style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
+		style.WindowMenuButtonPosition = ImGuiDir_None;
+		style.ChildRounding = 20.0f;
+		style.ChildBorderSize = 1.0f;
+		style.PopupRounding = 17.4f;
+		style.PopupBorderSize = 1.0f;
+		style.FramePadding = ImVec2(20.0f, 3.4f);
+		style.FrameRounding = 11.9f;
+		style.FrameBorderSize = 0.0f;
+		style.ItemSpacing = ImVec2(8.9f, 13.4f);
+		style.ItemInnerSpacing = ImVec2(7.1f, 1.8f);
+		style.CellPadding = ImVec2(12.1f, 9.2f);
+		style.IndentSpacing = 0.0f;
+		style.ColumnsMinSpacing = 8.7f;
+		style.ScrollbarSize = 11.6f;
+		style.ScrollbarRounding = 15.9f;
+		style.GrabMinSize = 3.7f;
+		style.GrabRounding = 20.0f;
+		style.TabRounding = 9.8f;
+		style.TabBorderSize = 0.0f;
+		style.ColorButtonPosition = ImGuiDir_Right;
+		style.ButtonTextAlign = ImVec2(0.5f, 0.5f);
+		style.SelectableTextAlign = ImVec2(0.0f, 0.0f);
+
+		style.Colors[ImGuiCol_Text] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+		style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.7254902f, 0.68235296f, 0.54901963f, 1.0f);
+		style.Colors[ImGuiCol_WindowBg] = ImVec4(0.92156863f, 0.9137255f, 0.8980392f, 1.0f);
+		style.Colors[ImGuiCol_ChildBg] = ImVec4(0.90588236f, 0.8980392f, 0.88235295f, 1.0f);
+		style.Colors[ImGuiCol_PopupBg] = ImVec4(0.92156863f, 0.9137255f, 0.8980392f, 1.0f);
+		style.Colors[ImGuiCol_Border] = ImVec4(0.84313726f, 0.83137256f, 0.80784315f, 1.0f);
+		style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.92156863f, 0.9137255f, 0.8980392f, 1.0f);
+		style.Colors[ImGuiCol_FrameBg] = ImVec4(0.8862745f, 0.8745098f, 0.84705883f, 1.0f);
+		style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.84313726f, 0.83137256f, 0.80784315f, 1.0f);
+		style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.84313726f, 0.83137256f, 0.80784315f, 1.0f);
+		style.Colors[ImGuiCol_TitleBg] = ImVec4(0.9529412f, 0.94509804f, 0.92941177f, 1.0f);
+		style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.9529412f, 0.94509804f, 0.92941177f, 1.0f);
+		style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.92156863f, 0.9137255f, 0.8980392f, 1.0f);
+		style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.9019608f, 0.89411765f, 0.8784314f, 1.0f);
+		style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.9529412f, 0.94509804f, 0.92941177f, 1.0f);
+		style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.88235295f, 0.8666667f, 0.8509804f, 1.0f);
+		style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.84313726f, 0.83137256f, 0.80784315f, 1.0f);
+		style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.88235295f, 0.8666667f, 0.8509804f, 1.0f);
+		style.Colors[ImGuiCol_CheckMark] = ImVec4(0.96862745f, 0.050980393f, 0.15686275f, 1.0f);
+		style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.9647059f, 0.8f, 0.02745098f, 1.0f);
+		style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.96862745f, 0.5882353f, 0.03529412f, 1.0f);
+		style.Colors[ImGuiCol_Button] = ImVec4(0.88235295f, 0.8666667f, 0.8509804f, 1.0f);
+		style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.81960785f, 0.8117647f, 0.8039216f, 1.0f);
+		style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.84705883f, 0.84705883f, 0.84705883f, 1.0f);
+		style.Colors[ImGuiCol_Header] = ImVec4(0.85882354f, 0.8352941f, 0.7921569f, 1.0f);
+		style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.89411765f, 0.89411765f, 0.89411765f, 1.0f);
+		style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.92156863f, 0.9137255f, 0.8980392f, 1.0f);
+		style.Colors[ImGuiCol_Separator] = ImVec4(0.87058824f, 0.8509804f, 0.80784315f, 1.0f);
+		style.Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.84313726f, 0.8156863f, 0.7490196f, 1.0f);
+		style.Colors[ImGuiCol_SeparatorActive] = ImVec4(0.84313726f, 0.8156863f, 0.7490196f, 1.0f);
+		style.Colors[ImGuiCol_ResizeGrip] = ImVec4(0.85490197f, 0.85490197f, 0.85490197f, 1.0f);
+		style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.96862745f, 0.050980393f, 0.15686275f, 1.0f);
+		style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+		style.Colors[ImGuiCol_Tab] = ImVec4(0.92156863f, 0.9137255f, 0.8980392f, 1.0f);
+		style.Colors[ImGuiCol_TabHovered] = ImVec4(0.88235295f, 0.8666667f, 0.8509804f, 1.0f);
+		style.Colors[ImGuiCol_TabActive] = ImVec4(0.88235295f, 0.8666667f, 0.8509804f, 1.0f);
+		style.Colors[ImGuiCol_TabUnfocused] = ImVec4(0.92156863f, 0.9137255f, 0.8980392f, 1.0f);
+		style.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.8745098f, 0.7254902f, 0.42745098f, 1.0f);
+		style.Colors[ImGuiCol_PlotLines] = ImVec4(0.47843137f, 0.4f, 0.29803923f, 1.0f);
+		style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.9607843f, 0.019607844f, 0.11764706f, 1.0f);
+		style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90588236f, 0.6627451f, 0.30980393f, 1.0f);
+		style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.6392157f, 0.39607844f, 0.043137256f, 1.0f);
+		style.Colors[ImGuiCol_TableHeaderBg] = ImVec4(0.9529412f, 0.94509804f, 0.92941177f, 1.0f);
+		style.Colors[ImGuiCol_TableBorderStrong] = ImVec4(0.9529412f, 0.94509804f, 0.92941177f, 1.0f);
+		style.Colors[ImGuiCol_TableBorderLight] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+		style.Colors[ImGuiCol_TableRowBg] = ImVec4(0.88235295f, 0.8666667f, 0.8509804f, 1.0f);
+		style.Colors[ImGuiCol_TableRowBgAlt] = ImVec4(0.9019608f, 0.89411765f, 0.8784314f, 1.0f);
+		style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.0627451f, 0.0627451f, 0.0627451f, 1.0f);
+		style.Colors[ImGuiCol_DragDropTarget] = ImVec4(0.5019608f, 0.4862745f, 0.0f, 1.0f);
+		style.Colors[ImGuiCol_NavHighlight] = ImVec4(0.73333335f, 0.70980394f, 0.0f, 1.0f);
+		style.Colors[ImGuiCol_NavWindowingHighlight] = ImVec4(0.5019608f, 0.4862745f, 0.0f, 1.0f);
+		style.Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.8039216f, 0.8235294f, 0.45490196f, 0.502f);
+		style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.8039216f, 0.8235294f, 0.45490196f, 0.502f);
+	}
+
+    inline void SetupImGuiStyleGrey()
     {
-	    // Purple Comfy style by RegularLunar from ImThemes
+	    // Visual Studio style by MomoDeve from ImThemes
 	    ImGuiStyle& style = ImGui::GetStyle();
 
 	    style.Alpha = 1.0f;
-	    style.DisabledAlpha = 0.1f;
+	    style.DisabledAlpha = 0.6f;
 	    style.WindowPadding = ImVec2(8.0f, 8.0f);
-	    style.WindowRounding = 10.0f;
-	    style.WindowBorderSize = 0.0f;
-	    style.WindowMinSize = ImVec2(30.0f, 30.0f);
-	    style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
-	    style.WindowMenuButtonPosition = ImGuiDir_Right;
-	    style.ChildRounding = 5.0f;
+	    style.WindowRounding = 0.0f;
+	    style.WindowBorderSize = 1.0f;
+	    style.WindowMinSize = ImVec2(32.0f, 32.0f);
+	    style.WindowTitleAlign = ImVec2(0.0f, 0.5f);
+	    style.WindowMenuButtonPosition = ImGuiDir_Left;
+	    style.ChildRounding = 0.0f;
 	    style.ChildBorderSize = 1.0f;
-	    style.PopupRounding = 10.0f;
-	    style.PopupBorderSize = 0.0f;
-	    style.FramePadding = ImVec2(5.0f, 3.5f);
-	    style.FrameRounding = 5.0f;
+	    style.PopupRounding = 0.0f;
+	    style.PopupBorderSize = 1.0f;
+	    style.FramePadding = ImVec2(4.0f, 3.0f);
+	    style.FrameRounding = 0.0f;
 	    style.FrameBorderSize = 0.0f;
-	    style.ItemSpacing = ImVec2(5.0f, 4.0f);
-	    style.ItemInnerSpacing = ImVec2(5.0f, 5.0f);
+	    style.ItemSpacing = ImVec2(8.0f, 4.0f);
+	    style.ItemInnerSpacing = ImVec2(4.0f, 4.0f);
 	    style.CellPadding = ImVec2(4.0f, 2.0f);
-	    style.IndentSpacing = 5.0f;
-	    style.ColumnsMinSpacing = 5.0f;
-	    style.ScrollbarSize = 15.0f;
-	    style.ScrollbarRounding = 9.0f;
-	    style.GrabMinSize = 15.0f;
-	    style.GrabRounding = 5.0f;
-	    style.TabRounding = 5.0f;
+	    style.IndentSpacing = 21.0f;
+	    style.ColumnsMinSpacing = 6.0f;
+	    style.ScrollbarSize = 14.0f;
+	    style.ScrollbarRounding = 0.0f;
+	    style.GrabMinSize = 10.0f;
+	    style.GrabRounding = 0.0f;
+	    style.TabRounding = 0.0f;
 	    style.TabBorderSize = 0.0f;
-	    //style.TabMinWidthForCloseButton = 0.0f;
 	    style.ColorButtonPosition = ImGuiDir_Right;
 	    style.ButtonTextAlign = ImVec2(0.5f, 0.5f);
 	    style.SelectableTextAlign = ImVec2(0.0f, 0.0f);
 
 	    style.Colors[ImGuiCol_Text] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-	    style.Colors[ImGuiCol_TextDisabled] = ImVec4(1.0f, 1.0f, 1.0f, 0.360515f);
-	    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.09803922f, 0.09803922f, 0.09803922f, 1.0f);
-	    style.Colors[ImGuiCol_ChildBg] = ImVec4(1.0f, 0.0f, 0.0f, 0.0f);
-	    style.Colors[ImGuiCol_PopupBg] = ImVec4(0.09803922f, 0.09803922f, 0.09803922f, 1.0f);
-	    style.Colors[ImGuiCol_Border] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-	    style.Colors[ImGuiCol_FrameBg] = ImVec4(0.15686275f, 0.15686275f, 0.15686275f, 1.0f);
-	    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.38039216f, 0.42352942f, 0.57254905f, 0.54901963f);
-	    style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_TitleBg] = ImVec4(0.09803922f, 0.09803922f, 0.09803922f, 1.0f);
-	    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.09803922f, 0.09803922f, 0.09803922f, 1.0f);
-	    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.25882354f, 0.25882354f, 0.25882354f, 0.0f);
-	    style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-	    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.15686275f, 0.15686275f, 0.15686275f, 0.0f);
-	    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.15686275f, 0.15686275f, 0.15686275f, 1.0f);
-	    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.23529412f, 0.23529412f, 0.23529412f, 1.0f);
-	    style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.29411766f, 0.29411766f, 0.29411766f, 1.0f);
-	    style.Colors[ImGuiCol_CheckMark] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_Button] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_Header] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_Separator] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_SeparatorActive] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_ResizeGrip] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_Tab] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_TabHovered] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_TabActive] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_TabUnfocused] = ImVec4(0.0f, 0.4509804f, 1.0f, 0.0f);
-	    style.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.13333334f, 0.25882354f, 0.42352942f, 0.0f);
-	    style.Colors[ImGuiCol_PlotLines] = ImVec4(0.29411766f, 0.29411766f, 0.29411766f, 1.0f);
-	    style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.7372549f, 0.69411767f, 0.8862745f, 0.54901963f);
+	    style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.5921569f, 0.5921569f, 0.5921569f, 1.0f);
+	    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.14509805f, 0.14509805f, 0.14901961f, 1.0f);
+	    style.Colors[ImGuiCol_ChildBg] = ImVec4(0.14509805f, 0.14509805f, 0.14901961f, 1.0f);
+	    style.Colors[ImGuiCol_PopupBg] = ImVec4(0.14509805f, 0.14509805f, 0.14901961f, 1.0f);
+	    style.Colors[ImGuiCol_Border] = ImVec4(0.30588236f, 0.30588236f, 0.30588236f, 1.0f);
+	    style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.30588236f, 0.30588236f, 0.30588236f, 1.0f);
+	    style.Colors[ImGuiCol_FrameBg] = ImVec4(0.2f, 0.2f, 0.21568628f, 1.0f);
+	    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.11372549f, 0.5921569f, 0.9254902f, 1.0f);
+	    style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.0f, 0.46666667f, 0.78431374f, 1.0f);
+	    style.Colors[ImGuiCol_TitleBg] = ImVec4(0.14509805f, 0.14509805f, 0.14901961f, 1.0f);
+	    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.14509805f, 0.14509805f, 0.14901961f, 1.0f);
+	    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.14509805f, 0.14509805f, 0.14901961f, 1.0f);
+	    style.Colors[ImGuiCol_MenuBarBg] = ImVec4(0.2f, 0.2f, 0.21568628f, 1.0f);
+	    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.2f, 0.2f, 0.21568628f, 1.0f);
+	    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.32156864f, 0.32156864f, 0.33333334f, 1.0f);
+	    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.3529412f, 0.3529412f, 0.37254903f, 1.0f);
+	    style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.3529412f, 0.3529412f, 0.37254903f, 1.0f);
+	    style.Colors[ImGuiCol_CheckMark] = ImVec4(0.0f, 0.46666667f, 0.78431374f, 1.0f);
+	    style.Colors[ImGuiCol_SliderGrab] = ImVec4(0.11372549f, 0.5921569f, 0.9254902f, 1.0f);
+	    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.0f, 0.46666667f, 0.78431374f, 1.0f);
+	    style.Colors[ImGuiCol_Button] = ImVec4(0.2f, 0.2f, 0.21568628f, 1.0f);
+	    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.11372549f, 0.5921569f, 0.9254902f, 1.0f);
+	    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.11372549f, 0.5921569f, 0.9254902f, 1.0f);
+	    style.Colors[ImGuiCol_Header] = ImVec4(0.2f, 0.2f, 0.21568628f, 1.0f);
+	    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.11372549f, 0.5921569f, 0.9254902f, 1.0f);
+	    style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.0f, 0.46666667f, 0.78431374f, 1.0f);
+	    style.Colors[ImGuiCol_Separator] = ImVec4(0.30588236f, 0.30588236f, 0.30588236f, 1.0f);
+	    style.Colors[ImGuiCol_SeparatorHovered] = ImVec4(0.30588236f, 0.30588236f, 0.30588236f, 1.0f);
+	    style.Colors[ImGuiCol_SeparatorActive] = ImVec4(0.30588236f, 0.30588236f, 0.30588236f, 1.0f);
+	    style.Colors[ImGuiCol_ResizeGrip] = ImVec4(0.14509805f, 0.14509805f, 0.14901961f, 1.0f);
+	    style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.2f, 0.2f, 0.21568628f, 1.0f);
+	    style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(0.32156864f, 0.32156864f, 0.33333334f, 1.0f);
+	    style.Colors[ImGuiCol_Tab] = ImVec4(0.14509805f, 0.14509805f, 0.14901961f, 1.0f);
+	    style.Colors[ImGuiCol_TabHovered] = ImVec4(0.11372549f, 0.5921569f, 0.9254902f, 1.0f);
+	    style.Colors[ImGuiCol_TabActive] = ImVec4(0.0f, 0.46666667f, 0.78431374f, 1.0f);
+	    style.Colors[ImGuiCol_TabUnfocused] = ImVec4(0.14509805f, 0.14509805f, 0.14901961f, 1.0f);
+	    style.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.0f, 0.46666667f, 0.78431374f, 1.0f);
+	    style.Colors[ImGuiCol_PlotLines] = ImVec4(0.0f, 0.46666667f, 0.78431374f, 1.0f);
+	    style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.11372549f, 0.5921569f, 0.9254902f, 1.0f);
+	    style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.0f, 0.46666667f, 0.78431374f, 1.0f);
+	    style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.11372549f, 0.5921569f, 0.9254902f, 1.0f);
 	    style.Colors[ImGuiCol_TableHeaderBg] = ImVec4(0.1882353f, 0.1882353f, 0.2f, 1.0f);
-	    style.Colors[ImGuiCol_TableBorderStrong] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_TableBorderLight] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.2901961f);
+	    style.Colors[ImGuiCol_TableBorderStrong] = ImVec4(0.30980393f, 0.30980393f, 0.34901962f, 1.0f);
+	    style.Colors[ImGuiCol_TableBorderLight] = ImVec4(0.22745098f, 0.22745098f, 0.24705882f, 1.0f);
 	    style.Colors[ImGuiCol_TableRowBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-	    style.Colors[ImGuiCol_TableRowBgAlt] = ImVec4(1.0f, 1.0f, 1.0f, 0.03433478f);
-	    style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.5019608f, 0.3019608f, 1.0f, 0.54901963f);
-	    style.Colors[ImGuiCol_DragDropTarget] = ImVec4(1.0f, 1.0f, 0.0f, 0.9f);
-	    style.Colors[ImGuiCol_NavHighlight] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+	    style.Colors[ImGuiCol_TableRowBgAlt] = ImVec4(1.0f, 1.0f, 1.0f, 0.06f);
+	    style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.0f, 0.46666667f, 0.78431374f, 1.0f);
+	    style.Colors[ImGuiCol_DragDropTarget] = ImVec4(0.14509805f, 0.14509805f, 0.14901961f, 1.0f);
+	    style.Colors[ImGuiCol_NavHighlight] = ImVec4(0.14509805f, 0.14509805f, 0.14901961f, 1.0f);
 	    style.Colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.0f, 1.0f, 1.0f, 0.7f);
 	    style.Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.8f, 0.8f, 0.8f, 0.2f);
-	    style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.8f, 0.8f, 0.8f, 0.35f);
-}
+	    style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.14509805f, 0.14509805f, 0.14901961f, 1.0f);
+    }
 
     inline ImGuiContext InitializeImGui(const GraphicsContext& graphics_context)
     {
@@ -182,6 +273,7 @@ namespace dmg
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
+    	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForOpenGL(graphics_context.window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
@@ -202,10 +294,8 @@ namespace dmg
 
         // Initialize File Browser
         ImGuiContext context;
-        context.rom_file_dialog = ImGui::FileBrowser{ImGuiFileBrowserFlags_SelectDirectory};
-        context.rom_file_dialog.SetTitle("File Explorer");
 
-        SetupImGuiStyle();
+        SetupImGuiStyleWhite();
 
         DMG_INFO("ImGui UI was initialized.");
 
@@ -256,32 +346,88 @@ namespace dmg
         value >> 4 & 1 ? ImGui::Text("C") : ImGui::Text("-");
     }
 
-    inline void DrawAssetWindow(unsigned int gl_texture)
+    inline void DrawVRAMViewer(ImGuiContext& context, unsigned int tiles_texture, unsigned int tilemap1_texture, unsigned int tilemap2_texture)
     {
-        if (ImGui::Begin("Asset Viewport"))
-        {
-            ImVec2 avail_size = ImGui::GetContentRegionAvail();
+    	if (context.show_vram_viewer)
+    	{
+    		if (ImGui::Begin("VRAM Viewer", &context.show_vram_viewer))
+    		{
+    			if (ImGui::BeginTabBar("##TabBar"))
+    			{
+    				if (ImGui::BeginTabItem("Tiles"))
+    				{
+    					const ImVec2 avail_size = ImGui::GetContentRegionAvail();
+    					const float scale_x = avail_size.x / globals::TILE_DATA_VIEW_WIDTH;
+    					const float scale_y = avail_size.y / globals::TILE_DATA_VIEW_HEIGHT;
+    					const float final_scale = scale_x < scale_y ? scale_x : scale_y;
+    					ImVec2 viewport_size
+    					{
+    						globals::TILE_DATA_VIEW_WIDTH * final_scale,
+							globals::TILE_DATA_VIEW_HEIGHT * final_scale,
+						};
 
-            const float scale_x = avail_size.x / globals::TILE_DATA_VIEW_WIDTH;
-            const float scale_y = avail_size.y / globals::TILE_DATA_VIEW_HEIGHT;
-            const float final_scale = scale_x < scale_y ? scale_x : scale_y;
-            ImVec2 viewport_size
-            {
-                globals::TILE_DATA_VIEW_WIDTH * final_scale,
-                globals::TILE_DATA_VIEW_HEIGHT * final_scale,
-            };
+    					const ImVec2 cursor = ImGui::GetCursorPos();
+    					const float offset_x = (avail_size.x - viewport_size.x) * 0.5f;
+    					const float offset_y = (avail_size.y - viewport_size.y) * 0.5f;
 
-            const ImVec2 cursor = ImGui::GetCursorPos();
-            const float offset_x = (avail_size.x - viewport_size.x) * 0.5f;
-            const float offset_y = (avail_size.y - viewport_size.y) * 0.5f;
+    					ImGui::SetCursorPos(ImVec2(
+							cursor.x + (offset_x > 0.0f ? offset_x : 0.0f),
+							cursor.y + (offset_y > 0.0f ? offset_y : 0.0f)));
 
-            ImGui::SetCursorPos(ImVec2(
-                cursor.x + (offset_x > 0.0f ? offset_x : 0.0f),
-                cursor.y + (offset_y > 0.0f ? offset_y : 0.0f)));
+    					ImGui::Image(static_cast<ImTextureID>(tiles_texture), viewport_size);
+    					ImGui::EndTabItem();
+    				}
+    				if (ImGui::BeginTabItem("BG Tilemap"))
+    				{
+    					const ImVec2 avail_size = ImGui::GetContentRegionAvail();
+    					const float scale_x = avail_size.x / globals::TILEMAP_DATA_WIDTH;
+    					const float scale_y = avail_size.y / globals::TILEMAP_DATA_HEIGHT;
+    					const float final_scale = scale_x < scale_y ? scale_x : scale_y;
+    					ImVec2 viewport_size
+    					{
+    						globals::TILEMAP_DATA_WIDTH * final_scale,
+							globals::TILEMAP_DATA_HEIGHT * final_scale,
+						};
 
-            ImGui::Image(static_cast<ImTextureID>(gl_texture), viewport_size);
-        }
-        ImGui::End();
+    					const ImVec2 cursor = ImGui::GetCursorPos();
+    					const float offset_x = (avail_size.x - viewport_size.x) * 0.5f;
+    					const float offset_y = (avail_size.y - viewport_size.y) * 0.5f;
+
+    					ImGui::SetCursorPos(ImVec2(
+							cursor.x + (offset_x > 0.0f ? offset_x : 0.0f),
+							cursor.y + (offset_y > 0.0f ? offset_y : 0.0f)));
+
+    					ImGui::Image(static_cast<ImTextureID>(tilemap1_texture), viewport_size);
+    					ImGui::EndTabItem();
+    				}
+    				if (ImGui::BeginTabItem("Window Tilemap"))
+    				{
+    					const ImVec2 avail_size = ImGui::GetContentRegionAvail();
+    					const float scale_x = avail_size.x / globals::TILEMAP_DATA_WIDTH;
+    					const float scale_y = avail_size.y / globals::TILEMAP_DATA_HEIGHT;
+    					const float final_scale = scale_x < scale_y ? scale_x : scale_y;
+    					ImVec2 viewport_size
+    					{
+    						globals::TILEMAP_DATA_WIDTH * final_scale,
+							globals::TILEMAP_DATA_HEIGHT * final_scale,
+						};
+
+    					const ImVec2 cursor = ImGui::GetCursorPos();
+    					const float offset_x = (avail_size.x - viewport_size.x) * 0.5f;
+    					const float offset_y = (avail_size.y - viewport_size.y) * 0.5f;
+
+    					ImGui::SetCursorPos(ImVec2(
+							cursor.x + (offset_x > 0.0f ? offset_x : 0.0f),
+							cursor.y + (offset_y > 0.0f ? offset_y : 0.0f)));
+
+    					ImGui::Image(static_cast<ImTextureID>(tilemap2_texture), viewport_size);
+    					ImGui::EndTabItem();
+    				}
+    				ImGui::EndTabBar();
+    			}
+    		}
+    		ImGui::End();
+    	}
     }
 
     inline void DrawViewport(unsigned int viewport_texture)
@@ -419,7 +565,7 @@ namespace dmg
         if (condition) ImGui::EndDisabled();
     }
 
-    inline void DrawControlWindow(DMG& dmg, const ImGuiContext& imgui_context, const Config& config)
+    /*inline void DrawControlWindow(DMG& dmg, const ImGuiContext& imgui_context, const Config& config)
     {
         if (ImGui::Begin("Control"))
         {
@@ -499,7 +645,7 @@ namespace dmg
             });
         }
         ImGui::End();
-    }
+    }*/
 
     inline void DrawMemoryWindow(const DMG& dmg, const DMGInfo& register_info)
     {
@@ -518,7 +664,7 @@ namespace dmg
         mem_edit.DrawWindow("Memory", memory.data(), memory.size());
     }
 
-    inline void PrintEntry(ImGuiContext& context, ROMEntry* entry, ROMEntry** selected_rom_entry)
+    inline void PrintEntry(DMG& dmg, ROMEntry* entry, ROMEntry** selected_rom_entry)
     {
         static int selected = 0;
         static int i = 0;
@@ -534,9 +680,9 @@ namespace dmg
             sprintf(label, ICON_FA_GAMEPAD " %s", entry->name.c_str());
 
         ImGui::PushID(i);
-        bool is_loaded = context.selected_rom == entry->path;
-        if (is_loaded)
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
+        //bool is_loaded = context.selected_rom == entry->path;
+        //if (is_loaded)
+            //ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
         if (ImGui::Selectable(label, selected == i, ImGuiSelectableFlags_SelectOnNav | ImGuiSelectableFlags_AllowDoubleClick))
         {
             selected = i;
@@ -550,13 +696,14 @@ namespace dmg
                 }
                 else if (!entry->is_directory)
                 {
-                    //dmg.LoadROM(entry->path);
-                    context.selected_rom = entry->path;
+                    dmg.LoadROM(entry->path);
+                	dmg.SetState(DMG::PlayState::PLAY);
+                    //context.selected_rom = entry->path;
                 }
             }
         }
-        if (is_loaded)
-            ImGui::PopStyleColor();
+        //if (is_loaded)
+            //ImGui::PopStyleColor();
         ImGui::PopID();
         ++i;
 
@@ -565,7 +712,7 @@ namespace dmg
             ImGui::Indent();
             for (const auto& child : entry->children)
             {
-                PrintEntry(context, child.get(), selected_rom_entry);
+                PrintEntry(dmg, child.get(), selected_rom_entry);
             }
             ImGui::Unindent();
         }
@@ -596,7 +743,7 @@ namespace dmg
                 {
                     for ( const auto& child : imgui_context.root_entry->children )
                     {
-                        PrintEntry(imgui_context, child.get(), &selected_rom_entry);
+                        PrintEntry(dmg, child.get(), &selected_rom_entry);
                     }
                 }
                 ImGui::EndChild();
@@ -655,6 +802,135 @@ namespace dmg
         }
     }
 
+	inline void DrawLibrary(ImGuiContext& imgui_context, DMG& dmg, GLuint viewport_texture)
+    {
+    	if (ImGui::Begin("Library"))
+    	{
+    		if (dmg.GetState() == DMG::PlayState::IDLE)
+    		{
+    			static ROMEntry* selected_rom_entry = nullptr;
+    			if (imgui_context.root_entry != nullptr)
+    				for ( const auto& child : imgui_context.root_entry->children )
+    					PrintEntry(dmg, child.get(), &selected_rom_entry);
+    		}
+    		else
+    		{
+    			ImVec2 avail_size = ImGui::GetContentRegionAvail();
 
+    			const float scale_x = avail_size.x / globals::LCD_WIDTH;
+    			const float scale_y = avail_size.y / globals::LCD_HEIGHT;
+    			const float final_scale = scale_x < scale_y ? scale_x : scale_y;
+    			ImVec2 viewport_size
+    			{
+    				globals::LCD_WIDTH * final_scale,
+					globals::LCD_HEIGHT * final_scale,
+				};
 
+    			const ImVec2 cursor = ImGui::GetCursorPos();
+    			const float offset_x = (avail_size.x - viewport_size.x) * 0.5f;
+    			const float offset_y = (avail_size.y - viewport_size.y) * 0.5f;
+
+    			ImGui::SetCursorPos(ImVec2(
+					cursor.x + (offset_x > 0.0f ? offset_x : 0.0f),
+					cursor.y + (offset_y > 0.0f ? offset_y : 0.0f)));
+
+    			ImGui::Image(static_cast<ImTextureID>(viewport_texture), viewport_size);
+    		}
+    	}
+    	ImGui::End();
+    }
+
+	inline void DrawMain2(ImGuiContext& imgui_context, DMG& dmg, Config& config)
+    {
+    	static bool show_settings = false;
+
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("System"))
+			{
+				if (ImGui::Button("Reset"))
+				{
+					dmg.SetState(DMG::PlayState::IDLE);
+				}
+				if (ImGui::Button("Exit"))
+				{
+					std::exit(0);
+				}
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Settings"))
+			{
+                ImGui::MenuItem("Roms", nullptr, &show_settings);
+                ImGui::MenuItem("Themes", nullptr, &show_settings);
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Debug"))
+			{
+                ImGui::MenuItem("VRAM Viewer", nullptr, &imgui_context.show_vram_viewer);
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Help"))
+			{
+				ImGui::TextLinkOpenURL("GitHub Page", "https://github.com/StanislavDidus/Project-Thax");
+				//if (ImGui::Button("GitHub Page"))
+				//{
+				//}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMainMenuBar();
+		}
+    	ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+
+    	if (show_settings)
+    	{
+    		if (ImGui::Begin("Settings", &show_settings))
+    		{
+    			if (ImGui::BeginTabBar("##TabBar"))
+    			{
+    				if (ImGui::BeginTabItem("Roms"))
+    				{
+    					ImGui::SeparatorText("Select a path to your preferred rom folder");
+    					DrawTextInputField("1", "Select rom folder", {},
+							"Select rom folder", config.rom_folder, ImGuiFileBrowserFlags_SelectDirectory);
+
+    					if (ImGui::Button("Search for ROMs"))
+    					{
+    						imgui_context.root_entry = std::move(SearchROMs(config.rom_folder));
+    					}
+
+    					ImGui::SeparatorText("Load bootrom");
+    					static const char* items[] = {"Initialize without a bootrom", "Specify path to bootrom"};
+    					int& current_item = config.bootrom_load_option;
+    					ImGui::Combo("##combo", &current_item, items, IM_ARRAYSIZE(items));
+
+    					if (current_item == 1)
+    					{
+    						DrawTextInputField("2", "Select bootrom", {".gb"},
+								"Select bootrom", config.bootrom_file, 0);
+    					}
+    					ImGui::EndTabItem();
+    				}
+    				if (ImGui::BeginTabItem("Themes"))
+    				{
+    					static const char* themes[] = {"Light (Default)", "Visual Studio Code Like"};
+    					static int current_theme = 0;
+    					if (ImGui::Combo("Choose a theme", &current_theme, themes, IM_ARRAYSIZE(themes)))
+    					{
+    						if (current_theme == 0)
+    						{
+								SetupImGuiStyleWhite();
+    						}
+    						if (current_theme == 1)
+    						{
+								SetupImGuiStyleGrey();
+    						}
+    					}
+    					ImGui::EndTabItem();
+    				}
+    				ImGui::EndTabBar();
+    			}
+    		}
+    		ImGui::End();
+    	}
+    }
 }

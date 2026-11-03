@@ -44,6 +44,8 @@ dmg::DMG::DMG(const InitState init_state)
         m_cpu = std::make_unique<CPU>(*m_bus, *m_interrupt_controller);
     }
 
+    SetState(PlayState::IDLE);
+
     DMG_INFO("Game Boy was initialized.");
 }
 
@@ -191,25 +193,36 @@ void dmg::DMG::SetState(PlayState state)
     }
 }
 
-const dmg::globals::LCD_BUFFER& dmg::DMG::getLCDBuffer() const
+const dmg::globals::LCD_BUFFER& dmg::DMG::GetLCDBuffer() const
 {
     if (m_ppu)
-        return m_ppu->getLCDBuffer();
+        return m_ppu->GetLCDBuffer();
 
     throw std::runtime_error{"Trying to get LCD Buffer without an existing PPU."};
 }
 
-dmg::globals::TILE_DATA_BUFFER dmg::DMG::getTileDataBuffer() const
+dmg::globals::TILE_DATA_BUFFER dmg::DMG::GetTileDataBuffer() const
 {
     if (m_ppu)
-        return m_ppu->getTileDataBuffer();
+        return m_ppu->GetTileDataBuffer();
 
     throw std::runtime_error{"Trying to get LCD Buffer without an existing PPU."};
 }
 
-void dmg::DMG::Reset()
+dmg::globals::TILEMAP_BUFFER dmg::DMG::GetBGTilemapBuffer() const
 {
-    m_cpu->Reset();
+    if (m_ppu)
+        return std::move(m_ppu->GetBGTilemapBuffer());
+
+    throw std::runtime_error{"Trying to get LCD Buffer without an existing PPU."};
+}
+
+dmg::globals::TILEMAP_BUFFER dmg::DMG::GetWindowTilemapBuffer() const
+{
+    if (m_ppu)
+        return std::move(m_ppu->GetWindowTilemapBuffer());
+
+    throw std::runtime_error{"Trying to get LCD Buffer without an existing PPU."};
 }
 
 void dmg::DMG::SetRegisters(const CPUInfo& register_info)

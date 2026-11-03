@@ -24,8 +24,10 @@ namespace dmg
         ~PPU() = default;
 
         void Update(uint32_t cycles);
-        [[nodiscard]] const globals::LCD_BUFFER& getLCDBuffer() const;
-        [[nodiscard]] globals::TILE_DATA_BUFFER getTileDataBuffer();
+        [[nodiscard]] const globals::LCD_BUFFER& GetLCDBuffer() const;
+        [[nodiscard]] globals::TILE_DATA_BUFFER GetTileDataBuffer() const;
+        [[nodiscard]] globals::TILEMAP_BUFFER GetBGTilemapBuffer() const;
+        [[nodiscard]] globals::TILEMAP_BUFFER GetWindowTilemapBuffer() const;
 
         void WriteVRAM(uint16_t address, uint8_t value);
         void WriteOAM(uint16_t address, uint8_t value);

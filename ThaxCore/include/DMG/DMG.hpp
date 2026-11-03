@@ -64,12 +64,12 @@ namespace dmg
         void SetState(PlayState state);
 
         // Setters and getters that are needed for objects outside of DMG class
-        PlayState GetState() { return m_play_state; }
+        [[nodiscard]] PlayState GetState() const { return m_play_state; }
 
-        [[nodiscard]] const globals::LCD_BUFFER& getLCDBuffer() const;
-        [[nodiscard]] globals::TILE_DATA_BUFFER getTileDataBuffer() const;
-
-        void Reset();
+        [[nodiscard]] const globals::LCD_BUFFER& GetLCDBuffer() const;
+        [[nodiscard]] globals::TILE_DATA_BUFFER GetTileDataBuffer() const;
+        [[nodiscard]] globals::TILEMAP_BUFFER GetBGTilemapBuffer() const;
+        [[nodiscard]] globals::TILEMAP_BUFFER GetWindowTilemapBuffer() const;
 
         void SetRegisters(const CPUInfo& register_info);
         [[nodiscard]] DMGInfo GetDMGInfo() const;

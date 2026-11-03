@@ -48,6 +48,36 @@ int main()
         GL_UNSIGNED_BYTE, nullptr);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    // Initialize Tilemap1 Texture
+    unsigned int tilemap1_texture;
+    glGenTextures(1, &tilemap1_texture);
+    glBindTexture(GL_TEXTURE_2D, tilemap1_texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+        dmg::globals::TILEMAP_DATA_WIDTH, dmg::globals::TILEMAP_DATA_HEIGHT,
+        0, GL_RGB,
+        GL_UNSIGNED_BYTE, nullptr);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // Initialize Tilemap1 Texture
+    unsigned int tilemap2_texture;
+    glGenTextures(1, &tilemap2_texture);
+    glBindTexture(GL_TEXTURE_2D, tilemap2_texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+        dmg::globals::TILEMAP_DATA_WIDTH, dmg::globals::TILEMAP_DATA_HEIGHT,
+        0, GL_RGB,
+        GL_UNSIGNED_BYTE, nullptr);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     // Initialize LCD Buffer texture
     unsigned int lcd_texture;
     glGenTextures(1, &lcd_texture);
@@ -82,14 +112,28 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         glBindTexture(GL_TEXTURE_2D, tile_data_texture);
-        auto tile_data_buffer = dmg.getTileDataBuffer();
+        auto tile_data_buffer = dmg.GetTileDataBuffer();
         auto tile_data_buffer_rgb = dmg::ConvertBufferToRGB(tile_data_buffer);
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
             dmg::globals::TILE_DATA_VIEW_WIDTH, dmg::globals::TILE_DATA_VIEW_HEIGHT,
             GL_RGB, GL_UNSIGNED_BYTE, tile_data_buffer_rgb.data());
 
+        glBindTexture(GL_TEXTURE_2D, tilemap1_texture);
+        auto tilemap1_buffer = dmg.GetBGTilemapBuffer();
+        auto tilemap1_buffer_rgb = dmg::ConvertBufferToRGB2(*tilemap1_buffer);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+            dmg::globals::TILEMAP_DATA_WIDTH, dmg::globals::TILEMAP_DATA_HEIGHT,
+            GL_RGB, GL_UNSIGNED_BYTE, tilemap1_buffer_rgb->data());
+
+        glBindTexture(GL_TEXTURE_2D, tilemap2_texture);
+        auto tilemap2_buffer = dmg.GetWindowTilemapBuffer();
+        auto tilemap2_buffer_rgb = dmg::ConvertBufferToRGB2(*tilemap2_buffer);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+            dmg::globals::TILEMAP_DATA_WIDTH, dmg::globals::TILEMAP_DATA_HEIGHT,
+            GL_RGB, GL_UNSIGNED_BYTE, tilemap2_buffer_rgb->data());
+
         glBindTexture(GL_TEXTURE_2D, lcd_texture);
-        auto lcd_buffer_rgb = dmg::ConvertBufferToRGB(dmg.getLCDBuffer());
+        auto lcd_buffer_rgb = dmg::ConvertBufferToRGB(dmg.GetLCDBuffer());
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
             dmg::globals::LCD_WIDTH, dmg::globals::LCD_HEIGHT,
             GL_RGB, GL_UNSIGNED_BYTE, lcd_buffer_rgb.data());
@@ -97,19 +141,32 @@ int main()
 
         dmg::StartImGuiFrame();
 
-        ImGui::DockSpaceOverViewport();
+        //ImGui::DockSpaceOverViewport();
 
         dmg::DMGInfo dmg_info = dmg.GetDMGInfo();
 
+        /*
         dmg::DrawAssetWindow(tile_data_texture);
         dmg::DrawViewport(lcd_texture);
         dmg::DrawInfoWindow(dmg_info, dmg);
         dmg::DrawControlWindow(dmg, imgui_context, current_config);
         dmg::DrawMemoryWindow(dmg, dmg_info);
         dmg::DrawMain(dmg, imgui_context, current_config);
-        ImGui::ShowDemoWindow();
+        */
+        dmg::DrawMain2(imgui_context, dmg, current_config);
+        dmg::DrawLibrary(imgui_context, dmg, lcd_texture);
+        dmg::DrawVRAMViewer(imgui_context, tile_data_texture, tilemap1_texture, tilemap2_texture);
+        //ImGui::ShowDemoWindow();
 
         dmg::EndImGuiFrame();
+
+        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
 
         glfwSwapBuffers(graphics_context.window);
 
@@ -117,6 +174,11 @@ int main()
         std::chrono::time_point<std::chrono::high_resolution_clock> frame_end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = frame_end - frame_start;
         double fps = 1.0 / elapsed.count();
+
+        // Change window title
+        //std::stringstream window_title;
+        //window_title << "Game Boy Emulator (" << fps << ")";
+        //glfwSetWindowTitle(graphics_context.window, window_title.str().c_str());
 
         if (elapsed < FRAME_DURATION)
         {

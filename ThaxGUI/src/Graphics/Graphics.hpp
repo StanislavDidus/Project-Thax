@@ -3,6 +3,7 @@
 #include "DMG/Utils/Log.hpp"
 
 #define GLFW_INCLUDE_NONE
+#include <span>
 #include <glad/glad.h>
 #include "GLFW/glfw3.h"
 
@@ -81,7 +82,7 @@ namespace dmg
     };
 
     template<std::size_t N>
-    std::array<uint8_t, N * 3> ConvertBufferToRGB(std::array<uint8_t, N> buffer)
+    std::array<uint8_t, N * 3> ConvertBufferToRGB(const std::array<uint8_t, N>& buffer)
     {
         std::array<uint8_t, N * 3> rgb;
 
@@ -98,11 +99,36 @@ namespace dmg
             else if (buffer[i] == 0b10) color = c10;
             else if (buffer[i] == 0b11) color = c11;
 
-           rgb[i * 3 + 0] = color.r;
-           rgb[i * 3 + 1] = color.g;
-           rgb[i * 3 + 2] = color.b;
+            rgb[i * 3 + 0] = color.r;
+            rgb[i * 3 + 1] = color.g;
+            rgb[i * 3 + 2] = color.b;
         }
 
         return rgb;
     }
-}
+
+    std::unique_ptr<std::vector<uint8_t>> ConvertBufferToRGB2(std::span<uint8_t> buffer)
+    {
+        std::unique_ptr<std::vector<uint8_t>> rgb = std::make_unique<std::vector<uint8_t>>();
+        rgb->resize(buffer.size() * 3);
+
+        static RGBColor c00 = {.r = 139,.g = 172, .b = 15};
+        static RGBColor c01 = {.r = 48, .g = 98, .b = 48};
+        static RGBColor c10 = {.r = 15, .g = 56, .b = 15};
+        static RGBColor c11 = {.r = 15, .g = 56, .b = 15};
+
+        for (int i = 0; i < buffer.size(); ++i)
+        {
+            RGBColor color{};
+            if (buffer[i] == 0b00) color = c00;
+            else if (buffer[i] == 0b01) color = c01;
+            else if (buffer[i] == 0b10) color = c10;
+            else if (buffer[i] == 0b11) color = c11;
+
+            (*rgb)[i * 3 + 0] = color.r;
+            (*rgb)[i * 3 + 1] = color.g;
+            (*rgb)[i * 3 + 2] = color.b;
+        }
+
+        return std::move(rgb);
+    }}
