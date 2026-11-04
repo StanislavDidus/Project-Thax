@@ -14,6 +14,13 @@ namespace dmg
         KeyChanged(button, false);
     }
 
+    void Joypad::Reset()
+    {
+        m_dpad = 0x0F;
+        m_buttons = 0x0F;
+        m_select = 0x30;
+    }
+
     uint8_t Joypad::Read() const
     {
         uint8_t low = 0x0F;

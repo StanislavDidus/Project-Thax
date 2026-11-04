@@ -29,6 +29,8 @@ namespace dmg
         [[nodiscard]] globals::TILEMAP_BUFFER GetBGTilemapBuffer() const;
         [[nodiscard]] globals::TILEMAP_BUFFER GetWindowTilemapBuffer() const;
 
+        void Reset();
+
         void WriteVRAM(uint16_t address, uint8_t value);
         void WriteOAM(uint16_t address, uint8_t value);
         void WriteIO(uint16_t address, uint8_t value);
@@ -81,7 +83,6 @@ namespace dmg
         uint32_t fetcher_y = 0;
 
         globals::LCD_BUFFER m_lcd {};
-        globals::TILE_DATA_BUFFER m_tile_data_buffer {};
 
         uint32_t m_current_cycles = 0;
         PPUMode m_mode = PPUMode::NONE;

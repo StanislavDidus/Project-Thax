@@ -31,3 +31,6 @@ set(IMGUI_ALL_FILES
 add_library(imgui ${IMGUI_ALL_FILES})
 target_include_directories(imgui PUBLIC imgui imgui/misc/cpp imgui/backends imgui_memory_editor imgui-filebrowser iconfontcppheaders)
 target_link_libraries(imgui PUBLIC glfw)
+
+add_library(stb_img INTERFACE stb_image/stb_image.h)
+target_include_directories(stb_img INTERFACE stb_image/)

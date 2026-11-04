@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ExternalGlobals.hpp"
-#include "Input.hpp"
 #include "Info.hpp"
+#include "Input.hpp"
 
 #include <memory>
 
@@ -54,6 +54,8 @@ namespace dmg
 
         void Update();
 
+        void Reset();
+
         void StepInstruction();
         void StepFrame();
         void StepCycles(uint32_t target_cycles);
@@ -63,7 +65,6 @@ namespace dmg
 
         void SetState(PlayState state);
 
-        // Setters and getters that are needed for objects outside of DMG class
         [[nodiscard]] PlayState GetState() const { return m_play_state; }
 
         [[nodiscard]] const globals::LCD_BUFFER& GetLCDBuffer() const;

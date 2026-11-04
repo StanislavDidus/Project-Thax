@@ -51,18 +51,18 @@ namespace dmg
         void WriteLog();
         std::ofstream log_file{};
 
-        ByteRegister A {0x01};
-        FlagRegister F {0xB0};
-        ByteRegister B {0x00};
-        ByteRegister C {0x13};
-        ByteRegister D {0x00};
-        ByteRegister E {0xD8};
-        ByteRegister H {0x01};
-        ByteRegister L {0x4D};
+        ByteRegister A {};
+        FlagRegister F {};
+        ByteRegister B {};
+        ByteRegister C {};
+        ByteRegister D {};
+        ByteRegister E {};
+        ByteRegister H {};
+        ByteRegister L {};
         ByteRegisterPair AF, BC, DE, HL;
 
-        TwoByteRegister PC {0x000};
-        TwoByteRegister SP {0xFFFE};
+        TwoByteRegister PC {};
+        TwoByteRegister SP {};
 
         ControlUnit m_control_unit {*this};
         InterruptController& m_interrupt_controller;

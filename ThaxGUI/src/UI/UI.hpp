@@ -29,8 +29,9 @@ namespace dmg
         std::unique_ptr<ROMEntry> root_entry = nullptr;
 
     	bool show_vram_viewer = false;
-    	bool show_settings_rom = false;
-    	bool show_settings_themes = false;
+    	bool show_memory_layout = false;
+    	bool show_register_info = false;
+    	bool show_control_menu = false;
     };
 
     class FileBrowser
@@ -285,21 +286,27 @@ namespace dmg
         base_config.FontDataOwnedByAtlas = false;
         io.Fonts->AddFontFromMemoryTTF(inconsolata_medium_font_data, inconsolata_medium_font_size, 13.0f, &base_config);
 
-        ImFontConfig config;
-        config.FontDataOwnedByAtlas = false;
-        config.MergeMode = true;
-        config.PixelSnapH = true;
+        ImFontConfig imgui_config;
+        imgui_config.FontDataOwnedByAtlas = false;
+        imgui_config.MergeMode = true;
+        imgui_config.PixelSnapH = true;
         static const ImWchar icon_ranges[] = {ICON_MIN_FA, ICON_MIN_FA, 0};
-        io.Fonts->AddFontFromMemoryTTF(fontawesome_webfont_data, fontawesome_webfont_size, 13.0f, &config, icon_ranges);
+        io.Fonts->AddFontFromMemoryTTF(fontawesome_webfont_data, fontawesome_webfont_size, 13.0f, &imgui_config, icon_ranges);
 
         // Initialize File Browser
         ImGuiContext context;
 
-        SetupImGuiStyleWhite();
-
         DMG_INFO("ImGui UI was initialized.");
 
         return context;
+    }
+
+	inline void InitializeImGuiTheme(Config& config)
+    {
+    	if (config.theme == 0)
+    		SetupImGuiStyleWhite();
+    	else if (config.theme == 1)
+    		SetupImGuiStyleGrey();
     }
 
     inline void StartImGuiFrame()
@@ -346,6 +353,30 @@ namespace dmg
         value >> 4 & 1 ? ImGui::Text("C") : ImGui::Text("-");
     }
 
+	inline void DrawImage(GLuint gl_texture, float width, float height)
+    {
+    	const ImVec2 avail_size = ImGui::GetContentRegionAvail();
+    	const float scale_x = avail_size.x / width;
+    	const float scale_y = avail_size.y / height;
+    	const float final_scale = scale_x < scale_y ? scale_x : scale_y;
+    	ImVec2 viewport_size
+    	{
+    		width * final_scale,
+			height * final_scale,
+		};
+
+    	const ImVec2 cursor = ImGui::GetCursorPos();
+    	const float offset_x = (avail_size.x - viewport_size.x) * 0.5f;
+    	const float offset_y = (avail_size.y - viewport_size.y) * 0.5f;
+
+    	ImGui::SetCursorPos(ImVec2(
+			cursor.x + (offset_x > 0.0f ? offset_x : 0.0f),
+			cursor.y + (offset_y > 0.0f ? offset_y : 0.0f)));
+
+    	ImGui::Image(static_cast<ImTextureID>(gl_texture), viewport_size);
+    }
+
+
     inline void DrawVRAMViewer(ImGuiContext& context, unsigned int tiles_texture, unsigned int tilemap1_texture, unsigned int tilemap2_texture)
     {
     	if (context.show_vram_viewer)
@@ -356,71 +387,17 @@ namespace dmg
     			{
     				if (ImGui::BeginTabItem("Tiles"))
     				{
-    					const ImVec2 avail_size = ImGui::GetContentRegionAvail();
-    					const float scale_x = avail_size.x / globals::TILE_DATA_VIEW_WIDTH;
-    					const float scale_y = avail_size.y / globals::TILE_DATA_VIEW_HEIGHT;
-    					const float final_scale = scale_x < scale_y ? scale_x : scale_y;
-    					ImVec2 viewport_size
-    					{
-    						globals::TILE_DATA_VIEW_WIDTH * final_scale,
-							globals::TILE_DATA_VIEW_HEIGHT * final_scale,
-						};
-
-    					const ImVec2 cursor = ImGui::GetCursorPos();
-    					const float offset_x = (avail_size.x - viewport_size.x) * 0.5f;
-    					const float offset_y = (avail_size.y - viewport_size.y) * 0.5f;
-
-    					ImGui::SetCursorPos(ImVec2(
-							cursor.x + (offset_x > 0.0f ? offset_x : 0.0f),
-							cursor.y + (offset_y > 0.0f ? offset_y : 0.0f)));
-
-    					ImGui::Image(static_cast<ImTextureID>(tiles_texture), viewport_size);
+    					DrawImage(tiles_texture, globals::TILE_DATA_VIEW_WIDTH, globals::TILE_DATA_VIEW_HEIGHT);
     					ImGui::EndTabItem();
     				}
     				if (ImGui::BeginTabItem("BG Tilemap"))
     				{
-    					const ImVec2 avail_size = ImGui::GetContentRegionAvail();
-    					const float scale_x = avail_size.x / globals::TILEMAP_DATA_WIDTH;
-    					const float scale_y = avail_size.y / globals::TILEMAP_DATA_HEIGHT;
-    					const float final_scale = scale_x < scale_y ? scale_x : scale_y;
-    					ImVec2 viewport_size
-    					{
-    						globals::TILEMAP_DATA_WIDTH * final_scale,
-							globals::TILEMAP_DATA_HEIGHT * final_scale,
-						};
-
-    					const ImVec2 cursor = ImGui::GetCursorPos();
-    					const float offset_x = (avail_size.x - viewport_size.x) * 0.5f;
-    					const float offset_y = (avail_size.y - viewport_size.y) * 0.5f;
-
-    					ImGui::SetCursorPos(ImVec2(
-							cursor.x + (offset_x > 0.0f ? offset_x : 0.0f),
-							cursor.y + (offset_y > 0.0f ? offset_y : 0.0f)));
-
-    					ImGui::Image(static_cast<ImTextureID>(tilemap1_texture), viewport_size);
+    					DrawImage(tilemap1_texture, globals::TILEMAP_DATA_WIDTH, globals::TILEMAP_DATA_HEIGHT);
     					ImGui::EndTabItem();
     				}
     				if (ImGui::BeginTabItem("Window Tilemap"))
     				{
-    					const ImVec2 avail_size = ImGui::GetContentRegionAvail();
-    					const float scale_x = avail_size.x / globals::TILEMAP_DATA_WIDTH;
-    					const float scale_y = avail_size.y / globals::TILEMAP_DATA_HEIGHT;
-    					const float final_scale = scale_x < scale_y ? scale_x : scale_y;
-    					ImVec2 viewport_size
-    					{
-    						globals::TILEMAP_DATA_WIDTH * final_scale,
-							globals::TILEMAP_DATA_HEIGHT * final_scale,
-						};
-
-    					const ImVec2 cursor = ImGui::GetCursorPos();
-    					const float offset_x = (avail_size.x - viewport_size.x) * 0.5f;
-    					const float offset_y = (avail_size.y - viewport_size.y) * 0.5f;
-
-    					ImGui::SetCursorPos(ImVec2(
-							cursor.x + (offset_x > 0.0f ? offset_x : 0.0f),
-							cursor.y + (offset_y > 0.0f ? offset_y : 0.0f)));
-
-    					ImGui::Image(static_cast<ImTextureID>(tilemap2_texture), viewport_size);
+    					DrawImage(tilemap2_texture, globals::TILEMAP_DATA_WIDTH, globals::TILEMAP_DATA_HEIGHT);
     					ImGui::EndTabItem();
     				}
     				ImGui::EndTabBar();
@@ -434,126 +411,116 @@ namespace dmg
     {
         if (ImGui::Begin("Viewport"))
         {
-            ImVec2 avail_size = ImGui::GetContentRegionAvail();
-
-            const float scale_x = avail_size.x / globals::LCD_WIDTH;
-            const float scale_y = avail_size.y / globals::LCD_HEIGHT;
-            const float final_scale = scale_x < scale_y ? scale_x : scale_y;
-            ImVec2 viewport_size
-            {
-                globals::LCD_WIDTH * final_scale,
-                globals::LCD_HEIGHT * final_scale,
-            };
-
-            const ImVec2 cursor = ImGui::GetCursorPos();
-            const float offset_x = (avail_size.x - viewport_size.x) * 0.5f;
-            const float offset_y = (avail_size.y - viewport_size.y) * 0.5f;
-
-            ImGui::SetCursorPos(ImVec2(
-                cursor.x + (offset_x > 0.0f ? offset_x : 0.0f),
-                cursor.y + (offset_y > 0.0f ? offset_y : 0.0f)));
-
-            ImGui::Image(static_cast<ImTextureID>(viewport_texture), viewport_size);
+        	DrawImage(viewport_texture, globals::LCD_WIDTH, globals::LCD_HEIGHT);
         }
         ImGui::End();
     }
 
-    inline void DrawInfoWindow(const DMGInfo& info, const DMG& dmg)
+    inline void DrawInfoWindow(const DMGInfo& info, const DMG& dmg, ImGuiContext& imgui_context)
     {
-        if (ImGui::Begin("Info"))
-        {
-            if (ImGui::CollapsingHeader("State"))
-            {
-                ImGui::Text("CPU State: %d", info.CPU_State);
+    	if (imgui_context.show_register_info)
+    	{
+    		if (ImGui::Begin("Info", &imgui_context.show_register_info))
+    		{
+    			ImGui::SeparatorText("States");
 
-                std::string ppu_state;
-                switch(info.ppu_info.ppu_mode)
-                {
-                case PPUMode::MODE0: ppu_state = "MODE0"; break;
-                case PPUMode::MODE1: ppu_state = "MODE1"; break;
-                case PPUMode::MODE2: ppu_state = "MODE2"; break;
-                case PPUMode::MODE3: ppu_state = "MODE3"; break;
-                case PPUMode::NONE: ppu_state = "NONE"; break;
-                }
-                ImGui::Text("PPU State: %s", ppu_state.c_str());
+    			std::string cpu_state;
+    			switch(info.CPU_State)
+    			{
+    			case 0: cpu_state = "NORMAL"; break;
+    			case 1: cpu_state = "HALT"; break;
+    			case 2: cpu_state = "STOP"; break;
+			    default: ;
+			    }
+    			ImGui::Text("CPU State: %s", cpu_state.c_str());
 
-                std::string pixel_fetcher_state;
-                switch (info.ppu_info.pixel_fetcher_state)
-                {
-                case PixelFetcherState::GET_TILE_DATA: pixel_fetcher_state = "GET_TILE_DATA"; break;
-                case PixelFetcherState::GET_TILE_DATA_LOW: pixel_fetcher_state = "GET_TILE_DATA_LOW"; break;
-                case PixelFetcherState::GET_TILE_DATA_HIGH: pixel_fetcher_state = "GET_TILE_DATA_HIGH"; break;
-                case PixelFetcherState::PUSH: pixel_fetcher_state = "PUSH"; break;
-                default: pixel_fetcher_state = "NONE"; break;
-                }
-                ImGui::Text("Pixel Fetcher State: %s", pixel_fetcher_state.c_str());
-                ImGui::Text("FIFO Size: %d", info.ppu_info.fifo_pixels);
-            }
-            if (ImGui::CollapsingHeader("Registers"))
-            {
-                ImGui::SeparatorText("CPU Registers");
+    			std::string ppu_state;
+    			switch(info.ppu_info.ppu_mode)
+    			{
+    			case PPUMode::MODE0: ppu_state = "MODE0"; break;
+    			case PPUMode::MODE1: ppu_state = "MODE1"; break;
+    			case PPUMode::MODE2: ppu_state = "MODE2"; break;
+    			case PPUMode::MODE3: ppu_state = "MODE3"; break;
+    			case PPUMode::NONE: ppu_state = "NONE"; break;
+    			}
+    			ImGui::Text("PPU State: %s", ppu_state.c_str());
 
-                if (ImGui::BeginTable("##anything", 2))
-                {
-                    ImGui::TableNextColumn();
-                    PrintRegisterValue("PC: ", info.PC);
-                    PrintRegisterValue("A: ", info.A);
-                    PrintRegisterValue("B: ", info.B);
-                    PrintRegisterValue("D: ", info.D);
-                    PrintRegisterValue("H: ", info.H);
-                    ImGui::TableNextColumn();
-                    PrintRegisterValue("SP: ", info.SP);
-                    PrintFRegisterValue(info.F);
-                    PrintRegisterValue("C: ", info.C);
-                    PrintRegisterValue("E: ", info.E);
-                    PrintRegisterValue("L: ", info.L);
-                }
-                ImGui::EndTable();
+    			std::string pixel_fetcher_state;
+    			switch (info.ppu_info.pixel_fetcher_state)
+    			{
+    			case PixelFetcherState::GET_TILE_DATA: pixel_fetcher_state = "GET_TILE_DATA"; break;
+    			case PixelFetcherState::GET_TILE_DATA_LOW: pixel_fetcher_state = "GET_TILE_DATA_LOW"; break;
+    			case PixelFetcherState::GET_TILE_DATA_HIGH: pixel_fetcher_state = "GET_TILE_DATA_HIGH"; break;
+    			case PixelFetcherState::PUSH: pixel_fetcher_state = "PUSH"; break;
+    			default: pixel_fetcher_state = "NONE"; break;
+    			}
+    			ImGui::Text("Pixel Fetcher State: %s", pixel_fetcher_state.c_str());
+    			ImGui::Text("FIFO Size: %d", info.ppu_info.fifo_pixels);
 
-                ImGui::SeparatorText("General Component Registers");
-                if (ImGui::BeginTable("##anything", 3))
-                {
-                    ImGui::TableNextColumn();
-                    PrintRegisterValue("DIV: ", info.DIV);
-                    PrintRegisterValue("TIMA: ", info.TIMA);
-                    PrintRegisterValue("TMA: ", info.TMA);
-                    PrintRegisterValue("TAC: ", info.TAC);
-                    ImGui::TableNextColumn();
-                    PrintRegisterValue("IF: ", info.IF);
-                    PrintRegisterValue("IE: ", info.IE);
-                    PrintRegisterValue("*IME: ", info.IME);
-                    ImGui::TableNextColumn();
-                    PrintRegisterValue("P1: ", info.P1);
-                    PrintRegisterValue("SB: ", info.SB);
-                    PrintRegisterValue("SC: ", info.SC);
-                }
-                ImGui::EndTable();
+    			ImGui::SeparatorText("Registers");
+    			ImGui::SeparatorText("CPU Registers");
 
-                ImGui::SeparatorText("PPU Registers");
-                if (ImGui::BeginTable("##anything", 3))
-                {
-                    const auto& ppu_info = info.ppu_info;
-                    ImGui::TableNextColumn();
-                    PrintRegisterValue("LCDC: ", ppu_info.LCDC);
-                    PrintRegisterValue("STAT: ", ppu_info.STAT);
-                    PrintRegisterValue("SCY: ", ppu_info.SCY);
-                    PrintRegisterValue("SCX: ", ppu_info.SCX);
-                    ImGui::TableNextColumn();
-                    PrintRegisterValue("LY: ", ppu_info.LY);
-                    PrintRegisterValue("LYC: ", ppu_info.LYC);
-                    PrintRegisterValue("WX: ", ppu_info.WX);
-                    PrintRegisterValue("WY: ", ppu_info.WY);
-                    ImGui::TableNextColumn();
-                    PrintRegisterValue("DMA: ", ppu_info.DMA);
-                    PrintRegisterValue("BGP: ", ppu_info.BGP);
-                    PrintRegisterValue("OBP0: ", ppu_info.OBP0);
-                    PrintRegisterValue("OBP1: ", ppu_info.OBP1);
-                }
-                ImGui::EndTable();
-            }
+    			if (ImGui::BeginTable("##anything", 2))
+    			{
+    				ImGui::TableNextColumn();
+    				PrintRegisterValue("PC: ", info.PC);
+    				PrintRegisterValue("A: ", info.A);
+    				PrintRegisterValue("B: ", info.B);
+    				PrintRegisterValue("D: ", info.D);
+    				PrintRegisterValue("H: ", info.H);
+    				ImGui::TableNextColumn();
+    				PrintRegisterValue("SP: ", info.SP);
+    				PrintFRegisterValue(info.F);
+    				PrintRegisterValue("C: ", info.C);
+    				PrintRegisterValue("E: ", info.E);
+    				PrintRegisterValue("L: ", info.L);
+    			}
+    			ImGui::EndTable();
 
-        }
-        ImGui::End();
+    			ImGui::SeparatorText("General Component Registers");
+    			if (ImGui::BeginTable("##anything", 3))
+    			{
+    				ImGui::TableNextColumn();
+    				PrintRegisterValue("DIV: ", info.DIV);
+    				PrintRegisterValue("TIMA: ", info.TIMA);
+    				PrintRegisterValue("TMA: ", info.TMA);
+    				PrintRegisterValue("TAC: ", info.TAC);
+    				ImGui::TableNextColumn();
+    				PrintRegisterValue("IF: ", info.IF);
+    				PrintRegisterValue("IE: ", info.IE);
+    				PrintRegisterValue("*IME: ", info.IME);
+    				ImGui::TableNextColumn();
+    				PrintRegisterValue("P1: ", info.P1);
+    				PrintRegisterValue("SB: ", info.SB);
+    				PrintRegisterValue("SC: ", info.SC);
+    			}
+    			ImGui::EndTable();
+
+    			ImGui::SeparatorText("PPU Registers");
+    			if (ImGui::BeginTable("##anything", 3))
+    			{
+    				const auto& ppu_info = info.ppu_info;
+    				ImGui::TableNextColumn();
+    				PrintRegisterValue("LCDC: ", ppu_info.LCDC);
+    				PrintRegisterValue("STAT: ", ppu_info.STAT);
+    				PrintRegisterValue("SCY: ", ppu_info.SCY);
+    				PrintRegisterValue("SCX: ", ppu_info.SCX);
+    				ImGui::TableNextColumn();
+    				PrintRegisterValue("LY: ", ppu_info.LY);
+    				PrintRegisterValue("LYC: ", ppu_info.LYC);
+    				PrintRegisterValue("WX: ", ppu_info.WX);
+    				PrintRegisterValue("WY: ", ppu_info.WY);
+    				ImGui::TableNextColumn();
+    				PrintRegisterValue("DMA: ", ppu_info.DMA);
+    				PrintRegisterValue("BGP: ", ppu_info.BGP);
+    				PrintRegisterValue("OBP0: ", ppu_info.OBP0);
+    				PrintRegisterValue("OBP1: ", ppu_info.OBP1);
+    			}
+    			ImGui::EndTable();
+
+    		}
+    		ImGui::End();
+    	}
     }
 
     inline void DoIfEnabled(bool condition, const std::function<void()>& func)
@@ -565,372 +532,371 @@ namespace dmg
         if (condition) ImGui::EndDisabled();
     }
 
-    /*inline void DrawControlWindow(DMG& dmg, const ImGuiContext& imgui_context, const Config& config)
+    inline void DrawControlWindow(DMG& dmg, ImGuiContext& imgui_context, const Config& config)
     {
-        if (ImGui::Begin("Control"))
-        {
-            if (ImGui::BeginTable("##anything", 2))
-            {
-                ImGui::TableNextColumn();
+	    if (imgui_context.show_control_menu)
+	    {
+	    	if (ImGui::Begin("Control", &imgui_context.show_control_menu))
+	    	{
+	    		DoIfEnabled(dmg.GetState() != DMG::PlayState::PAUSE,[&dmg]
+				{
+					static int instruction_skip = 1;
+					char label[128];
+					sprintf(label, "Step Instructions");
+					if (ImGui::Button(label))
+					{
+						for (int i = 0; i < instruction_skip; ++i)
+							dmg.StepInstruction();
+					}
 
-                if (ImGui::Button(ICON_FA_PLAY " Play"))
-                {
-                    dmg.LoadROM(imgui_context.selected_rom);
-                    if (config.bootrom_load_option == 1)
-                        dmg.LoadBootrom(config.bootrom_file);
-                    dmg.SetState(DMG::PlayState::PLAY);
-                }
+					ImGui::SameLine();
+					ImGui::PushItemWidth(150.0f);
+					if (ImGui::InputInt("##anything1", &instruction_skip))
+					{
+						if (instruction_skip < 0) instruction_skip = 0;
+					}
 
-                if (ImGui::Button(ICON_FA_PLAY_CIRCLE " Play & Pause"))
-                {
-                    dmg.SetState(DMG::PlayState::PAUSE);
-                }
+					static int frame_skip = 1;
+					char label_1[128];
+					sprintf(label_1, "Step Frames");
+					if (ImGui::Button(label_1))
+					{
+						dmg.StepFrame();
+					}
 
-                ImGui::TableNextColumn();
-
-                DoIfEnabled(dmg.GetState() != DMG::PlayState::PLAY, [&dmg, &imgui_context, &config]
-                {
-                    if (ImGui::Button(ICON_FA_PAUSE " Pause"))
-                    {
-                        dmg.LoadROM(imgui_context.selected_rom);
-                        if (config.bootrom_load_option == 1)
-                            dmg.LoadBootrom(config.bootrom_file);
-                        dmg.SetState(DMG::PlayState::PAUSE);
-                    }
-                });
-
-                DoIfEnabled(dmg.GetState() == DMG::PlayState::IDLE, [&dmg]
-                {
-                    if (ImGui::Button(ICON_FA_STOP " Stop"))
-                    {
-                        dmg.SetState(DMG::PlayState::IDLE);
-                    }
-                });
-            }
-            ImGui::EndTable();
-
-
-            DoIfEnabled(dmg.GetState() != DMG::PlayState::PAUSE,[&dmg]
-            {
-                static int instruction_skip = 1;
-                char label[128];
-                sprintf(label, "Step Instructions");
-                if (ImGui::Button(label))
-                {
-                    for (int i = 0; i < instruction_skip; ++i)
-                        dmg.StepInstruction();
-                }
-
-                ImGui::SameLine();
-                ImGui::PushItemWidth(150.0f);
-                if (ImGui::InputInt("##anything1", &instruction_skip))
-                {
-                    if (instruction_skip < 0) instruction_skip = 0;
-                }
-
-                static int frame_skip = 1;
-                char label_1[128];
-                sprintf(label_1, "Step Frames");
-                if (ImGui::Button(label_1))
-                {
-                    dmg.StepFrame();
-                }
-
-                ImGui::SameLine();
-                ImGui::PushItemWidth(150.0f);
-                if (ImGui::InputInt("##anything2", &frame_skip))
-                {
-                    if (frame_skip < 0) frame_skip = 0;
-                }
-            });
-        }
-        ImGui::End();
-    }*/
-
-    inline void DrawMemoryWindow(const DMG& dmg, const DMGInfo& register_info)
-    {
-        static MemoryEditor mem_edit;
-        mem_edit.OptShowAscii = false;
-        static std::array<uint8_t, 65'536> memory {0};
-
-        mem_edit.HighlightMin = register_info.PC;
-        mem_edit.HighlightMax = register_info.PC + 1;
-        mem_edit.HighlightColor = IM_COL32(0, 255, 0, 255);
-
-        for (int i = 0; i < 65'536; ++i)
-        {
-            memory[i] = dmg.ReadMemory(i);
-        }
-        mem_edit.DrawWindow("Memory", memory.data(), memory.size());
+					ImGui::SameLine();
+					ImGui::PushItemWidth(150.0f);
+					if (ImGui::InputInt("##anything2", &frame_skip))
+					{
+						if (frame_skip < 0) frame_skip = 0;
+					}
+				});
+	    	}
+	    	ImGui::End();
+	    }
     }
 
-    inline void PrintEntry(DMG& dmg, ROMEntry* entry, ROMEntry** selected_rom_entry)
-    {
-        static int selected = 0;
-        static int i = 0;
-        if (!entry) return;
+    	inline void DrawMemoryWindow(const DMG& dmg, const DMGInfo& register_info, ImGuiContext& imgui_context)
+	    {
+	    	if (imgui_context.show_memory_layout)
+	    	{
+	    		static MemoryEditor mem_edit;
+	    		mem_edit.OptShowAscii = false;
+	    		static std::array<uint8_t, 65'536> memory {0};
 
-        char label[128];
+	    		mem_edit.HighlightMin = register_info.PC;
+	    		mem_edit.HighlightMax = register_info.PC + 1;
+	    		mem_edit.HighlightColor = IM_COL32(0, 255, 0, 255);
 
-        if (entry->is_directory && !entry->closed_directory)
-            sprintf(label, ICON_FA_FOLDER_OPEN " %s", entry->name.c_str());
-        else if (entry->is_directory && entry->closed_directory)
-            sprintf(label, ICON_FA_FOLDER " %s", entry->name.c_str());
-        else
-            sprintf(label, ICON_FA_GAMEPAD " %s", entry->name.c_str());
+	    		for (int i = 0; i < 65'536; ++i)
+	    		{
+	    			memory[i] = dmg.ReadMemory(i);
+	    		}
+	    		mem_edit.DrawWindow("Memory", imgui_context.show_memory_layout, memory.data(), memory.size());
+	    	}
+	    }
 
-        ImGui::PushID(i);
-        //bool is_loaded = context.selected_rom == entry->path;
-        //if (is_loaded)
-            //ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
-        if (ImGui::Selectable(label, selected == i, ImGuiSelectableFlags_SelectOnNav | ImGuiSelectableFlags_AllowDoubleClick))
-        {
-            selected = i;
-            *selected_rom_entry = entry;
+    	inline void PrintEntry(DMG& dmg, const Config& config, ROMEntry* entry, ROMEntry** selected_rom_entry)
+	    {
+	    	static int selected = 0;
+	    	static int i = 0;
+	    	if (!entry) return;
 
-            if (ImGui::IsMouseDoubleClicked(0))
-            {
-                if (entry->is_directory)
-                {
-                    entry->closed_directory = !entry->closed_directory;
-                }
-                else if (!entry->is_directory)
-                {
-                    dmg.LoadROM(entry->path);
-                	dmg.SetState(DMG::PlayState::PLAY);
-                    //context.selected_rom = entry->path;
-                }
-            }
-        }
-        //if (is_loaded)
-            //ImGui::PopStyleColor();
-        ImGui::PopID();
-        ++i;
+	    	char label[128];
 
-        if (entry->is_directory && !entry->closed_directory)
-        {
-            ImGui::Indent();
-            for (const auto& child : entry->children)
-            {
-                PrintEntry(dmg, child.get(), selected_rom_entry);
-            }
-            ImGui::Unindent();
-        }
-    }
+	    	if (entry->is_directory && !entry->closed_directory)
+	    		sprintf(label, ICON_FA_FOLDER_OPEN " %s", entry->name.c_str());
+	    	else if (entry->is_directory && entry->closed_directory)
+	    		sprintf(label, ICON_FA_FOLDER " %s", entry->name.c_str());
+	    	else
+	    		sprintf(label, ICON_FA_GAMEPAD " %s", entry->name.c_str());
 
-    inline void DrawMain(DMG& dmg, ImGuiContext& imgui_context, Config& config)
-    {
-        static bool show_settings = false;
-        if (ImGui::Begin("Main", nullptr, ImGuiWindowFlags_MenuBar))
-        {
-            if (ImGui::BeginMenuBar())
-            {
-                if (ImGui::BeginMenu("Menu"))
-                {
-                    ImGui::MenuItem("Settings", nullptr, &show_settings);
-                    ImGui::EndMenu();
-                }
-                ImGui::EndMenuBar();
-            }
+	    	ImGui::PushID(i);
+	    	//bool is_loaded = context.selected_rom == entry->path;
+	    	//if (is_loaded)
+	    	//ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
+	    	if (ImGui::Selectable(label, selected == i, ImGuiSelectableFlags_SelectOnNav | ImGuiSelectableFlags_AllowDoubleClick))
+	    	{
+	    		selected = i;
+	    		*selected_rom_entry = entry;
 
-            static ROMEntry* selected_rom_entry = nullptr;
-            {
-                ImGui::SetNextWindowSize({ImGui::GetWindowSize().x * 0.5f, 0.0f}, ImGuiCond_Once);
-                ImGui::BeginChild("Library", {0,0}, ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
+	    		if (ImGui::IsMouseDoubleClicked(0))
+	    		{
+	    			if (entry->is_directory)
+	    			{
+	    				entry->closed_directory = !entry->closed_directory;
+	    			}
+	    			else if (!entry->is_directory)
+	    			{
+	    				dmg.LoadROM(entry->path);
+	    				if (config.bootrom_load_option == 1) dmg.LoadBootrom(config.bootrom_file);
+	    				dmg.SetState(DMG::PlayState::PLAY);
+	    				//context.selected_rom = entry->path;
+	    			}
+	    		}
+	    	}
+	    	//if (is_loaded)
+	    	//ImGui::PopStyleColor();
+	    	ImGui::PopID();
+	    	++i;
 
-                // Get root entry
-                if (imgui_context.root_entry != nullptr)
-                {
-                    for ( const auto& child : imgui_context.root_entry->children )
-                    {
-                        PrintEntry(dmg, child.get(), &selected_rom_entry);
-                    }
-                }
-                ImGui::EndChild();
+	    	if (entry->is_directory && !entry->closed_directory)
+	    	{
+	    		ImGui::Indent();
+	    		for (const auto& child : entry->children)
+	    		{
+	    			PrintEntry(dmg, config, child.get(), selected_rom_entry);
+	    		}
+	    		ImGui::Unindent();
+	    	}
+	    }
 
-                ImGui::SameLine();
-
-                ImGui::BeginGroup();
-                ImGui::BeginChild("File Description", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
-                if (selected_rom_entry)
-                {
-                    std::string file_type;
-                    if (selected_rom_entry->is_directory) file_type = "Folder";
-                    else if (!selected_rom_entry->is_directory) file_type = "File";
-                    ImGui::Text("%s", file_type.c_str());
-                    ImGui::Separator();
-                    ImGui::SetCursorPosX(ImGui::GetWindowSize().x * 0.5f - ImGui::CalcTextSize(selected_rom_entry->name.c_str()).x * 0.5f);
-                    ImGui::Text(selected_rom_entry->name.c_str());
-                    //ImGui::Image();
-                    //ImDrawList* draw_list = ImGui::GetWindowDrawList();
-                    //ImVec2 p = ImGui::GetCursorPos();
-                    //draw_list->AddRect(p, ImVec2{p.x + 100.0f, p.y + 100.0f}, IM_COL32(255,0,0,255));
-                }
-                ImGui::EndChild();
-                ImGui::EndGroup();
-            }
-            ImGui::SameLine();
-        }
-        ImGui::End();
-
-        if (show_settings)
-        {
-            if (ImGui::Begin("Settings", &show_settings))
-            {
-                ImGui::SeparatorText("Select a path to your preferred rom folder");
-                DrawTextInputField("1", "Select rom folder", {},
-                    "Select rom folder", config.rom_folder, ImGuiFileBrowserFlags_SelectDirectory);
-
-                if (ImGui::Button("Search for ROMs"))
-                {
-                    imgui_context.root_entry = std::move(SearchROMs(config.rom_folder));
-                }
-
-                ImGui::SeparatorText("Load bootrom");
-                static const char* items[] = {"Initialize without a bootrom", "Specify path to bootrom"};
-                int& current_item = config.bootrom_load_option;
-                ImGui::Combo("##combo", &current_item, items, IM_ARRAYSIZE(items));
-
-                if (current_item == 1)
-                {
-                    DrawTextInputField("2", "Select bootrom", {".gb"},
-                        "Select bootrom", config.bootrom_file, 0);
-                }
-            }
-            ImGui::End();
-
-        }
-    }
-
-	inline void DrawLibrary(ImGuiContext& imgui_context, DMG& dmg, GLuint viewport_texture)
-    {
-    	if (ImGui::Begin("Library"))
-    	{
-    		if (dmg.GetState() == DMG::PlayState::IDLE)
-    		{
-    			static ROMEntry* selected_rom_entry = nullptr;
-    			if (imgui_context.root_entry != nullptr)
-    				for ( const auto& child : imgui_context.root_entry->children )
-    					PrintEntry(dmg, child.get(), &selected_rom_entry);
-    		}
-    		else
-    		{
-    			ImVec2 avail_size = ImGui::GetContentRegionAvail();
-
-    			const float scale_x = avail_size.x / globals::LCD_WIDTH;
-    			const float scale_y = avail_size.y / globals::LCD_HEIGHT;
-    			const float final_scale = scale_x < scale_y ? scale_x : scale_y;
-    			ImVec2 viewport_size
-    			{
-    				globals::LCD_WIDTH * final_scale,
-					globals::LCD_HEIGHT * final_scale,
-				};
-
-    			const ImVec2 cursor = ImGui::GetCursorPos();
-    			const float offset_x = (avail_size.x - viewport_size.x) * 0.5f;
-    			const float offset_y = (avail_size.y - viewport_size.y) * 0.5f;
-
-    			ImGui::SetCursorPos(ImVec2(
-					cursor.x + (offset_x > 0.0f ? offset_x : 0.0f),
-					cursor.y + (offset_y > 0.0f ? offset_y : 0.0f)));
-
-    			ImGui::Image(static_cast<ImTextureID>(viewport_texture), viewport_size);
-    		}
-    	}
-    	ImGui::End();
-    }
-
-	inline void DrawMain2(ImGuiContext& imgui_context, DMG& dmg, Config& config)
-    {
-    	static bool show_settings = false;
-
-		if (ImGui::BeginMainMenuBar())
+    	/*
+		inline void DrawMain(DMG& dmg, ImGuiContext& imgui_context, Config& config)
 		{
-			if (ImGui::BeginMenu("System"))
+			static bool show_settings = false;
+			if (ImGui::Begin("Main", nullptr, ImGuiWindowFlags_MenuBar))
 			{
-				if (ImGui::Button("Reset"))
+				if (ImGui::BeginMenuBar())
 				{
-					dmg.SetState(DMG::PlayState::IDLE);
+					if (ImGui::BeginMenu("Menu"))
+					{
+						ImGui::MenuItem("Settings", nullptr, &show_settings);
+						ImGui::EndMenu();
+					}
+					ImGui::EndMenuBar();
 				}
-				if (ImGui::Button("Exit"))
+
+				static ROMEntry* selected_rom_entry = nullptr;
 				{
-					std::exit(0);
+					ImGui::SetNextWindowSize({ImGui::GetWindowSize().x * 0.5f, 0.0f}, ImGuiCond_Once);
+					ImGui::BeginChild("Library", {0,0}, ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
+
+					// Get root entry
+					if (imgui_context.root_entry != nullptr)
+					{
+						for ( const auto& child : imgui_context.root_entry->children )
+						{
+							PrintEntry(dmg, child.get(), &selected_rom_entry);
+						}
+					}
+					ImGui::EndChild();
+
+					ImGui::SameLine();
+
+					ImGui::BeginGroup();
+					ImGui::BeginChild("File Description", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
+					if (selected_rom_entry)
+					{
+						std::string file_type;
+						if (selected_rom_entry->is_directory) file_type = "Folder";
+						else if (!selected_rom_entry->is_directory) file_type = "File";
+						ImGui::Text("%s", file_type.c_str());
+						ImGui::Separator();
+						ImGui::SetCursorPosX(ImGui::GetWindowSize().x * 0.5f - ImGui::CalcTextSize(selected_rom_entry->name.c_str()).x * 0.5f);
+						ImGui::Text(selected_rom_entry->name.c_str());
+						//ImGui::Image();
+						//ImDrawList* draw_list = ImGui::GetWindowDrawList();
+						//ImVec2 p = ImGui::GetCursorPos();
+						//draw_list->AddRect(p, ImVec2{p.x + 100.0f, p.y + 100.0f}, IM_COL32(255,0,0,255));
+					}
+					ImGui::EndChild();
+					ImGui::EndGroup();
 				}
-				ImGui::EndMenu();
+				ImGui::SameLine();
 			}
-			if (ImGui::BeginMenu("Settings"))
+			ImGui::End();
+
+			if (show_settings)
 			{
-                ImGui::MenuItem("Roms", nullptr, &show_settings);
-                ImGui::MenuItem("Themes", nullptr, &show_settings);
-				ImGui::EndMenu();
+				if (ImGui::Begin("Settings", &show_settings))
+				{
+					ImGui::SeparatorText("Select a path to your preferred rom folder");
+					DrawTextInputField("1", "Select rom folder", {},
+						"Select rom folder", config.rom_folder, ImGuiFileBrowserFlags_SelectDirectory);
+
+					if (ImGui::Button("Search for ROMs"))
+					{
+						imgui_context.root_entry = std::move(SearchROMs(config.rom_folder));
+					}
+
+					ImGui::SeparatorText("Load bootrom");
+					static const char* items[] = {"Initialize without a bootrom", "Specify path to bootrom"};
+					int& current_item = config.bootrom_load_option;
+					ImGui::Combo("##combo", &current_item, items, IM_ARRAYSIZE(items));
+
+					if (current_item == 1)
+					{
+						DrawTextInputField("2", "Select bootrom", {".gb"},
+							"Select bootrom", config.bootrom_file, 0);
+					}
+				}
+				ImGui::End();
+
 			}
-			if (ImGui::BeginMenu("Debug"))
-			{
-                ImGui::MenuItem("VRAM Viewer", nullptr, &imgui_context.show_vram_viewer);
-				ImGui::EndMenu();
-			}
-			if (ImGui::BeginMenu("Help"))
-			{
-				ImGui::TextLinkOpenURL("GitHub Page", "https://github.com/StanislavDidus/Project-Thax");
-				//if (ImGui::Button("GitHub Page"))
-				//{
-				//}
-				ImGui::EndMenu();
-			}
-			ImGui::EndMainMenuBar();
 		}
-    	ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+		*/
 
-    	if (show_settings)
-    	{
-    		if (ImGui::Begin("Settings", &show_settings))
-    		{
-    			if (ImGui::BeginTabBar("##TabBar"))
-    			{
-    				if (ImGui::BeginTabItem("Roms"))
-    				{
-    					ImGui::SeparatorText("Select a path to your preferred rom folder");
-    					DrawTextInputField("1", "Select rom folder", {},
-							"Select rom folder", config.rom_folder, ImGuiFileBrowserFlags_SelectDirectory);
+    	inline void DrawLibrary(ImGuiContext& imgui_context, const Config& config, DMG& dmg, GLuint viewport_texture)
+	    {
+	    	if (ImGui::Begin("Library"))
+	    	{
+	    		if (dmg.GetState() == DMG::PlayState::IDLE)
+	    		{
+	    			static ROMEntry* selected_rom_entry = nullptr;
+	    			if (imgui_context.root_entry != nullptr)
+	    				for ( const auto& child : imgui_context.root_entry->children )
+	    					PrintEntry(dmg, config, child.get(), &selected_rom_entry);
+	    		}
+	    		else
+	    		{
+	    			ImVec2 avail_size = ImGui::GetContentRegionAvail();
 
-    					if (ImGui::Button("Search for ROMs"))
-    					{
-    						imgui_context.root_entry = std::move(SearchROMs(config.rom_folder));
-    					}
+	    			const float scale_x = avail_size.x / globals::LCD_WIDTH;
+	    			const float scale_y = avail_size.y / globals::LCD_HEIGHT;
+	    			const float final_scale = scale_x < scale_y ? scale_x : scale_y;
+	    			ImVec2 viewport_size
+	    			{
+	    				globals::LCD_WIDTH * final_scale,
+						globals::LCD_HEIGHT * final_scale,
+					};
 
-    					ImGui::SeparatorText("Load bootrom");
-    					static const char* items[] = {"Initialize without a bootrom", "Specify path to bootrom"};
-    					int& current_item = config.bootrom_load_option;
-    					ImGui::Combo("##combo", &current_item, items, IM_ARRAYSIZE(items));
+	    			const ImVec2 cursor = ImGui::GetCursorPos();
+	    			const float offset_x = (avail_size.x - viewport_size.x) * 0.5f;
+	    			const float offset_y = (avail_size.y - viewport_size.y) * 0.5f;
 
-    					if (current_item == 1)
-    					{
-    						DrawTextInputField("2", "Select bootrom", {".gb"},
-								"Select bootrom", config.bootrom_file, 0);
-    					}
-    					ImGui::EndTabItem();
-    				}
-    				if (ImGui::BeginTabItem("Themes"))
-    				{
-    					static const char* themes[] = {"Light (Default)", "Visual Studio Code Like"};
-    					static int current_theme = 0;
-    					if (ImGui::Combo("Choose a theme", &current_theme, themes, IM_ARRAYSIZE(themes)))
-    					{
-    						if (current_theme == 0)
-    						{
-								SetupImGuiStyleWhite();
-    						}
-    						if (current_theme == 1)
-    						{
-								SetupImGuiStyleGrey();
-    						}
-    					}
-    					ImGui::EndTabItem();
-    				}
-    				ImGui::EndTabBar();
-    			}
-    		}
-    		ImGui::End();
-    	}
-    }
+	    			ImGui::SetCursorPos(ImVec2(
+						cursor.x + (offset_x > 0.0f ? offset_x : 0.0f),
+						cursor.y + (offset_y > 0.0f ? offset_y : 0.0f)));
+
+	    			ImGui::Image(static_cast<ImTextureID>(viewport_texture), viewport_size);
+	    		}
+	    	}
+	    	ImGui::End();
+	    }
+
+    	inline void DrawMain2(ImGuiContext& imgui_context, DMG& dmg, Config& config)
+	    {
+	    	static bool show_settings = false;
+	    	static bool show_roms = false;
+	    	static bool show_themes = false;
+
+	    	if (ImGui::BeginMainMenuBar())
+	    	{
+	    		if (ImGui::BeginMenu("System"))
+	    		{
+	    			if (dmg.GetState() == DMG::PlayState::PLAY)
+	    			{
+	    				if (ImGui::Button("Pause"))
+	    				{
+	    					dmg.SetState(DMG::PlayState::PAUSE);
+	    				}
+	    			}
+	    			else if (dmg.GetState() == DMG::PlayState::PAUSE)
+	    			{
+	    				if (ImGui::Button("Resume"))
+	    				{
+	    					dmg.SetState(DMG::PlayState::PLAY);
+	    				}
+	    			}
+	    			else
+	    			{
+	    				ImGui::BeginDisabled(); ImGui::Button("Pause"); ImGui::EndDisabled();
+	    			}
+
+	    			DoIfEnabled(dmg.GetState() == DMG::PlayState::IDLE, [&dmg]
+					{
+						if (ImGui::Button("Reset"))
+							dmg.SetState(DMG::PlayState::IDLE);
+					});
+
+	    			if (ImGui::Button("Exit"))
+	    			{
+	    				std::exit(0);
+	    			}
+	    			ImGui::EndMenu();
+	    		}
+	    		if (ImGui::BeginMenu("Settings"))
+	    		{
+	    			if (ImGui::MenuItem("Roms", nullptr, &show_settings)) show_roms = true;
+	    			if (ImGui::MenuItem("Themes", nullptr, &show_settings)) show_themes = true;
+	    			ImGui::EndMenu();
+	    		}
+	    		if (ImGui::BeginMenu("Debug"))
+	    		{
+	    			ImGui::MenuItem("VRAM Viewer", nullptr, &imgui_context.show_vram_viewer);
+	    			ImGui::MenuItem("Memory Layout", nullptr, &imgui_context.show_memory_layout);
+	    			ImGui::MenuItem("Register Info", nullptr, &imgui_context.show_register_info);
+	    			ImGui::MenuItem("Control Menu", nullptr, &imgui_context.show_control_menu);
+	    			ImGui::EndMenu();
+	    		}
+	    		if (ImGui::BeginMenu("Help"))
+	    		{
+	    			ImGui::TextLinkOpenURL("GitHub Page", "https://github.com/StanislavDidus/Project-Thax");
+	    			//if (ImGui::Button("GitHub Page"))
+	    			//{
+	    			//}
+	    			ImGui::EndMenu();
+	    		}
+	    		ImGui::EndMainMenuBar();
+	    	}
+	    	ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+
+	    	if (show_settings)
+	    	{
+	    		if (ImGui::Begin("Settings", &show_settings))
+	    		{
+	    			if (ImGui::BeginTabBar("##TabBar"))
+	    			{
+	    				ImGuiTabItemFlags_ flags = show_roms ? ImGuiTabItemFlags_SetSelected : static_cast<ImGuiTabItemFlags_>(0);
+	    				if (ImGui::BeginTabItem("Roms", nullptr, flags))
+	    				{
+	    					show_roms = false;
+	    					ImGui::SeparatorText("Select a path to your preferred rom folder");
+	    					DrawTextInputField("1", "Select rom folder", {},
+								"Select rom folder", config.rom_folder, ImGuiFileBrowserFlags_SelectDirectory);
+
+	    					if (ImGui::Button("Search for ROMs"))
+	    					{
+	    						imgui_context.root_entry = std::move(SearchROMs(config.rom_folder));
+	    					}
+
+	    					ImGui::SeparatorText("Load bootrom");
+	    					static const char* items[] = {"Initialize without a bootrom", "Specify path to bootrom"};
+	    					int& current_item = config.bootrom_load_option;
+	    					ImGui::Combo("##combo", &current_item, items, IM_ARRAYSIZE(items));
+
+	    					if (current_item == 1)
+	    					{
+	    						DrawTextInputField("2", "Select bootrom", {".gb"},
+									"Select bootrom", config.bootrom_file, 0);
+	    					}
+	    					ImGui::EndTabItem();
+	    				}
+
+	    				flags = show_themes ? ImGuiTabItemFlags_SetSelected : static_cast<ImGuiTabItemFlags_>(0);
+	    				if (ImGui::BeginTabItem("Themes", nullptr, flags))
+	    				{
+	    					show_themes = false;
+	    					static const char* themes[] = {"Light (Default)", "Visual Studio Code Like"};
+	    					int& current_theme = config.theme;
+	    					if (ImGui::Combo("Choose a theme", &current_theme, themes, IM_ARRAYSIZE(themes)))
+	    					{
+	    						if (current_theme == 0)
+	    						{
+	    							SetupImGuiStyleWhite();
+	    						}
+	    						if (current_theme == 1)
+	    						{
+	    							SetupImGuiStyleGrey();
+	    						}
+	    					}
+	    					ImGui::EndTabItem();
+	    				}
+	    				ImGui::EndTabBar();
+	    			}
+	    		}
+	    		ImGui::End();
+	    	}
+	    }
 }

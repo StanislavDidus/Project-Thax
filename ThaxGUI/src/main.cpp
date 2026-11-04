@@ -10,6 +10,9 @@
 #include "DMG/Utils/Log.hpp"
 #include "UI/UI.hpp"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 int main()
 {
 #ifdef _WIN32
@@ -30,68 +33,30 @@ int main()
         imgui_context.root_entry = std::move(dmg::SearchROMs(current_config.rom_folder));
     }
 
+    dmg::InitializeImGuiTheme(current_config);
+
     constexpr std::chrono::duration<double> FRAME_DURATION {1.0 / 59.7};
     std::chrono::time_point<std::chrono::high_resolution_clock> frame_start = std::chrono::high_resolution_clock::now();
 
-    // Initialize Tile Data Texture
-    unsigned int tile_data_texture;
-    glGenTextures(1, &tile_data_texture);
-    glBindTexture(GL_TEXTURE_2D, tile_data_texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
-        dmg::globals::TILE_DATA_VIEW_WIDTH, dmg::globals::TILE_DATA_VIEW_HEIGHT,
-        0, GL_RGB,
-        GL_UNSIGNED_BYTE, nullptr);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    unsigned int tile_data_texture = dmg::GenerateGLTexture(dmg::globals::TILE_DATA_VIEW_WIDTH, dmg::globals::TILE_DATA_VIEW_HEIGHT);
+    unsigned int bg_tilemap_texture = dmg::GenerateGLTexture(dmg::globals::TILEMAP_DATA_WIDTH, dmg::globals::TILEMAP_DATA_HEIGHT);
+    unsigned int window_tilemap_texture = dmg::GenerateGLTexture(dmg::globals::TILEMAP_DATA_WIDTH, dmg::globals::TILEMAP_DATA_HEIGHT);
+    unsigned int lcd_texture = dmg::GenerateGLTexture(dmg::globals::LCD_WIDTH, dmg::globals::LCD_HEIGHT);
 
-    // Initialize Tilemap1 Texture
-    unsigned int tilemap1_texture;
-    glGenTextures(1, &tilemap1_texture);
-    glBindTexture(GL_TEXTURE_2D, tilemap1_texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
-        dmg::globals::TILEMAP_DATA_WIDTH, dmg::globals::TILEMAP_DATA_HEIGHT,
-        0, GL_RGB,
-        GL_UNSIGNED_BYTE, nullptr);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    // Initialize Tilemap1 Texture
-    unsigned int tilemap2_texture;
-    glGenTextures(1, &tilemap2_texture);
-    glBindTexture(GL_TEXTURE_2D, tilemap2_texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
-        dmg::globals::TILEMAP_DATA_WIDTH, dmg::globals::TILEMAP_DATA_HEIGHT,
-        0, GL_RGB,
-        GL_UNSIGNED_BYTE, nullptr);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    // Initialize LCD Buffer texture
-    unsigned int lcd_texture;
-    glGenTextures(1, &lcd_texture);
-    glBindTexture(GL_TEXTURE_2D, lcd_texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
-        dmg::globals::LCD_WIDTH, dmg::globals::LCD_HEIGHT,
-        0, GL_RGB,
-        GL_UNSIGNED_BYTE, nullptr);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    // Setup icon
+    {
+        int width, height, channels;
+        unsigned char* pixels = stbi_load_from_memory(reinterpret_cast<const unsigned char*>(icon_data), icon_size, &width, &height, &channels, 0);
+        if (pixels)
+        {
+            GLFWimage images[1];
+            images[0].width = width;
+            images[0].height = height;
+            images[0].pixels = pixels;
+            glfwSetWindowIcon(graphics_context.window, 1, images);
+            stbi_image_free(pixels);
+        }
+    }
 
     while (!glfwWindowShouldClose(graphics_context.window))
     {
@@ -111,26 +76,9 @@ int main()
 
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glBindTexture(GL_TEXTURE_2D, tile_data_texture);
-        auto tile_data_buffer = dmg.GetTileDataBuffer();
-        auto tile_data_buffer_rgb = dmg::ConvertBufferToRGB(tile_data_buffer);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-            dmg::globals::TILE_DATA_VIEW_WIDTH, dmg::globals::TILE_DATA_VIEW_HEIGHT,
-            GL_RGB, GL_UNSIGNED_BYTE, tile_data_buffer_rgb.data());
-
-        glBindTexture(GL_TEXTURE_2D, tilemap1_texture);
-        auto tilemap1_buffer = dmg.GetBGTilemapBuffer();
-        auto tilemap1_buffer_rgb = dmg::ConvertBufferToRGB2(*tilemap1_buffer);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-            dmg::globals::TILEMAP_DATA_WIDTH, dmg::globals::TILEMAP_DATA_HEIGHT,
-            GL_RGB, GL_UNSIGNED_BYTE, tilemap1_buffer_rgb->data());
-
-        glBindTexture(GL_TEXTURE_2D, tilemap2_texture);
-        auto tilemap2_buffer = dmg.GetWindowTilemapBuffer();
-        auto tilemap2_buffer_rgb = dmg::ConvertBufferToRGB2(*tilemap2_buffer);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-            dmg::globals::TILEMAP_DATA_WIDTH, dmg::globals::TILEMAP_DATA_HEIGHT,
-            GL_RGB, GL_UNSIGNED_BYTE, tilemap2_buffer_rgb->data());
+        dmg::GenerateTextureFromBuffer(tile_data_texture, dmg::globals::TILE_DATA_VIEW_WIDTH, dmg::globals::TILE_DATA_VIEW_HEIGHT, std::move(dmg.GetTileDataBuffer()));
+        dmg::GenerateTextureFromBuffer(bg_tilemap_texture, dmg::globals::TILEMAP_DATA_WIDTH, dmg::globals::TILEMAP_DATA_HEIGHT, std::move(dmg.GetBGTilemapBuffer()));
+        dmg::GenerateTextureFromBuffer(window_tilemap_texture, dmg::globals::TILEMAP_DATA_WIDTH, dmg::globals::TILEMAP_DATA_HEIGHT, std::move(dmg.GetWindowTilemapBuffer()));
 
         glBindTexture(GL_TEXTURE_2D, lcd_texture);
         auto lcd_buffer_rgb = dmg::ConvertBufferToRGB(dmg.GetLCDBuffer());
@@ -142,7 +90,6 @@ int main()
         dmg::StartImGuiFrame();
 
         //ImGui::DockSpaceOverViewport();
-
         dmg::DMGInfo dmg_info = dmg.GetDMGInfo();
 
         /*
@@ -154,8 +101,11 @@ int main()
         dmg::DrawMain(dmg, imgui_context, current_config);
         */
         dmg::DrawMain2(imgui_context, dmg, current_config);
-        dmg::DrawLibrary(imgui_context, dmg, lcd_texture);
-        dmg::DrawVRAMViewer(imgui_context, tile_data_texture, tilemap1_texture, tilemap2_texture);
+        dmg::DrawLibrary(imgui_context, current_config, dmg, lcd_texture);
+        dmg::DrawVRAMViewer(imgui_context, tile_data_texture, bg_tilemap_texture, window_tilemap_texture);
+        dmg::DrawMemoryWindow(dmg, dmg_info, imgui_context);
+        dmg::DrawInfoWindow(dmg_info, dmg, imgui_context);
+        dmg::DrawControlWindow(dmg, imgui_context, current_config);
         //ImGui::ShowDemoWindow();
 
         dmg::EndImGuiFrame();

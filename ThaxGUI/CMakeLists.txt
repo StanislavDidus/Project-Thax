@@ -36,5 +36,4 @@ target_include_directories(ThaxGUI PRIVATE
         externals/glad/include
 )
 
-#target_link_libraries(GameBoyGUI PUBLIC spdlog::spdlog glfw imgui nlohmann_json::nlohmann_json)
-target_link_libraries(ThaxGUI PUBLIC ThaxCore glfw imgui)
+target_link_libraries(ThaxGUI PUBLIC ThaxCore glfw imgui stb_img)

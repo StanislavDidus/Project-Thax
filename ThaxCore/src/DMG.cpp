@@ -61,7 +61,10 @@ void dmg::DMG::LoadROM(const std::filesystem::path& path)
 
 void dmg::DMG::LoadBootrom(const std::filesystem::path& path)
 {
-    if (m_cartridge) m_cartridge->LoadBootrom(path);
+    if (m_cartridge)
+        m_cartridge->LoadBootrom(path);
+    else
+        DMG_ERROR("Trying to load Bootrom when cartridge is not existed.");
 }
 
 void dmg::DMG::StartFrame()
@@ -91,6 +94,11 @@ void dmg::DMG::Update()
             StartFrame();
         }
     }
+}
+
+void dmg::DMG::Reset()
+{
+    SetState(PlayState::IDLE);
 }
 
 void dmg::DMG::EndFrame()
@@ -183,6 +191,12 @@ void dmg::DMG::SetState(PlayState state)
         break;
     case PlayState::IDLE:
         m_cpu->Reset();
+        m_ppu->Reset();
+        m_timer->Reset();
+        m_serial_port->Reset();
+        m_joypad->Reset();
+        m_interrupt_controller->Reset();
+        m_dma_controller->Reset();
         break;
     case PlayState::PLAY:
         break;
@@ -204,7 +218,7 @@ const dmg::globals::LCD_BUFFER& dmg::DMG::GetLCDBuffer() const
 dmg::globals::TILE_DATA_BUFFER dmg::DMG::GetTileDataBuffer() const
 {
     if (m_ppu)
-        return m_ppu->GetTileDataBuffer();
+        return std::move(m_ppu->GetTileDataBuffer());
 
     throw std::runtime_error{"Trying to get LCD Buffer without an existing PPU."};
 }

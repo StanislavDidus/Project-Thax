@@ -5,9 +5,20 @@
 
 namespace dmg
 {
+    DMAController::DMAController()
+    {
+        Reset();
+    }
+
     void DMAController::Initialize(const std::shared_ptr<Bus>& bus)
     {
         m_bus = bus;
+    }
+    void DMAController::Reset()
+    {
+        m_data = 0;
+        m_dma_active = false;
+        m_dma_progress = 0;
     }
 
     bool DMAController::IsActive() const

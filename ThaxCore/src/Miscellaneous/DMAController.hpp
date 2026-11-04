@@ -9,8 +9,10 @@ namespace dmg
     class DMAController
     {
     public:
-        DMAController() = default;
+        DMAController();
         ~DMAController() = default;
+
+        void Reset();
 
         [[nodiscard]] bool IsActive() const;
         void Initialize(const std::shared_ptr<Bus>& bus);

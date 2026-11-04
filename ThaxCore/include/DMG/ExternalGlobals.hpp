@@ -43,6 +43,6 @@ namespace dmg::globals
     inline constexpr uint32_t LCD_HEIGHT = 144;
 
     using LCD_BUFFER = std::array<uint8_t, LCD_WIDTH * LCD_HEIGHT>;
-    using TILE_DATA_BUFFER = std::array<uint8_t, TILE_DATA_VIEW_WIDTH * TILE_DATA_VIEW_HEIGHT>;
+    using TILE_DATA_BUFFER = std::unique_ptr<std::vector<uint8_t>>;
     using TILEMAP_BUFFER = std::unique_ptr<std::vector<uint8_t>>;
 }

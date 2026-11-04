@@ -14,7 +14,7 @@ namespace dmg
         explicit SerialPort(InterruptController& interrupt_controller)
             : m_interrupt_controller(interrupt_controller)
         {
-
+            Reset();
         }
         ~SerialPort() = default;
 
@@ -47,6 +47,12 @@ namespace dmg
             }
         }
 
+        void Reset()
+        {
+            SB = 0;
+            SC = 0;
+        }
+
         void WriteSB(const uint8_t value) { SB = value; }
         [[nodiscard]] uint8_t ReadSB() const { return SB; }
 
@@ -67,4 +73,5 @@ namespace dmg
 
         InterruptController& m_interrupt_controller;
     };
+
 }

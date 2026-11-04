@@ -15,6 +15,8 @@ namespace dmg
 
         void Update(uint32_t cycles);
 
+        void Reset();
+
         [[nodiscard]] uint8_t ReadDIV() const { return DIV >> 6 & 0xFF; }
         void WriteDIV(const uint8_t) { DIV = 0; }
 

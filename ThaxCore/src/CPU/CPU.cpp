@@ -19,6 +19,8 @@ dmg::CPU::CPU(Bus& bus, InterruptController& interrupt_controller)
     {
         CreateLog();
     }
+
+    Reset();
 }
 
 void dmg::CPU::SetRegisters(const CPUInfo& register_info)
@@ -72,18 +74,23 @@ uint32_t dmg::CPU::Step()
 
 void dmg::CPU::Reset()
 {
-    PC.WriteWord(0x000);
-    SP.WriteWord(0);
-    A.Write(0);
-    F.Write(0);
-    B.Write(0);
-    C.Write(0);
-    D.Write(0);
-    E.Write(0);
-    H.Write(0);
-    L.Write(0);
+    PC.WriteWord(0x0000);
+    SP.WriteWord(0xFFFE);
+    A.Write(0x01);
+    F.Write(0xB0);
+    B.Write(0x00);
+    C.Write(0x13);
+    D.Write(0x00);
+    E.Write(0xD8);
+    H.Write(0x01);
+    L.Write(0x4D);
 
     m_current_state = State::NORMAL;
+
+    IME = false;
+    set_IME = false;
+    set_IME_delay = false;
+    halt_bug = false;
 }
 
 std::optional<uint32_t> dmg::CPU::HandleInterrupts()
@@ -177,7 +184,7 @@ uint8_t dmg::CPU::ReadMemory(uint16_t address) const
     return m_bus.Read(address);
 }
 
-void dmg::CPU::WriteMemory(uint16_t address, uint8_t value)
+void dmg::CPU::WriteMemory(const uint16_t address, const uint8_t value)
 {
     m_bus.Write(address, value);
 }

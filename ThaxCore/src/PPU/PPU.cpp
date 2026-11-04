@@ -15,7 +15,7 @@ namespace dmg
     {
         m_objects.reserve(globals::MAX_OBJECTS);
 
-        SetMode(PPUMode::MODE2);
+        Reset();
     }
 
     void PPU::Update(const uint32_t cycles)
@@ -45,7 +45,8 @@ namespace dmg
 
     globals::TILE_DATA_BUFFER PPU::GetTileDataBuffer() const
     {
-        globals::TILE_DATA_BUFFER tile_data_buffer {};
+        globals::TILE_DATA_BUFFER tile_data_buffer = std::make_unique<std::vector<uint8_t>>();
+        tile_data_buffer->resize(globals::TILE_DATA_VIEW_WIDTH * globals::TILE_DATA_VIEW_HEIGHT);
 
         for (int y = 0; y < globals::TILE_DATA_HEIGHT; ++y)
         {
@@ -66,7 +67,7 @@ namespace dmg
 
                         int px = x * 8 + j;
                         int py = y * 8 + row;
-                        tile_data_buffer[py * globals::TILE_DATA_VIEW_WIDTH + px] = color;
+                        (*tile_data_buffer)[py * globals::TILE_DATA_VIEW_WIDTH + px] = color;
                     }
                 }
             }
@@ -139,6 +140,39 @@ namespace dmg
         }
 
         return std::move(tilemap_buffer);
+    }
+
+    void PPU::Reset()
+    {
+        VRAM.fill(0x00);
+        OAM.fill(0x00);
+
+        m_y_condition = false;
+        fetcher_x = 0;
+        fetcher_y = 0;
+
+        LCDC.Write(0x00);
+        STAT.Write(0x00);
+        SCY.Write(0x00);
+        SCX.Write(0x00);
+        LY.Write(0x00);
+        LYC.Write(0x00);
+        BGP.Write(0x00);
+        OBP0.Write(0x00);
+        OBP1.Write(0x00);
+        WY.Write(0x00);
+        WX.Write(0x00);
+
+        m_lcd.fill(0);
+
+        m_objects.clear();
+
+        m_current_cycles = 0;
+
+        m_pixel_fetcher.Reset();
+        m_fifo.Reset();
+
+        SetMode(PPUMode::MODE2);
     }
 
     void PPU::WriteVRAM(const uint16_t address, const uint8_t value)

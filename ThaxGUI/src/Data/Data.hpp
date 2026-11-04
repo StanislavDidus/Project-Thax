@@ -24,6 +24,7 @@ namespace dmg
         std::filesystem::path rom_folder {""};
         int bootrom_load_option = 0; // 0 - Default values 1 - specify bootrom file
         std::filesystem::path bootrom_file {""};
+        int theme = 0;
     };
 
     inline void ScanDirectory(const std::filesystem::path& path, ROMEntry* parent)
@@ -92,16 +93,33 @@ namespace dmg
             return std::nullopt;
         }
 
-        Config config {};
+        Config c {};
 
-        config.rom_folder = LoadString(file);
-        file >> config.bootrom_load_option;
-        config.bootrom_file = LoadString(file);
+        std::string rom, boot, opt, theme;
 
-        return config;
+        if (!std::getline(file, rom)   ||
+        !std::getline(file, opt)   ||
+        !std::getline(file, boot)  ||
+        !std::getline(file, theme))
+            return std::nullopt;
+
+        try
+        {
+            c.bootrom_load_option = std::stoi(opt);
+            c.theme = std::stoi(theme);
+        }
+        catch (std::exception&)
+        {
+            return std::nullopt;
+        }
+
+        c.rom_folder = rom;
+        c.bootrom_file = boot;
+
+        return c;
     }
 
-    inline void SaveConfig(const Config& config)
+    inline void SaveConfig(const Config& c)
     {
         std::filesystem::create_directories("data/internal");
         std::ofstream file{"data/internal/config.txt"};
@@ -111,9 +129,10 @@ namespace dmg
             return;
         }
 
-        SaveString(file, config.rom_folder.string());
-        file << config.bootrom_load_option;
-        SaveString(file, config.bootrom_file.string());
+        file << c.rom_folder.string() << '\n'
+         << c.bootrom_load_option << '\n'
+         << c.bootrom_file.string() << '\n'
+         << c.theme << '\n';
 
         file.close();
     }

@@ -10,8 +10,17 @@ namespace dmg
     class InterruptController
     {
     public:
-        InterruptController() = default;
+        InterruptController()
+        {
+            Reset();
+        }
         ~InterruptController() = default;
+
+        void Reset()
+        {
+            IF = 0;
+            IE = 0;
+        }
 
         void WriteIF(const uint8_t value)
         {

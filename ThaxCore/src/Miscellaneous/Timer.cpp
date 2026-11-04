@@ -7,6 +7,7 @@ namespace dmg
     Timer::Timer(InterruptController& interrupt_controller)
         : m_interrupt_controller(interrupt_controller)
     {
+        Reset();
     }
 
     void Timer::Update(const uint32_t cycles)
@@ -40,6 +41,17 @@ namespace dmg
                 old_bit_value = new_bit_value;
             }
         }
+    }
+
+    void Timer::Reset()
+    {
+        DIV = 0;
+        TIMA = 0;
+        TMA = 0;
+        TAC = 0;
+        old_bit_value = 0;
+        overflow_delay = false;
+        overflow = false;
     }
 
     void Timer::WriteTAC(const uint8_t value)

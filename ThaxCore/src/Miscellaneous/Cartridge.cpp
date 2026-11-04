@@ -10,7 +10,7 @@ namespace dmg
     void Cartridge::Load(const std::filesystem::path& path)
     {
         // Reset ROM
-        std::fill_n(ROM.data(), ROM.size(), 0);
+        ROM.clear();
 
         std::ifstream file(path, std::ios::binary | std::ios::ate);
         if (!file)

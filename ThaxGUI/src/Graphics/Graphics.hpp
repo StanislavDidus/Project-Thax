@@ -20,8 +20,8 @@ namespace dmg
 
     inline void input_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-            glfwSetWindowShouldClose(window, GLFW_TRUE);
+        //if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+            //glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
 
     struct GraphicsContext
@@ -107,28 +107,51 @@ namespace dmg
         return rgb;
     }
 
-    std::unique_ptr<std::vector<uint8_t>> ConvertBufferToRGB2(std::span<uint8_t> buffer)
+    inline void GenerateTextureFromBuffer(unsigned int gl_texture, int texture_width, int texture_height, std::unique_ptr<std::vector<uint8_t>> buffer)
     {
+        glBindTexture(GL_TEXTURE_2D, gl_texture);
+
         std::unique_ptr<std::vector<uint8_t>> rgb = std::make_unique<std::vector<uint8_t>>();
-        rgb->resize(buffer.size() * 3);
+        rgb->resize(buffer->size() * 3);
 
         static RGBColor c00 = {.r = 139,.g = 172, .b = 15};
         static RGBColor c01 = {.r = 48, .g = 98, .b = 48};
         static RGBColor c10 = {.r = 15, .g = 56, .b = 15};
         static RGBColor c11 = {.r = 15, .g = 56, .b = 15};
 
-        for (int i = 0; i < buffer.size(); ++i)
+        for (int i = 0; i < buffer->size(); ++i)
         {
             RGBColor color{};
-            if (buffer[i] == 0b00) color = c00;
-            else if (buffer[i] == 0b01) color = c01;
-            else if (buffer[i] == 0b10) color = c10;
-            else if (buffer[i] == 0b11) color = c11;
+            if ((*buffer)[i] == 0b00) color = c00;
+            else if ((*buffer)[i] == 0b01) color = c01;
+            else if ((*buffer)[i] == 0b10) color = c10;
+            else if ((*buffer)[i] == 0b11) color = c11;
 
             (*rgb)[i * 3 + 0] = color.r;
             (*rgb)[i * 3 + 1] = color.g;
             (*rgb)[i * 3 + 2] = color.b;
         }
 
-        return std::move(rgb);
-    }}
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+            texture_width, texture_height,
+            GL_RGB, GL_UNSIGNED_BYTE, rgb->data());
+    }
+
+    inline unsigned int GenerateGLTexture(int texture_width, int texture_height)
+    {
+        unsigned int texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+            texture_width, texture_height,
+            0, GL_RGB,
+            GL_UNSIGNED_BYTE, nullptr);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        return texture;
+    }
+}
