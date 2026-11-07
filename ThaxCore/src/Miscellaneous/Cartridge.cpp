@@ -19,7 +19,7 @@ namespace dmg
         }
 
         std::streamsize file_size = file.tellg();
-        ROM.resize(file_size);
+        ROM.resize(std::max(static_cast<unsigned int>(file_size), globals::ROM_0.m_size + globals::ROM_N.m_size));
 
         file.seekg(0, std::ios::beg);
 

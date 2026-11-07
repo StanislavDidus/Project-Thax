@@ -138,11 +138,11 @@ void dmg::DMG::StepInstruction()
         cycles = m_cpu->Step();
     }
 
-    total_cycles += cycles;
-
     if (m_timer) m_timer->Update(cycles);
     if (m_serial_port) m_serial_port->Update(cycles);
     if (m_ppu) m_ppu->Update(cycles);
+
+    total_cycles += cycles;
 }
 
 void dmg::DMG::StepFrame()
