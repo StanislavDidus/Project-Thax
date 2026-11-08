@@ -43,8 +43,9 @@ namespace dmg
     private:
         void SetMode(PPUMode mode);
         void EnterMode(PPUMode mode);
-        void UpdateMode(PPUMode mode, uint32_t cycles);
+        void UpdateMode(PPUMode mode);
         void ExitMode(PPUMode mode);
+        void ProgressMode();
 
         void FindObjectsOnScanline();
         [[nodiscard]] std::optional<Object> GetObject();

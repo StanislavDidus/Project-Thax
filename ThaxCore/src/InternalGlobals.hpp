@@ -6,7 +6,7 @@ namespace dmg
 {
 #ifndef NDEBUG
     inline constexpr bool DEBUG_MODE = true;
-    inline constexpr bool PRINT_SERIAL_PORT = false;
+    inline constexpr bool PRINT_SERIAL_PORT = true;
     inline constexpr bool WRITE_DOCTOR_LOGS = false;
 #else
     inline constexpr bool DEBUG_MODE = false;
@@ -53,10 +53,10 @@ namespace dmg
 namespace dmg::globals
 {
     // PPU MODES
-    inline constexpr uint32_t PPU_MODE_0_LENGTH = 204;
-    inline constexpr uint32_t PPU_MODE_1_LENGTH = 4560;
-    inline constexpr uint32_t PPU_MODE_2_LENGTH = 80;
-    inline constexpr uint32_t PPU_MODE_3_LENGTH = 172;
+    inline constexpr uint32_t HBLANK_LENGTH = 204;
+    inline constexpr uint32_t VBLANK_LENGTH = 4560;
+    inline constexpr uint32_t OAM_SCAN_LENGTH = 80;
+    inline constexpr uint32_t DRAWING_PIXELS_LENGTH = 172;
 
     inline constexpr uint32_t TILE_BYTE_SIZE = 16;
     inline constexpr uint32_t TILE_PIXEl_SIZE = 8;

@@ -190,13 +190,13 @@ void dmg::DMG::SetState(PlayState state)
     case PlayState::NONE:
         break;
     case PlayState::IDLE:
-        m_cpu->Reset();
-        m_ppu->Reset();
-        m_timer->Reset();
-        m_serial_port->Reset();
-        m_joypad->Reset();
-        m_interrupt_controller->Reset();
-        m_dma_controller->Reset();
+        if (m_cpu) m_cpu->Reset();
+        if (m_ppu) m_ppu->Reset();
+        if (m_timer) m_timer->Reset();
+        if (m_serial_port) m_serial_port->Reset();
+        if (m_joypad) m_joypad->Reset();
+        if (m_interrupt_controller) m_interrupt_controller->Reset();
+        if (m_dma_controller) m_dma_controller->Reset();
         break;
     case PlayState::PLAY:
         break;
@@ -246,8 +246,8 @@ void dmg::DMG::SetRegisters(const CPUInfo& register_info)
 
 dmg::DMGInfo dmg::DMG::GetDMGInfo() const
 {
-    const CPUInfo cpu_info = m_cpu->GetCPUInfo();
-    const PPUInfo ppu_info = m_ppu->GetPPUInfo();
+    const CPUInfo cpu_info = m_cpu ? m_cpu->GetCPUInfo() : CPUInfo{};
+    const PPUInfo ppu_info = m_ppu ? m_ppu->GetPPUInfo() : PPUInfo{};
     return DMGInfo
     {
         .F = cpu_info.F,
@@ -261,16 +261,16 @@ dmg::DMGInfo dmg::DMG::GetDMGInfo() const
         .PC = cpu_info.PC,
         .SP = cpu_info.SP,
         .CPU_State = cpu_info.CPU_State,
-        .IF = m_interrupt_controller->ReadIF(),
-        .IE = m_interrupt_controller->ReadIE(),
+        .IF = m_interrupt_controller ? m_interrupt_controller->ReadIF() : static_cast<uint8_t>(0x00),
+        .IE = m_interrupt_controller ? m_interrupt_controller->ReadIE() : static_cast<uint8_t>(0x00),
         .IME = cpu_info.IME,
-        .DIV = m_timer->ReadDIV(),
-        .TIMA = m_timer->ReadTIMA(),
-        .TMA = m_timer->ReadTMA(),
-        .TAC = m_timer->ReadTAC(),
-        .P1 = m_joypad->Read(),
-        .SB = m_serial_port->ReadSB(),
-        .SC = m_serial_port->ReadSC(),
+        .DIV = m_timer ? m_timer->ReadDIV() : static_cast<uint8_t>(0x00),
+        .TIMA = m_timer ? m_timer->ReadTIMA() : static_cast<uint8_t>(0x00),
+        .TMA = m_timer ? m_timer->ReadTMA() : static_cast<uint8_t>(0x00),
+        .TAC = m_timer ? m_timer->ReadTAC() : static_cast<uint8_t>(0x00),
+        .P1 = m_joypad ? m_joypad->Read() : static_cast<uint8_t>(0x00),
+        .SB = m_serial_port ? m_serial_port->ReadSB() : static_cast<uint8_t>(0x00),
+        .SC = m_serial_port ? m_serial_port->ReadSC() : static_cast<uint8_t>(0x00),
         .ppu_info = ppu_info
     };
 }

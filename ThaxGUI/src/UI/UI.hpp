@@ -437,10 +437,10 @@ namespace dmg
     			std::string ppu_state;
     			switch(info.ppu_info.ppu_mode)
     			{
-    			case PPUMode::MODE0: ppu_state = "MODE0"; break;
-    			case PPUMode::MODE1: ppu_state = "MODE1"; break;
-    			case PPUMode::MODE2: ppu_state = "MODE2"; break;
-    			case PPUMode::MODE3: ppu_state = "MODE3"; break;
+    			case PPUMode::HBLANK: ppu_state = "MODE0"; break;
+    			case PPUMode::VBLANK: ppu_state = "MODE1"; break;
+    			case PPUMode::OAM_SCAN: ppu_state = "MODE2"; break;
+    			case PPUMode::DRAWING_PIXELS: ppu_state = "MODE3"; break;
     			case PPUMode::NONE: ppu_state = "NONE"; break;
     			}
     			ImGui::Text("PPU State: %s", ppu_state.c_str());

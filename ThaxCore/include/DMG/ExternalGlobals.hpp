@@ -10,10 +10,10 @@ namespace dmg
     enum class PPUMode : uint8_t
     {
         NONE,
-        MODE0,
-        MODE1,
-        MODE2,
-        MODE3,
+        HBLANK,
+        VBLANK,
+        OAM_SCAN,
+        DRAWING_PIXELS,
     };
 
     enum class PixelFetcherState

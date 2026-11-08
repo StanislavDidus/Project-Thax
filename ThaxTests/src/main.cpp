@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
 
     for (int i = 0; i < 256; ++i)
     {
-        std::string file_name = std::format("SST/cb {:02x}.json", i);
+        std::string file_name = std::format("{}/cb {:02x}.json", std::string{argv[1]}, i);
         std::ifstream f{file_name};
 
         json root = json::parse(f);

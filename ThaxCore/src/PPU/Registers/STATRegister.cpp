@@ -18,9 +18,9 @@ namespace dmg
     {
         const bool line =
         (IsLYCIntSelect()   && lcyly) ||
-        (IsMode2InSelect()  && mode == PPUMode::MODE2) ||
-        (IsMode1InSelect()  && mode == PPUMode::MODE1) ||
-        (IsMode0InSelect()  && mode == PPUMode::MODE0);
+        (IsMode2InSelect()  && mode == PPUMode::OAM_SCAN) ||
+        (IsMode1InSelect()  && mode == PPUMode::VBLANK) ||
+        (IsMode0InSelect()  && mode == PPUMode::HBLANK);
 
         const bool rising = line && !m_active;
         m_active = line;

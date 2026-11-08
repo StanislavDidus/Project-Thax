@@ -29,13 +29,31 @@ namespace dmg
 
     private:
         enum class FetchType{ TILE, OBJECT};
-        struct FetchData
+
+        struct TileFetchData
         {
-            FetchType m_type = FetchType::TILE;
+            uint16_t m_address = 0;
+            uint8_t m_tile_row = 0;
+        };
+
+        struct ObjectFetchData
+        {
             uint16_t m_address = 0;
             uint8_t m_tile_row = 0;
             Object m_object{};
         };
+
+        void GetTileData();
+        void GetObjectTileData();
+        void GetTileDataLow();
+        void GetObjectTileDataLow();
+        void GetTileDataHigh();
+        void GetObjectTileDataHigh();
+        void PushTile();
+        void PushObject();
+
+        void AdvanceState();
+        void RestartState();
 
         void FetchTile();
 
@@ -44,8 +62,12 @@ namespace dmg
 
         uint32_t m_x = 0;
 
-        FetchData m_current_fetch {};
-        FetchData m_last_fetch {};
+        FetchType m_current_fetch_type = FetchType::TILE;
+        TileFetchData m_tile_fetch{};
+        ObjectFetchData m_object_fetch{};
+
+        //FetchData m_current_fetch {};
+        //FetchData m_last_fetch {};
 
         uint16_t m_tile_ref = 0;
         uint8_t m_tile_row = 0;

@@ -22,11 +22,9 @@ namespace dmg
     {
         if (!LCDC.IsLCDEnabled()) return;
 
-        m_current_cycles += cycles;
-
         for (int i = 0; i < cycles / 4; ++i)
         {
-            UpdateMode(m_mode, 4);
+            UpdateMode(m_mode);
 
             if (m_dma_controller.IsActive())
                 m_dma_controller.Update();
@@ -172,21 +170,16 @@ namespace dmg
         m_pixel_fetcher.Reset();
         m_fifo.Reset();
 
-        SetMode(PPUMode::MODE2);
+        SetMode(PPUMode::OAM_SCAN);
     }
 
     void PPU::WriteVRAM(const uint16_t address, const uint8_t value)
     {
-        //if (m_mode == PPUMode::MODE3) return;
-
         VRAM[address] = value;
     }
 
     void PPU::WriteOAM(const uint16_t address, const uint8_t value)
     {
-        //if (m_mode == PPUMode::MODE3) return;
-        //if (m_mode == PPUMode::MODE2) return;
-
         OAM[address] = value;
     }
 
@@ -212,16 +205,11 @@ namespace dmg
 
     uint8_t PPU::ReadVRAM(const uint16_t address) const
     {
-        //if (m_mode == PPUMode::MODE3) return 0xFF;
-
         return VRAM[address];
     }
 
     uint8_t PPU::ReadOAM(const uint16_t address) const
     {
-        //if (m_mode == PPUMode::MODE3) return 0xFF;
-        //if (m_mode == PPUMode::MODE2) return 0xFF;
-
         return OAM[address];
     }
 
@@ -279,22 +267,22 @@ namespace dmg
         EnterMode(m_mode);
     }
 
-    void PPU::EnterMode(PPUMode mode)
+    void PPU::EnterMode(const PPUMode mode)
     {
         switch (mode)
         {
-        case PPUMode::MODE0:
+        case PPUMode::HBLANK:
             break;
-        case PPUMode::MODE1:
+        case PPUMode::VBLANK:
             m_interrupt_controller.SetIF(InterruptController::VBLANK);
             m_fifo.Reset();
             m_y_condition = false;
             m_pixel_fetcher.Reset();
             break;
-        case PPUMode::MODE2:
+        case PPUMode::OAM_SCAN:
             FindObjectsOnScanline();
             break;
-        case PPUMode::MODE3:
+        case PPUMode::DRAWING_PIXELS:
             m_pixel_fetcher.StartScanline();
             m_fifo.StartScanline();
 
@@ -302,49 +290,25 @@ namespace dmg
                 m_y_condition = true;
 
             break;
+        case PPUMode::NONE:
+            break;
         }
     }
 
-    void PPU::UpdateMode(const PPUMode mode, uint32_t cycles)
+    void PPU::UpdateMode(const PPUMode mode)
     {
         switch (mode)
         {
-        case PPUMode::MODE0:
-            if (m_current_cycles >= globals::PPU_MODE_0_LENGTH)
-            {
-                LY.Write(LY.Read() + 1);
-
-                if (LY.Read() >= 144)
-                {
-                    SetMode(PPUMode::MODE1);
-                    m_current_cycles = 0;
-                }
-                else
-                {
-                    SetMode(PPUMode::MODE2);
-                    m_current_cycles = 0;
-                }
-            }
+        case PPUMode::HBLANK:
             break;
-        case PPUMode::MODE1:
+        case PPUMode::VBLANK:
             LY.Write(144 + m_current_cycles / 456);
-
-            if (m_current_cycles >= globals::PPU_MODE_1_LENGTH)
-            {
-                SetMode(PPUMode::MODE2);
-                m_current_cycles = 0;
-            }
             break;
-        case PPUMode::MODE2:
-            if (m_current_cycles >= globals::PPU_MODE_2_LENGTH)
-            {
-                SetMode(PPUMode::MODE3);
-                m_current_cycles = 0;
-            }
+        case PPUMode::OAM_SCAN:
             break;
-        case PPUMode::MODE3:
+        case PPUMode::DRAWING_PIXELS:
             {
-                for (int i = 0; i < cycles; ++i)
+                for (int i = 0; i < 4; ++i)
                 {
                     m_pixel_fetcher.Step();
                     if (m_fifo.SendPixelToLCD(m_lcd))
@@ -366,37 +330,85 @@ namespace dmg
                     if (m_fetch_object.has_value() && m_fifo.GetSize() >= 8)
                     {
                         m_pixel_fetcher.FetchObject(m_fetch_object.value());
-                        m_fifo.SetStop(true);
                         m_fetch_object = std::nullopt;
                     }
 
                     if (m_fifo.IsScanlineDone())
                     {
-                        SetMode(PPUMode::MODE0);
                         m_current_cycles = 0;
+                        SetMode(PPUMode::HBLANK);
                         break;
                     }
                 }
 
             }
             break;
+        case PPUMode::NONE:
+            break;
         }
+
+        ProgressMode();
     }
 
-    void PPU::ExitMode(PPUMode mode)
+    void PPU::ExitMode(const PPUMode mode)
     {
         switch (mode)
         {
-        case PPUMode::MODE0:
+        case PPUMode::HBLANK:
             break;
-        case PPUMode::MODE1:
+        case PPUMode::VBLANK:
             LY.Write(0);
             break;
-        case PPUMode::MODE2:
+        case PPUMode::OAM_SCAN:
             break;
-        case PPUMode::MODE3:
+        case PPUMode::DRAWING_PIXELS:
             m_pixel_fetcher.EndScanline();
             break;
+        case PPUMode::NONE:
+            break;
+        }
+    }
+
+    void PPU::ProgressMode()
+    {
+        m_current_cycles += 4;
+
+        switch (m_mode)
+        {
+        case PPUMode::OAM_SCAN:
+            if (m_current_cycles >= globals::OAM_SCAN_LENGTH)
+            {
+                m_current_cycles = 0;
+                SetMode(PPUMode::DRAWING_PIXELS);
+            }
+            break;
+        case PPUMode::DRAWING_PIXELS:
+            break;
+        case PPUMode::HBLANK:
+            if (m_current_cycles >= globals::HBLANK_LENGTH)
+            {
+                LY.Write(LY.Read() + 1);
+
+                if (LY.Read() >= 144)
+                {
+                    m_current_cycles = 0;
+                    SetMode(PPUMode::VBLANK);
+                }
+                else
+                {
+                    m_current_cycles = 0;
+                    SetMode(PPUMode::OAM_SCAN);
+                }
+            }
+            break;
+        case PPUMode::VBLANK:
+            if (m_current_cycles >= globals::VBLANK_LENGTH)
+            {
+                m_current_cycles = 0;
+                SetMode(PPUMode::OAM_SCAN);
+            }
+            break;
+        default: ;
         }
     }
 
@@ -421,10 +433,6 @@ namespace dmg
 
         // Sort objects by their x position and their address
         std::sort(m_objects.begin(), m_objects.end());
-
-        // Pick first 10 objects
-        //if (m_objects.size() > globals::MAX_OBJECTS_PER_SCANLINE)
-            //m_objects.erase(m_objects.begin() + globals::MAX_OBJECTS_PER_SCANLINE, m_objects.end());
     }
 
     std::optional<Object> PPU::GetObject()
