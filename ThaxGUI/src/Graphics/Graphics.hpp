@@ -3,7 +3,6 @@
 #include "DMG/Utils/Log.hpp"
 
 #define GLFW_INCLUDE_NONE
-#include <span>
 #include <glad/glad.h>
 #include "GLFW/glfw3.h"
 

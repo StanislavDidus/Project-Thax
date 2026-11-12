@@ -17,7 +17,7 @@ namespace dmg
 
         void Reset();
 
-        [[nodiscard]] uint8_t ReadDIV() const { return DIV >> 6 & 0xFF; }
+        [[nodiscard]] uint8_t ReadDIV() const { return (DIV >> 8) & 0xFF; }
         void WriteDIV(const uint8_t) { DIV = 0; }
 
         [[nodiscard]] uint8_t ReadTIMA() const { return TIMA; }

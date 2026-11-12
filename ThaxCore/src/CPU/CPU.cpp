@@ -74,7 +74,7 @@ uint32_t dmg::CPU::Step()
 
 void dmg::CPU::Reset()
 {
-    PC.WriteWord(0x0000);
+    PC.WriteWord(0x0100);
     SP.WriteWord(0xFFFE);
     A.Write(0x01);
     F.Write(0xB0);
@@ -91,6 +91,11 @@ void dmg::CPU::Reset()
     set_IME = false;
     set_IME_delay = false;
     halt_bug = false;
+}
+
+void dmg::CPU::StartFromBootrom()
+{
+    PC.WriteWord(0x000);
 }
 
 std::optional<uint32_t> dmg::CPU::HandleInterrupts()

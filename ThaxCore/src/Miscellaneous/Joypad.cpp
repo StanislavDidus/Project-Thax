@@ -4,6 +4,12 @@
 
 namespace dmg
 {
+    Joypad::Joypad(InterruptController& interrupt_controller)
+        : m_interrupt_controller(interrupt_controller)
+    {
+        Reset();
+    }
+
     void Joypad::KeyPressed(const JoypadButton button)
     {
         KeyChanged(button, true);
@@ -21,12 +27,20 @@ namespace dmg
         m_select = 0x30;
     }
 
-    uint8_t Joypad::Read() const
+    uint8_t Joypad::Read()
     {
         uint8_t low = 0x0F;
         if (!(m_select & 0x10)) low &= m_dpad;
         if (!(m_select & 0x20)) low &= m_buttons;
         uint8_t result =  0xC0 | m_select | low;
+
+        /*
+        std::cout << "-------------------" << std::endl;
+        std::cout << "select: " << +m_select << std::endl;
+        std::cout << "dpad: " << +m_dpad << std::endl;
+        std::cout << "buttons: " << +m_buttons << std::endl;
+        */
+
         return result;
     }
 

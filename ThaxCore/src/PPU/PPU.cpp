@@ -20,7 +20,8 @@ namespace dmg
 
     void PPU::Update(const uint32_t cycles)
     {
-        if (!LCDC.IsLCDEnabled()) return;
+        if (!LCDC.IsLCDEnabled())
+            return;
 
         for (int i = 0; i < cycles / 4; ++i)
         {

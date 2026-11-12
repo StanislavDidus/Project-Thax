@@ -12,20 +12,18 @@ namespace dmg
 
     void Timer::Update(const uint32_t cycles)
     {
-        if (overflow)
-        {
-            overflow_delay += cycles;
-            if (overflow_delay >= 4)
-            {
-                TIMA = TMA;
-                m_interrupt_controller.SetIF(InterruptController::Timer);
-                overflow = false;
-                overflow_delay = 0;
-            }
-        }
-
         for (int i = 0; i < cycles; ++i)
         {
+            if (overflow)
+            {
+                if (++overflow_delay >= 4)
+                {
+                    TIMA = TMA;
+                    m_interrupt_controller.SetIF(InterruptController::Timer);
+                    overflow = false;
+                    overflow_delay = 0;
+                }
+            }
             DIV++;
 
             if (IsClockEnabled())
@@ -63,7 +61,7 @@ namespace dmg
         TAC = value;
         const bool now = IsClockEnabled();
 
-        if (old && !now && GetSelectedBit())
+        if (old && !now && getBit(DIV, GetSelectedBit()))
         {
             m_interrupt_controller.SetIF(InterruptController::Timer);
         }

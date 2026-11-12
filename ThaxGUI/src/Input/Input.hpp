@@ -7,12 +7,25 @@ namespace dmg
 {
     inline void HandleKey(dmg::DMG& dmg, const GraphicsContext& graphics_context, const int glfw_key, const JoypadButton joypad_button)
     {
+        static int keys[512] {};
         const int state = glfwGetKey(graphics_context.window, glfw_key);
 
+        /*
         if (state == GLFW_PRESS)
             dmg.KeyPressed(joypad_button);
         else if (state == GLFW_RELEASE)
             dmg.KeyReleased(joypad_button);
+        */
+        if (state == GLFW_PRESS && keys[glfw_key] == 0)
+        {
+            keys[glfw_key] = 1;
+            dmg.KeyPressed(joypad_button);
+        }
+        if (state == GLFW_RELEASE && keys[glfw_key] == 1)
+        {
+            keys[glfw_key] = 0;
+            dmg.KeyReleased(joypad_button);
+        }
     }
 
     inline void HandleInput(const GraphicsContext& graphics_context, dmg::DMG& dmg)

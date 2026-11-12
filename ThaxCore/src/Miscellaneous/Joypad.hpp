@@ -8,11 +8,7 @@ namespace dmg
     class Joypad
     {
     public:
-        explicit Joypad(InterruptController& interrupt_controller)
-            : m_interrupt_controller(interrupt_controller)
-        {
-            Reset();
-        }
+        explicit Joypad(InterruptController& interrupt_controller);
         ~Joypad() = default;
 
         void KeyPressed(JoypadButton button);
@@ -20,7 +16,7 @@ namespace dmg
 
         void Reset();
 
-        [[nodiscard]] uint8_t Read() const;
+        [[nodiscard]] uint8_t Read();
         void Write(uint8_t value);
     private:
         uint8_t m_dpad = 0;

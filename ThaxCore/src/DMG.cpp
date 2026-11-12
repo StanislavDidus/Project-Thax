@@ -62,7 +62,10 @@ void dmg::DMG::LoadROM(const std::filesystem::path& path)
 void dmg::DMG::LoadBootrom(const std::filesystem::path& path)
 {
     if (m_cartridge)
+    {
         m_cartridge->LoadBootrom(path);
+        m_cpu->StartFromBootrom();
+    }
     else
         DMG_ERROR("Trying to load Bootrom when cartridge is not existed.");
 }
@@ -172,12 +175,14 @@ void dmg::DMG::StepCycles(uint32_t target_cycles)
 
 void dmg::DMG::KeyPressed(JoypadButton button)
 {
-    if (m_joypad) m_joypad->KeyPressed(button);
+    if (m_joypad)
+        m_joypad->KeyPressed(button);
 }
 
 void dmg::DMG::KeyReleased(JoypadButton button)
 {
-    if (m_joypad) m_joypad->KeyReleased(button);
+    if (m_joypad)
+        m_joypad->KeyReleased(button);
 }
 
 void dmg::DMG::SetState(PlayState state)

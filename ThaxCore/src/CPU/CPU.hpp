@@ -30,6 +30,8 @@ namespace dmg
         uint32_t Step();
         void Reset();
 
+        void StartFromBootrom();
+
         std::optional<uint32_t> HandleInterrupts();
 
         void UnHalt();
