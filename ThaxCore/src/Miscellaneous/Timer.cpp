@@ -29,7 +29,7 @@ namespace dmg
             if (IsClockEnabled())
             {
                 const uint8_t bit_selected = GetSelectedBit();
-                const uint8_t new_bit_value = getBit(DIV, bit_selected);
+                const uint8_t new_bit_value = GetBit(DIV, bit_selected);
 
                 if (old_bit_value == 1 && new_bit_value == 0)
                 {
@@ -61,7 +61,7 @@ namespace dmg
         TAC = value;
         const bool now = IsClockEnabled();
 
-        if (old && !now && getBit(DIV, GetSelectedBit()))
+        if (old && !now && GetBit(DIV, GetSelectedBit()))
         {
             m_interrupt_controller.SetIF(InterruptController::Timer);
         }

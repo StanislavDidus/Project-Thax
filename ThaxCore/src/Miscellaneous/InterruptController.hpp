@@ -55,7 +55,7 @@ namespace dmg
         {
             for (int i = 0; i < 5; ++i)
             {
-                if (getBit(IF, i) && getBit(IE, i))
+                if (GetBit(IF, i) && GetBit(IE, i))
                 {
                     return 1 << i;
                 }

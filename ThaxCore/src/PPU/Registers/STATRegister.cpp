@@ -29,21 +29,21 @@ namespace dmg
 
     bool STATRegister::IsLYCIntSelect() const
     {
-        return getBit(m_data, 6);
+        return GetBit(m_data, 6);
     }
 
     bool STATRegister::IsMode2InSelect() const
     {
-        return getBit(m_data, 5);
+        return GetBit(m_data, 5);
     }
 
     bool STATRegister::IsMode1InSelect() const
     {
-        return getBit(m_data, 4);
+        return GetBit(m_data, 4);
     }
 
     bool STATRegister::IsMode0InSelect() const
     {
-        return getBit(m_data, 3);
+        return GetBit(m_data, 3);
     }
 }

@@ -7,9 +7,9 @@ namespace dmg
     {
         uint8_t value = reg.Read();
 
-        const uint8_t first_bit = getBit(value, 7);
+        const uint8_t first_bit = GetBit(value, 7);
         value = value << 1;
-        setBit(value, 0, first_bit);
+        SetBit(value, 0, first_bit);
 
         m_cpu.F.SetFlagZ(value == 0);
         m_cpu.F.SetFlagN(false);
@@ -25,9 +25,9 @@ namespace dmg
     {
         uint8_t value = reg.Read();
 
-        const uint8_t first_bit = getBit(value, 7);
+        const uint8_t first_bit = GetBit(value, 7);
         value = value << 1;
-        setBit(value, 0, m_cpu.F.ReadFlagC());
+        SetBit(value, 0, m_cpu.F.ReadFlagC());
 
         m_cpu.F.SetFlagZ(value == 0);
         m_cpu.F.SetFlagN(false);
@@ -43,9 +43,9 @@ namespace dmg
     {
         uint8_t value = reg.Read();
 
-        const uint8_t first_bit = getBit(value, 7);
+        const uint8_t first_bit = GetBit(value, 7);
         value = value << 1;
-        setBit(value, 0, 0);
+        SetBit(value, 0, 0);
 
         m_cpu.F.SetFlagZ(value == 0);
         m_cpu.F.SetFlagN(false);
@@ -80,7 +80,7 @@ namespace dmg
     {
         const uint8_t value = reg.Read();
 
-        m_cpu.F.SetFlagZ(getBit(value, bit) == 0);
+        m_cpu.F.SetFlagZ(GetBit(value, bit) == 0);
         m_cpu.F.SetFlagN(false);
         m_cpu.F.SetFlagH(true);
 
@@ -91,7 +91,7 @@ namespace dmg
     {
         uint8_t value = reg.Read();
 
-        setBit(value, bit, 0);
+        SetBit(value, bit, 0);
 
         reg.Write(value);
 
@@ -102,7 +102,7 @@ namespace dmg
     {
         uint8_t value = reg.Read();
 
-        setBit(value, bit, 1);
+        SetBit(value, bit, 1);
 
         reg.Write(value);
 
@@ -113,9 +113,9 @@ namespace dmg
     {
         uint8_t value = m_cpu.ReadMemory(address.m_address);
 
-        const uint8_t first_bit = getBit(value, 7);
+        const uint8_t first_bit = GetBit(value, 7);
         value = value << 1;
-        setBit(value, 0, first_bit);
+        SetBit(value, 0, first_bit);
 
         m_cpu.F.SetFlagZ(value == 0);
         m_cpu.F.SetFlagN(false);
@@ -131,9 +131,9 @@ namespace dmg
     {
         uint8_t value = m_cpu.ReadMemory(address.m_address);
 
-        const uint8_t first_bit = getBit(value, 7);
+        const uint8_t first_bit = GetBit(value, 7);
         value = value << 1;
-        setBit(value, 0, m_cpu.F.ReadFlagC());
+        SetBit(value, 0, m_cpu.F.ReadFlagC());
 
         m_cpu.F.SetFlagZ(value == 0);
         m_cpu.F.SetFlagN(false);
@@ -149,9 +149,9 @@ namespace dmg
     {
         uint8_t value = m_cpu.ReadMemory(address.m_address);
 
-        const uint8_t first_bit = getBit(value, 7);
+        const uint8_t first_bit = GetBit(value, 7);
         value = value << 1;
-        setBit(value, 0, 0);
+        SetBit(value, 0, 0);
 
         m_cpu.F.SetFlagZ(value == 0);
         m_cpu.F.SetFlagN(false);
@@ -186,7 +186,7 @@ namespace dmg
     {
         const uint8_t value = m_cpu.ReadMemory(address.m_address);
 
-        m_cpu.F.SetFlagZ(getBit(value, bit) == 0);
+        m_cpu.F.SetFlagZ(GetBit(value, bit) == 0);
         m_cpu.F.SetFlagN(false);
         m_cpu.F.SetFlagH(true);
 
@@ -197,7 +197,7 @@ namespace dmg
     {
         uint8_t value = m_cpu.ReadMemory(address.m_address);
 
-        setBit(value, bit, 0);
+        SetBit(value, bit, 0);
 
         m_cpu.WriteMemory(address.m_address, value);
 
@@ -208,7 +208,7 @@ namespace dmg
     {
         uint8_t value = m_cpu.ReadMemory(address.m_address);
 
-        setBit(value, bit, 1);
+        SetBit(value, bit, 1);
 
         m_cpu.WriteMemory(address.m_address, value);
 
@@ -219,9 +219,9 @@ namespace dmg
     {
         uint8_t value = reg.Read();
 
-        const uint8_t last_bit = getBit(value, 0);
+        const uint8_t last_bit = GetBit(value, 0);
         value = value >> 1;
-        setBit(value, 7, last_bit);
+        SetBit(value, 7, last_bit);
 
         m_cpu.F.SetFlagZ(value == 0);
         m_cpu.F.SetFlagN(false);
@@ -237,9 +237,9 @@ namespace dmg
     {
         uint8_t value = reg.Read();
 
-        const uint8_t last_bit = getBit(value, 0);
+        const uint8_t last_bit = GetBit(value, 0);
         value = value >> 1;
-        setBit(value, 7, m_cpu.F.ReadFlagC());
+        SetBit(value, 7, m_cpu.F.ReadFlagC());
 
         m_cpu.F.SetFlagZ(value == 0);
         m_cpu.F.SetFlagN(false);
@@ -272,9 +272,9 @@ namespace dmg
     {
         uint8_t value = reg.Read();
 
-        const uint8_t last_bit = getBit(value, 0);
+        const uint8_t last_bit = GetBit(value, 0);
         value = value >> 1;
-        setBit(value, 7, 0);
+        SetBit(value, 7, 0);
 
         m_cpu.F.SetFlagZ(value == 0);
         m_cpu.F.SetFlagN(false);
@@ -291,9 +291,9 @@ namespace dmg
     {
         uint8_t value = m_cpu.ReadMemory(address.m_address);
 
-        const uint8_t last_bit = getBit(value, 0);
+        const uint8_t last_bit = GetBit(value, 0);
         value = value >> 1;
-        setBit(value, 7, last_bit);
+        SetBit(value, 7, last_bit);
 
         m_cpu.F.SetFlagZ(value == 0);
         m_cpu.F.SetFlagN(false);
@@ -309,9 +309,9 @@ namespace dmg
     {
         uint8_t value = m_cpu.ReadMemory(address.m_address);
 
-        const uint8_t last_bit = getBit(value, 0);
+        const uint8_t last_bit = GetBit(value, 0);
         value = value >> 1;
-        setBit(value, 7, m_cpu.F.ReadFlagC());
+        SetBit(value, 7, m_cpu.F.ReadFlagC());
 
         m_cpu.F.SetFlagZ(value == 0);
         m_cpu.F.SetFlagN(false);
@@ -344,9 +344,9 @@ namespace dmg
     {
         uint8_t value = m_cpu.ReadMemory(address.m_address);
 
-        const uint8_t last_bit = getBit(value, 0);
+        const uint8_t last_bit = GetBit(value, 0);
         value = value >> 1;
-        setBit(value, 7, 0);
+        SetBit(value, 7, 0);
 
         m_cpu.F.SetFlagZ(value == 0);
         m_cpu.F.SetFlagN(false);

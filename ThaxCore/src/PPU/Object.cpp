@@ -29,22 +29,22 @@ namespace dmg
 
     bool Object::GetPriority() const
     {
-        return getBit(m_oam[m_address + 3], 7);
+        return GetBit(m_oam[m_address + 3], 7);
     }
 
     bool Object::IsYFlipped() const
     {
-        return getBit(m_oam[m_address + 3], 6);
+        return GetBit(m_oam[m_address + 3], 6);
     }
 
     bool Object::IsXFlipped() const
     {
-        return getBit(m_oam[m_address + 3], 5);
+        return GetBit(m_oam[m_address + 3], 5);
     }
 
     ObjectPalette Object::GetPalette() const
     {
-        return getBit(m_oam[m_address + 3], 4) == 0 ? ObjectPalette::OBP0 : ObjectPalette::OBP1;
+        return GetBit(m_oam[m_address + 3], 4) == 0 ? ObjectPalette::OBP0 : ObjectPalette::OBP1;
     }
 
     void Object::SetFetched()

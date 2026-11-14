@@ -62,7 +62,7 @@ namespace dmg
 
                     for (int j = 0; j < 8; ++j)
                     {
-                        uint8_t color = (getBit(high, (7 - j)) << 1) | getBit(low, (7 - j));
+                        uint8_t color = (GetBit(high, (7 - j)) << 1) | GetBit(low, (7 - j));
 
                         int px = x * 8 + j;
                         int py = y * 8 + row;
@@ -95,7 +95,7 @@ namespace dmg
 
                     for (int j = 0; j < 8; ++j)
                     {
-                        uint8_t color = GetColorByID(BGP, (getBit(high, (7 - j)) << 1) | getBit(low, (7 - j)));
+                        uint8_t color = GetColorByID(BGP, (GetBit(high, (7 - j)) << 1) | GetBit(low, (7 - j)));
 
                         int px = x * 8 + j;
                         int py = y * 8 + row;
@@ -128,7 +128,7 @@ namespace dmg
 
                     for (int j = 0; j < 8; ++j)
                     {
-                        uint8_t color = GetColorByID(BGP, (getBit(high, (7 - j)) << 1) | getBit(low, (7 - j)));
+                        uint8_t color = GetColorByID(BGP, (GetBit(high, (7 - j)) << 1) | GetBit(low, (7 - j)));
 
                         int px = x * 8 + j;
                         int py = y * 8 + row;
@@ -452,7 +452,7 @@ namespace dmg
 
     Tile PPU::GetTileWindowBG(const uint32_t index) const
     {
-        if (getBit(LCDC.Read(), 4))
+        if (GetBit(LCDC.Read(), 4))
         {
             return Tile{static_cast<uint16_t>(globals::TILE_BLOCK_0.m_start + index * 16)};
         }

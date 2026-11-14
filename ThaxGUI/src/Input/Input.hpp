@@ -41,5 +41,6 @@ namespace dmg
         HandleKey(dmg, graphics_context, GLFW_KEY_X, JoypadButton::A);
         HandleKey(dmg, graphics_context, GLFW_KEY_ENTER, JoypadButton::START);
         HandleKey(dmg, graphics_context, GLFW_KEY_RIGHT_SHIFT, JoypadButton::SELECT);
+
     }
 }

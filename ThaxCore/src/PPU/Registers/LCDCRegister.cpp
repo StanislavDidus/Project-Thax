@@ -16,12 +16,12 @@ namespace dmg
 
     bool LCDCRegister::IsLCDEnabled() const
     {
-        return getBit(m_data, 7);
+        return GetBit(m_data, 7);
     }
 
     uint16_t LCDCRegister::GetWindowTileMapArea() const
     {
-        if (getBit(m_data, 6) == 0)
+        if (GetBit(m_data, 6) == 0)
         {
             return globals::TILEMAP_AREA_1.m_start;
         }
@@ -33,12 +33,12 @@ namespace dmg
 
     bool LCDCRegister::IsWindowEnabled() const
     {
-        return getBit(m_data, 5);
+        return GetBit(m_data, 5);
     }
 
     uint16_t LCDCRegister::GetBGWindowTileDataArea() const
     {
-        if (getBit(m_data, 4) == 0)
+        if (GetBit(m_data, 4) == 0)
         {
             return globals::TILE_BLOCK_1.m_start;
         }
@@ -50,7 +50,7 @@ namespace dmg
 
     uint16_t LCDCRegister::GetBGTileMapArea() const
     {
-        if (getBit(m_data, 3) == 0)
+        if (GetBit(m_data, 3) == 0)
         {
             return globals::TILEMAP_AREA_1.m_start;
         }
@@ -60,7 +60,7 @@ namespace dmg
 
     ObjectSize LCDCRegister::GetObjectSize() const
     {
-        if (getBit(m_data, 2) == 0)
+        if (GetBit(m_data, 2) == 0)
         {
             return ObjectSize::SIZE_8X8;
         }
@@ -72,11 +72,11 @@ namespace dmg
 
     bool LCDCRegister::AreObjectsEnabled() const
     {
-        return getBit(m_data, 1);
+        return GetBit(m_data, 1);
     }
 
     bool LCDCRegister::IsBGWindowEnabled() const
     {
-        return getBit(m_data, 0);
+        return GetBit(m_data, 0);
     }
 }

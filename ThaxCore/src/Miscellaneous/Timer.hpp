@@ -32,7 +32,7 @@ namespace dmg
     private:
         static constexpr uint32_t DIV_CLOCK_FREQUENCY = 256;
 
-        [[nodiscard]] bool IsClockEnabled() const { return getBit(TAC, 2); }
+        [[nodiscard]] bool IsClockEnabled() const { return GetBit(TAC, 2); }
         [[nodiscard]] uint8_t GetSelectedBit() const;
         void IncrementTima();
 

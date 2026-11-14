@@ -47,7 +47,7 @@ namespace dmg
     {
         uint8_t value = m_cpu.A.Read();
 
-        uint8_t first_bit = getBit(value, 7);
+        uint8_t first_bit = GetBit(value, 7);
 
         m_cpu.F.SetFlagZ(false);
         m_cpu.F.SetFlagN(false);
@@ -56,7 +56,7 @@ namespace dmg
 
         value = value << 1;
 
-        setBit(value, 0, first_bit);
+        SetBit(value, 0, first_bit);
         m_cpu.A.Write(value);
 
         return 4;
@@ -66,7 +66,7 @@ namespace dmg
     {
         uint8_t value = m_cpu.A.Read();
 
-        uint8_t first_bit = getBit(value, 7);
+        uint8_t first_bit = GetBit(value, 7);
         uint8_t old_carry_value = m_cpu.F.ReadFlagC();
 
         m_cpu.F.SetFlagZ(false);
@@ -76,7 +76,7 @@ namespace dmg
 
         value = value << 1;
 
-        setBit(value, 0, old_carry_value);
+        SetBit(value, 0, old_carry_value);
         m_cpu.A.Write(value);
 
         return 4;
@@ -139,7 +139,7 @@ namespace dmg
     {
         uint8_t value = m_cpu.A.Read();
 
-        uint8_t last_bit = getBit(value, 0);
+        uint8_t last_bit = GetBit(value, 0);
 
         m_cpu.F.SetFlagZ(false);
         m_cpu.F.SetFlagN(false);
@@ -148,7 +148,7 @@ namespace dmg
 
         value = value >> 1;
 
-        setBit(value, 7, last_bit);
+        SetBit(value, 7, last_bit);
         m_cpu.A.Write(value);
 
         return 4;
@@ -158,7 +158,7 @@ namespace dmg
     {
         uint8_t value = m_cpu.A.Read();
 
-        uint8_t last_bit = getBit(value, 0);
+        uint8_t last_bit = GetBit(value, 0);
         uint8_t old_carry_value = m_cpu.F.ReadFlagC();
 
         m_cpu.F.SetFlagZ(false);
@@ -168,7 +168,7 @@ namespace dmg
 
         value = value >> 1;
 
-        setBit(value, 7, old_carry_value);
+        SetBit(value, 7, old_carry_value);
         m_cpu.A.Write(value);
 
         return 4;
@@ -394,28 +394,28 @@ namespace dmg
 
     uint32_t dmg::ControlUnit::LD_internal_a8()
     {
-        m_cpu.WriteMemory(make_uint16_t(0xFF, ReadA8()), m_cpu.A.Read());
+        m_cpu.WriteMemory(MakeUint16t(0xFF, ReadA8()), m_cpu.A.Read());
 
         return 12;
     }
 
     uint32_t dmg::ControlUnit::LD_internal_c()
     {
-        m_cpu.WriteMemory(make_uint16_t(0xFF, m_cpu.C.Read()), m_cpu.A.Read());
+        m_cpu.WriteMemory(MakeUint16t(0xFF, m_cpu.C.Read()), m_cpu.A.Read());
 
         return 8;
     }
 
     uint32_t dmg::ControlUnit::LD_internal_a8_()
     {
-        m_cpu.A.Write(m_cpu.ReadMemory(make_uint16_t(0xFF, ReadA8())));
+        m_cpu.A.Write(m_cpu.ReadMemory(MakeUint16t(0xFF, ReadA8())));
 
         return 12;
     }
 
     uint32_t dmg::ControlUnit::LD_internal_c_()
     {
-        m_cpu.A.Write(m_cpu.ReadMemory(make_uint16_t(0xFF, m_cpu.C.Read())));
+        m_cpu.A.Write(m_cpu.ReadMemory(MakeUint16t(0xFF, m_cpu.C.Read())));
 
         return 8;
     }

@@ -20,7 +20,7 @@ namespace dmg
 
         void Update(const uint32_t cycles)
         {
-            if (IsTransferEnabled())
+            if (IsTransferEnabled() && IsInternalClock())
             {
                 m_serial_cycles += cycles;
                 while (m_serial_cycles >= TRANSFER_FREQUENCY)
@@ -60,8 +60,9 @@ namespace dmg
         [[nodiscard]] uint8_t ReadSC() const { return SC; }
 
     private:
-        [[nodiscard]] bool IsTransferEnabled() const { return getBit(SC, 7); }
-        void EndTransfer() { setBit(SC,7, 0); }
+        [[nodiscard]] bool IsTransferEnabled() const { return GetBit(SC, 7); }
+        [[nodiscard]] bool IsInternalClock() const { return GetBit(SC, 0);}
+        void EndTransfer() { SetBit(SC,7, 0); }
 
         static constexpr uint32_t TRANSFER_FREQUENCY = 512;
 
