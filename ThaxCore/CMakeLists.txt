@@ -42,6 +42,9 @@ set(HEADER_FILES
         src/Precompiled.hpp
         src/PPU/Registers/PaletteRegister.hpp
         src/Miscellaneous/DMAController.hpp
+        src/Miscellaneous/MBC/MBC.hpp
+        src/Miscellaneous/MBC/MBC1.hpp
+        src/Miscellaneous/MBC/NOMBC.hpp
 )
 
 set(SOURCE_FILES
@@ -64,6 +67,8 @@ set(SOURCE_FILES
         src/PPU/Registers/PaletteRegister.cpp
         src/Miscellaneous/DMAController.cpp
         src/Miscellaneous/Cartridge.cpp
+        src/Miscellaneous/MBC/MBC1.cpp
+        src/Miscellaneous/MBC/NOMBC.cpp
 )
 
 set(ALL_FILES

@@ -358,7 +358,7 @@ namespace dmg
     	const ImVec2 avail_size = ImGui::GetContentRegionAvail();
     	const float scale_x = avail_size.x / width;
     	const float scale_y = avail_size.y / height;
-    	const float final_scale = scale_x < scale_y ? scale_x : scale_y;
+    	const float final_scale = std::floor(scale_x < scale_y ? scale_x : scale_y);
     	ImVec2 viewport_size
     	{
     		width * final_scale,
@@ -366,12 +366,12 @@ namespace dmg
 		};
 
     	const ImVec2 cursor = ImGui::GetCursorPos();
-    	const float offset_x = (avail_size.x - viewport_size.x) * 0.5f;
-    	const float offset_y = (avail_size.y - viewport_size.y) * 0.5f;
+    	const float offset_x = std::floor((avail_size.x - viewport_size.x) * 0.5f);
+    	const float offset_y = std::floor((avail_size.y - viewport_size.y) * 0.5f);
 
     	ImGui::SetCursorPos(ImVec2(
-			cursor.x + (offset_x > 0.0f ? offset_x : 0.0f),
-			cursor.y + (offset_y > 0.0f ? offset_y : 0.0f)));
+			std::floor(cursor.x + (offset_x > 0.0f ? offset_x : 0.0f)),
+			std::floor(cursor.y + (offset_y > 0.0f ? offset_y : 0.0f))));
 
     	ImGui::Image(static_cast<ImTextureID>(gl_texture), viewport_size);
     }

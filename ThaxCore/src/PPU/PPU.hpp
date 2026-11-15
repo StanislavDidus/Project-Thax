@@ -74,6 +74,8 @@ namespace dmg
 
         std::optional<Object> m_fetch_object = std::nullopt;
 
+        uint32_t m_hblank_length = 0;
+
         // Window
         bool m_y_condition = false;
 

@@ -336,6 +336,8 @@ namespace dmg
 
                     if (m_fifo.IsScanlineDone())
                     {
+                        m_hblank_length = globals::HBLANK_LENGTH - (m_current_cycles - globals::DRAWING_PIXELS_LENGTH);
+
                         m_current_cycles = 0;
                         SetMode(PPUMode::HBLANK);
                         break;
@@ -386,7 +388,7 @@ namespace dmg
         case PPUMode::DRAWING_PIXELS:
             break;
         case PPUMode::HBLANK:
-            if (m_current_cycles >= globals::HBLANK_LENGTH)
+            if (m_current_cycles >= m_hblank_length)
             {
                 LY.Write(LY.Read() + 1);
 

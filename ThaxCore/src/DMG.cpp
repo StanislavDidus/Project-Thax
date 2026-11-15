@@ -202,6 +202,7 @@ void dmg::DMG::SetState(PlayState state)
         if (m_joypad) m_joypad->Reset();
         if (m_interrupt_controller) m_interrupt_controller->Reset();
         if (m_dma_controller) m_dma_controller->Reset();
+        if (m_cartridge) m_cartridge->Reset();
         break;
     case PlayState::PLAY:
         break;

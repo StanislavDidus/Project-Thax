@@ -47,19 +47,19 @@ namespace dmg
         {
             if (globals::ROM_0.Contains(address))
             {
-                return m_cartridge.Read(address);
+                return m_cartridge.ReadROM(address);
             }
             if (globals::ROM_N.Contains(address))
             {
-                return m_cartridge.Read(address);
+                return m_cartridge.ReadROM(address);
             }
             if (globals::VRAM.Contains(address))
             {
                 return m_ppu.ReadVRAM(address - globals::VRAM.m_start);
             }
-            if (globals::RAM_N.Contains(address))
+            if (globals::EXTERNAL_RAM.Contains(address))
             {
-                return RAM_N[address - globals::RAM_N.m_start];
+                return m_cartridge.ReadRAM(address - globals::EXTERNAL_RAM.m_start);
             }
             if (globals::WRAM.Contains(address))
             {
@@ -126,14 +126,15 @@ namespace dmg
 
             if (globals::ROM_0.Contains(address) || globals::ROM_N.Contains(address))
             {
+                m_cartridge.WriteROM(address, value);
             }
             else if (globals::VRAM.Contains(address))
             {
                 m_ppu.WriteVRAM(address - globals::VRAM.m_start, value);
             }
-            else if (globals::RAM_N.Contains(address))
+            else if (globals::EXTERNAL_RAM.Contains(address))
             {
-                RAM_N[address - globals::RAM_N.m_start] = value;
+                m_cartridge.WriteRAM(address - globals::EXTERNAL_RAM.m_start, value);
             }
             else if (globals::WRAM.Contains(address))
             {
@@ -210,7 +211,7 @@ namespace dmg
         PPU& m_ppu;
         DMAController& m_dma_controller;
 
-        std::array<uint8_t, globals::RAM_N.m_size> RAM_N {};
+        std::array<uint8_t, globals::EXTERNAL_RAM.m_size> RAM_N {};
         std::array<uint8_t, globals::WRAM.m_size> WRAM   {};
         std::array<uint8_t, globals::IO.m_size> IO       {};
         std::array<uint8_t, globals::HRAM.m_size> HRAM   {};

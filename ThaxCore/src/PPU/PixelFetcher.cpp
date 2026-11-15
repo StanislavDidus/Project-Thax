@@ -1,4 +1,6 @@
 #include "PPU/PixelFetcher.hpp"
+
+#include "../../../ThaxGUI/externals/imgui/imgui_internal.h"
 #include "PPU/FIFO.hpp"
 #include "PPU/PPU.hpp"
 
@@ -151,8 +153,7 @@ namespace dmg
         if (m_fifo.GetSize() >= 8)
         {
             m_fifo.PushObjectPixels(m_tile_low, m_tile_high,  m_object_fetch.m_object);
-            m_state = PixelFetcherState::GET_TILE_DATA;
-            m_progress = 0;
+            RestartState();
 
             if (const auto object = m_ppu.GetObject())
             {
@@ -191,7 +192,7 @@ namespace dmg
     {
         m_current_fetch_type = FetchType::TILE;
 
-        const uint32_t pixel_x = m_ppu.SCX.Read() + m_x * 8;
+        m_fifo.SetStop(false);
 
         const uint16_t tile_map_area = m_inside_window ? m_ppu.LCDC.GetWindowTileMapArea() : m_ppu.LCDC.GetBGTileMapArea();
 
@@ -203,6 +204,7 @@ namespace dmg
         }
         else
         {
+            const uint32_t pixel_x = m_ppu.SCX.Read() + m_x * 8;
             fx = (pixel_x / 8) & 0x1F;
             fy = (m_ppu.LY.Read() + m_ppu.SCY.Read()) & 255;
         }
