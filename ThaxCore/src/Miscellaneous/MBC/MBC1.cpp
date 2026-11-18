@@ -5,6 +5,13 @@ namespace dmg
     MBC1::MBC1(const CARTRIDGE_TYPE cartridge_type, const ROM_SIZE rom_size, const RAM_SIZE ram_size)
         : MBC(cartridge_type, rom_size, ram_size)
     {
+        if( rom_size == ROM_SIZE::BANKS_256 ||
+            rom_size == ROM_SIZE::BANKS_512 ||
+            ram_size == RAM_SIZE::BANK_8 ||
+            ram_size == RAM_SIZE::BANK_16 )
+        {
+            throw std::runtime_error{"Incompatible rom or ram size for this MBC."};
+        }
     }
 
     void MBC1::WriteROM(uint16_t address, uint8_t value)
@@ -44,7 +51,7 @@ namespace dmg
         }
         else if (globals::RAM_BANK_NUMBER.Contains(address))
         {
-            SetActiveRAMBank(value & 0b11);
+            m_two_bits_bank = value & 0b11;
         }
         else if (globals::BANKING_MODE_SELECT.Contains(address))
         {
@@ -66,7 +73,12 @@ namespace dmg
         if (!m_ram_enabled)
             return 0xFF;
 
-        return RAM[address];
+        if (m_banking_mode == 0)
+            return RAM[address + m_two_bits_bank * globals::EXTERNAL_RAM.m_size];
+        if (m_banking_mode == 1)
+            return RAM[address];
+
+        return 0xFF;
     }
 
     void MBC1::SelectROMBank(const int value, const uint8_t mask)
@@ -74,8 +86,11 @@ namespace dmg
         const uint8_t five_bit_register = value & 0x1F;
         if (mask > 0b11111)
         {
-            // Use additional two bits if mask requires more than 5 bits
-            SetActiveROMBank(five_bit_register == 0 ? 1 : ((GetActiveROMBank() << 5) | five_bit_register) & mask);
+            if (m_banking_mode == 1)
+            {
+                // Use additional two bits if mask requires more than 5 bits
+                SetActiveROMBank(five_bit_register == 0 ? 1 : ((m_two_bits_bank << 5) | five_bit_register) & mask);
+            }
         }
         else
         {

@@ -138,7 +138,8 @@ namespace dmg
 
     void Cartridge::CreateMBC()
     {
-        const auto cartridge_type = static_cast<CARTRIDGE_TYPE>(ROM[0x147]);
+        //const auto cartridge_type = static_cast<CARTRIDGE_TYPE>(ROM[0x147]);
+        const auto cartridge_type = CARTRIDGE_TYPE::MBC1;
         const auto rom_size = static_cast<ROM_SIZE>(ROM[0x148]);
         const auto ram_size = static_cast<RAM_SIZE>(ROM[0x149]);
 

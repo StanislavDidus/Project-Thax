@@ -85,10 +85,10 @@ namespace dmg
     {
         std::array<uint8_t, N * 3> rgb;
 
-        static RGBColor c00 = {.r = 139,.g = 172, .b = 15};
-        static RGBColor c01 = {.r = 48, .g = 98, .b = 48};
-        static RGBColor c10 = {.r = 15, .g = 56, .b = 15};
-        static RGBColor c11 = {.r = 15, .g = 56, .b = 15};
+        static RGBColor c00 = {.r = 155, .g = 188, .b = 15};
+        static RGBColor c01 = {.r = 139, .g = 172, .b = 15};
+        static RGBColor c10 = {.r = 48,  .g = 98,  .b = 48};
+        static RGBColor c11 = {.r = 15,  .g = 56,  .b = 15};
 
         for (int i = 0; i < buffer.size(); ++i)
         {
@@ -141,6 +141,7 @@ namespace dmg
         unsigned int texture;
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -149,6 +150,7 @@ namespace dmg
             texture_width, texture_height,
             0, GL_RGB,
             GL_UNSIGNED_BYTE, nullptr);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glBindTexture(GL_TEXTURE_2D, 0);
         return texture;
     }

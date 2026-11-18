@@ -611,10 +611,10 @@ namespace dmg
 	    	else
 	    		sprintf(label, ICON_FA_GAMEPAD " %s", entry->name.c_str());
 
-	    	ImGui::PushID(i);
 	    	//bool is_loaded = context.selected_rom == entry->path;
 	    	//if (is_loaded)
 	    	//ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.7f, 0.0f, 1.0f));
+	    	ImGui::PushID(i);
 	    	if (ImGui::Selectable(label, selected == i, ImGuiSelectableFlags_SelectOnNav | ImGuiSelectableFlags_AllowDoubleClick))
 	    	{
 	    		selected = i;
@@ -635,8 +635,7 @@ namespace dmg
 	    			}
 	    		}
 	    	}
-	    	//if (is_loaded)
-	    	//ImGui::PopStyleColor();
+
 	    	ImGui::PopID();
 	    	++i;
 

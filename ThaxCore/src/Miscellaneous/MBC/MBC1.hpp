@@ -17,6 +17,7 @@ namespace dmg
         void SelectROMBank(int value, uint8_t mask);
 
         bool m_ram_enabled = false;
+        uint8_t m_two_bits_bank = 0;
         uint8_t m_banking_mode = 0;
     };
 }
