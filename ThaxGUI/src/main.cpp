@@ -11,6 +11,8 @@
 #include "UI/UI.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
+#include <thread>
+
 #include "stb_image.h"
 
 int main()
@@ -19,7 +21,7 @@ int main()
     timeBeginPeriod(1);
 #endif
 
-    dmg::Log::Init();
+    //dmg::Log::Init();
     dmg::GraphicsContext graphics_context = dmg::InitializeGraphicsContext();
     dmg::ImGuiContext imgui_context = dmg::InitializeImGui(graphics_context);
 
@@ -86,7 +88,6 @@ int main()
             dmg::globals::LCD_WIDTH, dmg::globals::LCD_HEIGHT,
             GL_RGB, GL_UNSIGNED_BYTE, lcd_buffer_rgb.data());
 
-
         dmg::StartImGuiFrame();
 
         //ImGui::DockSpaceOverViewport();
@@ -103,10 +104,11 @@ int main()
         dmg::DrawMain2(imgui_context, dmg, current_config);
         dmg::DrawLibrary(imgui_context, current_config, dmg, lcd_texture);
         dmg::DrawVRAMViewer(imgui_context, tile_data_texture, bg_tilemap_texture, window_tilemap_texture);
+        dmg::DrawLogs(imgui_context);
         dmg::DrawMemoryWindow(dmg, dmg_info, imgui_context);
         dmg::DrawInfoWindow(dmg_info, dmg, imgui_context);
         dmg::DrawControlWindow(dmg, imgui_context, current_config);
-        //ImGui::ShowDemoWindow();
+        ImGui::ShowDemoWindow();
 
         dmg::EndImGuiFrame();
 

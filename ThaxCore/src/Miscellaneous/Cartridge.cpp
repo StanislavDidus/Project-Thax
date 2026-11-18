@@ -1,4 +1,7 @@
 #include "Cartridge.hpp"
+
+#include <cassert>
+
 #include "MBC/MBC.hpp"
 #include "MBC/NOMBC.hpp"
 #include "MBC/MBC1.hpp"

@@ -32,6 +32,7 @@ namespace dmg
     	bool show_memory_layout = false;
     	bool show_register_info = false;
     	bool show_control_menu = false;
+    	bool show_logs = false;
     };
 
     class FileBrowser
@@ -361,8 +362,8 @@ namespace dmg
     	const float final_scale = std::floor(scale_x < scale_y ? scale_x : scale_y);
     	ImVec2 viewport_size
     	{
-    		width * final_scale,
-			height * final_scale,
+    		std::floor(width * final_scale),
+			std::floor(height * final_scale),
 		};
 
     	const ImVec2 cursor = ImGui::GetCursorPos();
@@ -414,6 +415,22 @@ namespace dmg
         	DrawImage(viewport_texture, globals::LCD_WIDTH, globals::LCD_HEIGHT);
         }
         ImGui::End();
+    }
+
+	inline void DrawLogs(ImGuiContext& imgui_context)
+    {
+    	if (imgui_context.show_logs)
+    	{
+    		if (ImGui::Begin("Logs", &imgui_context.show_logs))
+    		{
+    			const auto& logs = Logger::GetLogger().GetLogs();
+    			for (const auto& log : logs)
+    			{
+    				ImGui::Text(log.GetText().c_str());
+    			}
+    		}
+    		ImGui::End();
+    	}
     }
 
     inline void DrawInfoWindow(const DMGInfo& info, const DMG& dmg, ImGuiContext& imgui_context)
@@ -827,6 +844,7 @@ namespace dmg
 	    			ImGui::MenuItem("Memory Layout", nullptr, &imgui_context.show_memory_layout);
 	    			ImGui::MenuItem("Register Info", nullptr, &imgui_context.show_register_info);
 	    			ImGui::MenuItem("Control Menu", nullptr, &imgui_context.show_control_menu);
+	    			ImGui::MenuItem("Logs", nullptr, &imgui_context.show_logs);
 	    			ImGui::EndMenu();
 	    		}
 	    		if (ImGui::BeginMenu("Help"))

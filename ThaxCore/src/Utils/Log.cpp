@@ -1,17 +1,19 @@
 #include "DMG/Utils/Log.hpp"
 
-#include "spdlog/sinks/stdout_color_sinks-inl.h"
-
 namespace dmg
 {
-    std::shared_ptr<spdlog::logger> Log::m_logger = nullptr;
-
-    void Log::Init()
+    Logger::Logger()
     {
-        spdlog::set_pattern("%^[%T] %n: %v%$");
-        m_logger = spdlog::stdout_color_mt("DMG");
-        m_logger->set_level(spdlog::level::trace);
+        m_prefix = "[DMG] ";
+    }
 
-        DMG_INFO("Logger was initialized.");
+    void Logger::PushLog(Log::Type type, const std::string& text)
+    {
+        m_messages.emplace_back(type, m_prefix + text);
+    }
+
+    const std::vector<Log>& Logger::GetLogs() const
+    {
+        return m_messages;
     }
 }

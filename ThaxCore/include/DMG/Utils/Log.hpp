@@ -1,21 +1,53 @@
 #pragma once
 
-#include "spdlog/spdlog.h"
+#include <format>
+#include <utility>
 
 namespace dmg
 {
     class Log
     {
     public:
-        static void Init();
+        enum class Type : uint8_t
+        {
+            INFO,
+            WARN,
+            ERR,
+        };
 
-        static std::shared_ptr<spdlog::logger>& GetLogger() { return m_logger; }
+        Log(const Type type, std::string  text) : m_type(type), m_text(std::move(text)) {}
+
+        [[nodiscard]] const std::string& GetText() const { return m_text; }
     private:
-        static std::shared_ptr<spdlog::logger> m_logger;
+        Type m_type = Type::INFO;
+        std::string m_text {};
+    };
+
+    class Logger
+    {
+    public:
+        Logger();
+        ~Logger() = default;
+
+        static Logger& GetLogger()
+        {
+            static Logger s;
+            return s;
+        }
+
+        void PushLog(Log::Type type, const std::string& text);
+        [[nodiscard]] const std::vector<Log>& GetLogs() const;
+    private:
+        std::vector<Log> m_messages;
+        std::string m_prefix {};
     };
 }
 
-#define DMG_TRACE(...)      ::dmg::Log::GetLogger()->trace(__VA_ARGS__)
+#define DMG_INFO(...)  ::dmg::Logger::GetLogger().PushLog(::dmg::Log::Type::INFO, std::format(__VA_ARGS__))
+#define DMG_WARN(...)  ::dmg::Logger::GetLogger().PushLog(::dmg::Log::Type::WARN, std::format(__VA_ARGS__))
+#define DMG_ERROR(...) ::dmg::Logger::GetLogger().PushLog(::dmg::Log::Type::ERR,  std::format(__VA_ARGS__))
+
+/*#define DMG_TRACE(...)      ::dmg::Log::GetLogger()->trace(__VA_ARGS__)
 #define DMG_INFO(...)       ::dmg::Log::GetLogger()->info(__VA_ARGS__)
 #define DMG_WARN(...)       ::dmg::Log::GetLogger()->warn(__VA_ARGS__)
 #define DMG_ERROR(...)      ::dmg::Log::GetLogger()->error(__VA_ARGS__)
@@ -32,4 +64,4 @@ namespace dmg
 #define DMG_ERROR
 #undef DMG_FATAL
 #define DMG_FATAL
-#endif
+#endif*/
