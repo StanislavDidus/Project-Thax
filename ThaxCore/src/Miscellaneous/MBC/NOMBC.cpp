@@ -2,8 +2,8 @@
 
 namespace dmg
 {
-    NOMBC::NOMBC(const CARTRIDGE_TYPE cartridge_type, const ROM_SIZE rom_size, const RAM_SIZE ram_size)
-        : MBC(cartridge_type, rom_size, ram_size)
+    NOMBC::NOMBC(std::vector<uint8_t>& ROM, std::vector<uint8_t>& RAM)
+        : MBC(ROM, RAM, C_NONE)
     {
     }
 
@@ -13,11 +13,16 @@ namespace dmg
 
     void NOMBC::WriteRAM(const uint16_t address, const uint8_t value)
     {
-        RAM[address] = value;
+    }
+
+    uint8_t NOMBC::ReadROM(uint16_t address) const
+    {
+        return ROM[address];
     }
 
     uint8_t NOMBC::ReadRAM(const uint16_t address) const
     {
         return RAM[address];
     }
+
 }

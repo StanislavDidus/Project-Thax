@@ -107,6 +107,9 @@ namespace dmg
 
 namespace dmg::globals
 {
+    // -------------------- MEMORY ------------------------ //
+    inline constexpr uint8_t GARBAGE = 0xFF;
+
     // -------------------- PPU ------------------------ //
     inline constexpr uint32_t HBLANK_LENGTH = 204;
     inline constexpr uint32_t VBLANK_LENGTH = 4560;

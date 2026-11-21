@@ -43,6 +43,8 @@ namespace dmg
         for (int i = 0x134; i <= 0x143; ++i)
             m_game_name += static_cast<char>(ROM[i]);
 
+        ResizeROM();
+        ResizeRAM();
         CreateMBC();
 
         DMG_INFO("ROM loaded: {}", path.filename().string());
@@ -100,23 +102,12 @@ namespace dmg
 
     uint8_t Cartridge::ReadROM(const uint16_t address) const
     {
-        assert(address < globals::ROM_0.m_size + globals::ROM_N.m_size);
-
-        if (!MBC) return 0xFF;
-
         if (address < 0x100 && m_bootrom_mapped)
             return BOOTROM[address];
 
-        if (globals::ROM_0.Contains(address))
-        {
-            return ROM[address];
-        }
-        if (globals::ROM_N.Contains(address))
-        {
-            return ROM[address + (MBC->GetActiveROMBank() - 1) * globals::ROM_N.m_size];
-        }
+        if (!MBC) return globals::GARBAGE;
 
-        return 0xFF;
+        return MBC->ReadROM(address);
     }
 
     void Cartridge::WriteROM(const uint16_t address, const uint8_t value)
@@ -130,7 +121,7 @@ namespace dmg
         if (MBC)
             return MBC->ReadRAM(address);
 
-        return 0xFF;
+        return globals::GARBAGE;
     }
 
     void Cartridge::WriteRAM(const uint16_t address, const uint8_t value)
@@ -141,20 +132,60 @@ namespace dmg
 
     void Cartridge::CreateMBC()
     {
-        //const auto cartridge_type = static_cast<CARTRIDGE_TYPE>(ROM[0x147]);
-        const auto cartridge_type = CARTRIDGE_TYPE::MBC1;
-        const auto rom_size = static_cast<ROM_SIZE>(ROM[0x148]);
-        const auto ram_size = static_cast<RAM_SIZE>(ROM[0x149]);
-
-        switch (cartridge_type)
+        switch (static_cast<CARTRIDGE_TYPE>(ROM[0x147]))
         {
         case CARTRIDGE_TYPE::ROM_ONLY:
-            MBC = std::make_unique<NOMBC>(cartridge_type, rom_size, ram_size);
+            MBC = std::make_unique<NOMBC>(ROM, RAM);
             break;
         case CARTRIDGE_TYPE::MBC1:
-            MBC = std::make_unique<MBC1>(cartridge_type, rom_size, ram_size);
+            MBC = std::make_unique<MBC1>(ROM, RAM, MBC::C_NONE);
+            break;
+        case CARTRIDGE_TYPE::MBC1_RAM:
+            MBC = std::make_unique<MBC1>(ROM, RAM, MBC::C_RAM);
+            break;
+        case CARTRIDGE_TYPE::MBC1_RAM_BATTERY:
+            MBC = std::make_unique<MBC1>(ROM, RAM, MBC::C_RAM | MBC::C_BATTERY);
             break;
         default: DMG_ERROR("This MBC type is not supported.") ;
         }
+    }
+
+    void Cartridge::ResizeROM()
+    {
+        byte rom_size {0_b};
+
+        switch (static_cast<ROM_SIZE>(ROM[0x148]))
+        {
+        case ROM_SIZE::BANKS_2:   rom_size = byte{32_kib};  break;
+        case ROM_SIZE::BANKS_4:   rom_size = byte{64_kib};  break;
+        case ROM_SIZE::BANKS_8:   rom_size = byte{128_kib}; break;
+        case ROM_SIZE::BANKS_16:  rom_size = byte{256_kib}; break;
+        case ROM_SIZE::BANKS_32:  rom_size = byte{512_kib}; break;
+        case ROM_SIZE::BANKS_64:  rom_size = byte{1_mib};   break;
+        case ROM_SIZE::BANKS_128: rom_size = byte{2_mib};   break;
+        case ROM_SIZE::BANKS_256: rom_size = byte{4_mib};   break;
+        case ROM_SIZE::BANKS_512: rom_size = byte{8_mib};   break;
+        default: DMG_ERROR("Unknown rom size");
+        }
+
+        ROM.resize(static_cast<size_t>(rom_size));
+
+    }
+
+    void Cartridge::ResizeRAM()
+    {
+        byte ram_size {0_b};
+
+        switch (static_cast<RAM_SIZE>(ROM[0x149]))
+        {
+        case RAM_SIZE::NO_RAM:   ram_size = byte{0_b};     break;
+        case RAM_SIZE::BANK_1:   ram_size = byte{8_kib};   break;
+        case RAM_SIZE::BANK_4:   ram_size = byte{32_kib};  break;
+        case RAM_SIZE::BANK_8:   ram_size = byte{64_kib};  break;
+        case RAM_SIZE::BANK_16:  ram_size = byte{128_kib}; break;
+        default: DMG_ERROR("Unknown ram size");
+        }
+
+        RAM.resize(static_cast<size_t>(ram_size));
     }
 }

@@ -109,7 +109,7 @@ namespace dmg
 		style.ItemSpacing = ImVec2(8.9f, 13.4f);
 		style.ItemInnerSpacing = ImVec2(7.1f, 1.8f);
 		style.CellPadding = ImVec2(12.1f, 9.2f);
-		style.IndentSpacing = 0.0f;
+		style.IndentSpacing = 20.0f;
 		style.ColumnsMinSpacing = 8.7f;
 		style.ScrollbarSize = 11.6f;
 		style.ScrollbarRounding = 15.9f;
@@ -408,6 +408,7 @@ namespace dmg
     	}
     }
 
+    /*
     inline void DrawViewport(unsigned int viewport_texture)
     {
         if (ImGui::Begin("Viewport"))
@@ -416,6 +417,7 @@ namespace dmg
         }
         ImGui::End();
     }
+    */
 
 	inline void DrawLogs(ImGuiContext& imgui_context)
     {
@@ -423,10 +425,55 @@ namespace dmg
     	{
     		if (ImGui::Begin("Logs", &imgui_context.show_logs))
     		{
+    			if (ImGui::Button("Clear"))
+    			{
+					Logger::GetLogger().ClearLogs();
+    			}
+
+    			ImGui::SameLine();
+
+    			static bool log_all = false;
+    			static bool log_info = false;
+    			static bool log_warnings = true;
+    			static bool log_errors = true;
+    			if (ImGui::BeginPopup("Options"))
+    			{
+    				ImGui::Checkbox("All", &log_all);
+    				ImGui::Checkbox("Info", &log_info);
+    				ImGui::Checkbox("Warnings", &log_warnings);
+    				ImGui::Checkbox("Errors", &log_errors);
+    				ImGui::EndPopup();
+    			}
+
+    			if (ImGui::Button("Options"))
+    				ImGui::OpenPopup("Options");
+
     			const auto& logs = Logger::GetLogger().GetLogs();
     			for (const auto& log : logs)
     			{
-    				ImGui::Text(log.GetText().c_str());
+    				switch (log.GetType())
+    				{
+    				case Log::Type::INFO:
+    					if (log_all || log_info)
+    						ImGui::TextUnformatted(log.GetText().c_str());
+    					break;
+    				case Log::Type::WARN:
+    					if (log_all || log_warnings)
+    					{
+    						ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 160, 45, 100));
+    						ImGui::TextUnformatted(log.GetText().c_str());
+    						ImGui::PopStyleColor();
+    					}
+    					break;
+    				case Log::Type::ERR:
+    					if (log_all || log_errors)
+    					{
+    						ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(190, 15, 20, 100));
+    						ImGui::TextUnformatted(log.GetText().c_str());
+    						ImGui::PopStyleColor();
+    					}
+    					break;
+    				}
     			}
     		}
     		ImGui::End();
@@ -766,26 +813,7 @@ namespace dmg
 	    		}
 	    		else
 	    		{
-	    			ImVec2 avail_size = ImGui::GetContentRegionAvail();
-
-	    			const float scale_x = avail_size.x / globals::LCD_WIDTH;
-	    			const float scale_y = avail_size.y / globals::LCD_HEIGHT;
-	    			const float final_scale = scale_x < scale_y ? scale_x : scale_y;
-	    			ImVec2 viewport_size
-	    			{
-	    				globals::LCD_WIDTH * final_scale,
-						globals::LCD_HEIGHT * final_scale,
-					};
-
-	    			const ImVec2 cursor = ImGui::GetCursorPos();
-	    			const float offset_x = (avail_size.x - viewport_size.x) * 0.5f;
-	    			const float offset_y = (avail_size.y - viewport_size.y) * 0.5f;
-
-	    			ImGui::SetCursorPos(ImVec2(
-						cursor.x + (offset_x > 0.0f ? offset_x : 0.0f),
-						cursor.y + (offset_y > 0.0f ? offset_y : 0.0f)));
-
-	    			ImGui::Image(static_cast<ImTextureID>(viewport_texture), viewport_size);
+        			DrawImage(viewport_texture, globals::LCD_WIDTH, globals::LCD_HEIGHT);
 	    		}
 	    	}
 	    	ImGui::End();

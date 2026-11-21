@@ -1,6 +1,7 @@
 #pragma once
 
 #include <format>
+#include <functional>
 #include <utility>
 
 namespace dmg
@@ -17,6 +18,7 @@ namespace dmg
 
         Log(const Type type, std::string  text) : m_type(type), m_text(std::move(text)) {}
 
+        [[nodiscard]] Type GetType() const { return m_type; }
         [[nodiscard]] const std::string& GetText() const { return m_text; }
     private:
         Type m_type = Type::INFO;
@@ -34,6 +36,8 @@ namespace dmg
             static Logger s;
             return s;
         }
+
+        void ClearLogs();
 
         void PushLog(Log::Type type, const std::string& text);
         [[nodiscard]] const std::vector<Log>& GetLogs() const;

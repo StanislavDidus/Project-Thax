@@ -45,6 +45,8 @@ set(HEADER_FILES
         src/Miscellaneous/MBC/MBC.hpp
         src/Miscellaneous/MBC/MBC1.hpp
         src/Miscellaneous/MBC/NOMBC.hpp
+        src/Miscellaneous/MBC/MBC2.hpp
+        src/Utils/Byte.hpp
 )
 
 set(SOURCE_FILES
@@ -69,6 +71,8 @@ set(SOURCE_FILES
         src/Miscellaneous/Cartridge.cpp
         src/Miscellaneous/MBC/MBC1.cpp
         src/Miscellaneous/MBC/NOMBC.cpp
+        src/Miscellaneous/MBC/MBC.cpp
+        src/Miscellaneous/MBC/MBC2.cpp
 )
 
 set(ALL_FILES

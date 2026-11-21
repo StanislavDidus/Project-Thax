@@ -7,6 +7,7 @@
 
 #include "DMG/Utils/Log.hpp"
 #include "../InternalGlobals.hpp"
+#include "Utils/Byte.hpp"
 
 namespace dmg
 {
@@ -33,6 +34,9 @@ namespace dmg
 
     private:
         void CreateMBC();
+
+        void ResizeROM();
+        void ResizeRAM();
 
         std::vector<uint8_t> ROM {};
         std::vector<uint8_t> RAM {};
