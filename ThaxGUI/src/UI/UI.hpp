@@ -359,7 +359,7 @@ namespace dmg
     	const ImVec2 avail_size = ImGui::GetContentRegionAvail();
     	const float scale_x = avail_size.x / width;
     	const float scale_y = avail_size.y / height;
-    	const float final_scale = std::floor(scale_x < scale_y ? scale_x : scale_y);
+    	const float final_scale = scale_x < scale_y ? scale_x : scale_y;
     	ImVec2 viewport_size
     	{
     		std::floor(width * final_scale),
@@ -460,7 +460,7 @@ namespace dmg
     				case Log::Type::WARN:
     					if (log_all || log_warnings)
     					{
-    						ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 160, 45, 100));
+    						ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 175, 50, 100));
     						ImGui::TextUnformatted(log.GetText().c_str());
     						ImGui::PopStyleColor();
     					}
@@ -468,7 +468,7 @@ namespace dmg
     				case Log::Type::ERR:
     					if (log_all || log_errors)
     					{
-    						ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(190, 15, 20, 100));
+    						ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(190, 30, 35, 100));
     						ImGui::TextUnformatted(log.GetText().c_str());
     						ImGui::PopStyleColor();
     					}

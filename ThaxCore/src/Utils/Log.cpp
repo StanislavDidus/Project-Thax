@@ -8,8 +8,8 @@ namespace dmg
     {
         m_prefix = "[DMG]";
 
-        PushLog(Log::Type::ERR, "ERROR");
-        PushLog(Log::Type::WARN, "This is a warning");
+        //PushLog(Log::Type::ERR, "ERROR");
+        //PushLog(Log::Type::WARN, "This is a warning");
     }
 
     void Logger::ClearLogs()

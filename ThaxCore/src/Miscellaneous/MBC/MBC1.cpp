@@ -17,19 +17,19 @@ namespace dmg
 
     void MBC1::WriteROM(const uint16_t address, const uint8_t value)
     {
-        if (globals::RAM_ENABLE.Contains(address))
+        if (globals::MBC1_RAM_ENABLE.Contains(address))
         {
             m_ram_enabled = (value & 0xF) == 0xA;
         }
-        else if (globals::ROM_BANK_NUMBER.Contains(address))
+        else if (globals::MBC1_ROM_BANK_NUMBER.Contains(address))
         {
             SetBank1(value);
         }
-        else if (globals::RAM_BANK_NUMBER.Contains(address))
+        else if (globals::MBC1_RAM_BANK_NUMBER.Contains(address))
         {
             m_bank2 = value & 0b11;
         }
-        else if (globals::BANKING_MODE_SELECT.Contains(address))
+        else if (globals::MBC1_BANKING_MODE_SELECT.Contains(address))
         {
             m_mode = value & 0b1;
         }
@@ -56,12 +56,20 @@ namespace dmg
             if (m_mode == 0)
                 return ROM[address];
             if (m_mode == 1)
-                return ROM[GetROMBankAddress((m_bank2 << 5) & GetROMMask()) + address];
+            {
+                if (m_multicart)
+                    return ROM[GetROMBankAddress((m_bank2 << 4) & GetROMMask()) + address];
+                else
+                    return ROM[GetROMBankAddress((m_bank2 << 5) & GetROMMask()) + address];
+            }
 
         }
         if (globals::ROM_N.Contains(address))
         {
-            return ROM[GetROMBankAddress(((m_bank2 << 5) | m_bank1) & GetROMMask()) - 1 * globals::ROM_N.m_size + address];
+            if (m_multicart)
+                return ROM[GetROMBankAddress(((m_bank2 << 4) | m_bank1) & GetROMMask()) - 1 * globals::ROM_N.m_size + address];
+            else
+                return ROM[GetROMBankAddress(((m_bank2 << 5) | m_bank1) & GetROMMask()) - 1 * globals::ROM_N.m_size + address];
         }
 
         return globals::GARBAGE;
@@ -85,27 +93,10 @@ namespace dmg
     {
         uint8_t five_bit_register = value & 0x1F;
         if (five_bit_register == 0) five_bit_register = 1;
-        m_bank1 = five_bit_register;
-    }
-
-    uint8_t MBC1::GetROMMask() const
-    {
-        if (GetROMSize() == 32_kib)
-            return 0b1;
-        if (GetROMSize() == 64_kib)
-            return 0b11;
-        if (GetROMSize() == 128_kib)
-            return 0b111;
-        if (GetROMSize() == 256_kib)
-            return 0b1111;
-        if (GetROMSize() == 512_kib)
-            return 0b11111;
-        if (GetROMSize() == 1_mib)
-            return 0b111111;
-        if (GetROMSize() == 2_mib)
-            return 0b1111111;
-
-        return 0b1;
+        if (m_multicart)
+            m_bank1 = five_bit_register & 0xF;
+        else
+            m_bank1 = five_bit_register;
     }
 
     void MBC1::CheckIfMultiCart()
@@ -116,15 +107,35 @@ namespace dmg
             return;
         }
 
-        m_bank1 = 0;
-        m_bank2 = 0;
-
-        bool result = true;
+        bool bank_10 = true;
         for (int i = 0x104; i < 0x133; ++i)
         {
-            bool value = ROM[GetROMBankAddress(0) + i] == ROM[GetROMBankAddress(1) + i] &&
-                         ROM[GetROMBankAddress(1) + i] == ROM[GetROMBankAddress(2) + i] &&
-                         ROM[GetROMBankAddress(2) + i] == ROM[GetROMBankAddress(3) + i];
+            if (ROM[GetROMBankAddress(0x10) + i] != ROM[GetROMBankAddress(0x00) + i])
+            {
+                bank_10 = false;
+                break;
+            }
         }
+        bool bank_20 = true;
+        for (int i = 0x104; i < 0x133; ++i)
+        {
+            if (ROM[GetROMBankAddress(0x20) + i] != ROM[GetROMBankAddress(0x00) + i])
+            {
+                bank_20 = false;
+                break;
+            }
+        }
+        bool bank_30 = true;
+        for (int i = 0x104; i < 0x133; ++i)
+        {
+            if (ROM[GetROMBankAddress(0x30) + i] != ROM[GetROMBankAddress(0x00) + i])
+            {
+                bank_30 = false;
+                break;
+            }
+        }
+
+        if (!bank_10 && !bank_20 && !bank_30)
+            m_multicart = false;
     }
 }

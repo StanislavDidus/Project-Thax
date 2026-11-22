@@ -16,7 +16,6 @@ namespace dmg
         [[nodiscard]] uint8_t ReadRAM(uint16_t address) const override;
     private:
         void SetBank1(int value);
-        [[nodiscard]] uint8_t GetROMMask() const;
 
         void CheckIfMultiCart();
 

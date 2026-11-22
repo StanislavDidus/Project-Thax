@@ -107,8 +107,7 @@ namespace dmg
 
 namespace dmg::globals
 {
-    // -------------------- MEMORY ------------------------ //
-    inline constexpr uint8_t GARBAGE = 0xFF;
+
 
     // -------------------- PPU ------------------------ //
     inline constexpr uint32_t HBLANK_LENGTH = 204;
@@ -150,12 +149,19 @@ namespace dmg::globals
     inline constexpr uint8_t COLOR_DARK_GRAY = 0b10;
     inline constexpr uint8_t COLOR_BLACk = 0b11;
 
+    // -------------------- MBC CHIPS ------------------------ //
+
+    inline constexpr Region MBC1_RAM_ENABLE {0x0000, 0x2000};
+    inline constexpr Region MBC1_ROM_BANK_NUMBER {0x2000, 0x2000};
+    inline constexpr Region MBC1_RAM_BANK_NUMBER {0x4000, 0x2000};
+    inline constexpr Region MBC1_BANKING_MODE_SELECT {0x6000, 0x2000};
+
+    inline constexpr int MBC2_RAM_SIZE = 512;
+    inline constexpr Region MBC2_RAM_ENABLE {0x0000, 0x4000};
+
     // -------------------- MEMORY AND REGIONS ------------------------ //
 
-    inline constexpr Region RAM_ENABLE {0x0000, 0x2000};
-    inline constexpr Region ROM_BANK_NUMBER {0x2000, 0x2000};
-    inline constexpr Region RAM_BANK_NUMBER {0x4000, 0x2000};
-    inline constexpr Region BANKING_MODE_SELECT {0x6000, 0x2000};
+    inline constexpr uint8_t GARBAGE = 0xFF;
 
     inline constexpr uint32_t RAM_SIZE = 0x10000;
     inline constexpr uint32_t ROM_SIZE = 0x8000;
@@ -203,8 +209,8 @@ namespace dmg::globals
                   TILE_BLOCK_1.m_size +
                   TILE_BLOCK_2.m_size == TILE_REGION_SIZE);
 
-    static_assert(RAM_ENABLE.m_size +
-                  ROM_BANK_NUMBER.m_size +
-                  RAM_BANK_NUMBER.m_size +
-                  BANKING_MODE_SELECT.m_size == ROM_SIZE);
+    static_assert(MBC1_RAM_ENABLE.m_size +
+                  MBC1_ROM_BANK_NUMBER.m_size +
+                  MBC1_RAM_BANK_NUMBER.m_size +
+                  MBC1_BANKING_MODE_SELECT.m_size == ROM_SIZE);
 }

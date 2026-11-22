@@ -31,6 +31,7 @@ namespace dmg
         [[nodiscard]] byte GetRAMSize() const;
         [[nodiscard]] bool HasComponent(uint8_t components) const;
         [[nodiscard]] static unsigned int GetROMBankAddress(unsigned int bank);
+        [[nodiscard]] uint16_t GetROMMask() const;
 
     protected:
         std::vector<uint8_t>& ROM;

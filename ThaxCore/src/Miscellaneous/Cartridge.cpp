@@ -5,6 +5,8 @@
 #include "MBC/MBC.hpp"
 #include "MBC/NOMBC.hpp"
 #include "MBC/MBC1.hpp"
+#include "MBC/MBC2.hpp"
+#include "MBC/MBC3.hpp"
 
 namespace dmg
 {
@@ -105,9 +107,10 @@ namespace dmg
         if (address < 0x100 && m_bootrom_mapped)
             return BOOTROM[address];
 
-        if (!MBC) return globals::GARBAGE;
+        if (MBC)
+            return MBC->ReadROM(address);
 
-        return MBC->ReadROM(address);
+        return globals::GARBAGE;
     }
 
     void Cartridge::WriteROM(const uint16_t address, const uint8_t value)
@@ -146,6 +149,28 @@ namespace dmg
         case CARTRIDGE_TYPE::MBC1_RAM_BATTERY:
             MBC = std::make_unique<MBC1>(ROM, RAM, MBC::C_RAM | MBC::C_BATTERY);
             break;
+        case CARTRIDGE_TYPE::MBC2:
+            MBC = std::make_unique<MBC2>(ROM, RAM, MBC::C_NONE);
+            break;
+        case CARTRIDGE_TYPE::MBC2_BATTERY:
+            MBC = std::make_unique<MBC2>(ROM, RAM, MBC::C_BATTERY);
+            break;
+        case CARTRIDGE_TYPE::MBC3_TIMER_BATTERY:
+            MBC = std::make_unique<MBC3>(ROM, RAM, MBC::C_TIMER | MBC::C_BATTERY);
+            break;
+        case CARTRIDGE_TYPE::MBC3_TIMER_RAM_BATTERY:
+            MBC = std::make_unique<MBC3>(ROM, RAM, MBC::C_TIMER | MBC::C_RAM | MBC::C_BATTERY);
+            break;
+        case CARTRIDGE_TYPE::MBC3:
+            MBC = std::make_unique<MBC3>(ROM, RAM, MBC::C_NONE);
+            break;
+        case CARTRIDGE_TYPE::MBC3_RAM:
+            MBC = std::make_unique<MBC3>(ROM, RAM, MBC::C_RAM);
+            break;
+        case CARTRIDGE_TYPE::MBC3_RAM_BATTERY:
+            MBC = std::make_unique<MBC3>(ROM, RAM, MBC::C_RAM | MBC::C_BATTERY);
+            break;
+
         default: DMG_ERROR("This MBC type is not supported.") ;
         }
     }

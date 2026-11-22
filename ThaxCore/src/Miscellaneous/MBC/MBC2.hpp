@@ -17,8 +17,9 @@ namespace dmg
         [[nodiscard]] uint8_t ReadROM(uint16_t address) const override;
         [[nodiscard]] uint8_t ReadRAM(uint16_t address) const override;
     private:
+        std::array<uint8_t, globals::MBC2_RAM_SIZE> m_half_ram {};
+
         bool m_ram_enabled = false;
-        uint8_t m_two_bits_bank = 0;
-        uint8_t m_banking_mode = 0;
+        uint8_t m_rom_bank = 1;
     };
 }
