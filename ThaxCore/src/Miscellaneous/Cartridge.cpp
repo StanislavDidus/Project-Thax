@@ -7,6 +7,7 @@
 #include "MBC/MBC1.hpp"
 #include "MBC/MBC2.hpp"
 #include "MBC/MBC3.hpp"
+#include "MBC/MBC5.hpp"
 
 namespace dmg
 {
@@ -169,6 +170,24 @@ namespace dmg
             break;
         case CARTRIDGE_TYPE::MBC3_RAM_BATTERY:
             MBC = std::make_unique<MBC3>(ROM, RAM, MBC::C_RAM | MBC::C_BATTERY);
+            break;
+        case CARTRIDGE_TYPE::MBC5:
+            MBC = std::make_unique<MBC5>(ROM, RAM, MBC::C_NONE);
+            break;
+        case CARTRIDGE_TYPE::MBC5_RAM:
+            MBC = std::make_unique<MBC5>(ROM, RAM, MBC::C_RAM);
+            break;
+        case CARTRIDGE_TYPE::MBC5_RAM_BATTERY:
+            MBC = std::make_unique<MBC5>(ROM, RAM, MBC::C_RAM | MBC::C_BATTERY);
+            break;
+        case CARTRIDGE_TYPE::MBC5_RUMBLE:
+            MBC = std::make_unique<MBC5>(ROM, RAM, MBC::C_RUMBLE);
+            break;
+        case CARTRIDGE_TYPE::MBC5_RUMBLE_RAM:
+            MBC = std::make_unique<MBC5>(ROM, RAM, MBC::C_RUMBLE | MBC::C_RAM);
+            break;
+        case CARTRIDGE_TYPE::MBC5_RUMBLE_RAM_BATTERY:
+            MBC = std::make_unique<MBC5>(ROM, RAM, MBC::C_RUMBLE | MBC::C_RAM | MBC::C_BATTERY);
             break;
 
         default: DMG_ERROR("This MBC type is not supported.") ;

@@ -48,6 +48,8 @@ set(HEADER_FILES
         src/Miscellaneous/MBC/MBC2.hpp
         src/Utils/Byte.hpp
         src/Miscellaneous/MBC/MBC3.hpp
+        src/Miscellaneous/MBC/MBC5.hpp
+        include/DMG/Input.hpp
 )
 
 set(SOURCE_FILES
@@ -75,22 +77,15 @@ set(SOURCE_FILES
         src/Miscellaneous/MBC/MBC.cpp
         src/Miscellaneous/MBC/MBC2.cpp
         src/Miscellaneous/MBC/MBC3.cpp
+        src/Miscellaneous/MBC/MBC5.cpp
 )
 
 set(ALL_FILES
         ${HEADER_FILES}
         ${SOURCE_FILES}
-        include/DMG/Input.hpp
-        #src/Precompiled.hpp
 )
 
 add_library(ThaxCore ${ALL_FILES})
-
-
-#add_custom_target(copy_command
-        #COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/copy_files.cmake
-#)
-#add_dependencies(GameBoyCore copy_command)
 
 target_include_directories(ThaxCore
         PRIVATE src/
@@ -101,5 +96,4 @@ target_precompile_headers(ThaxCore
     PRIVATE src/Precompiled.hpp
 )
 
-#target_link_libraries(GameBoyEm PUBLIC spdlog::spdlog glfw imgui nlohmann_json::nlohmann_json)
 target_link_libraries(ThaxCore spdlog::spdlog)
